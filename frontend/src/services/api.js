@@ -77,6 +77,11 @@ export const api = {
     return res.data;
   },
 
+  createStaffUser: async (staffData) => {
+    const res = await client.post('/admin/users/staff', staffData);
+    return res.data;
+  },
+
   updateUserRoles: async (userId, roleNames) => {
     const res = await client.put(`/admin/users/${userId}/roles`, { roleNames });
     return res.data;

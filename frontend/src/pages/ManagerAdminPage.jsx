@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, ShieldAlert, Users, UserCheck, UserX, CheckCircle, RefreshCw, Key, Lock, Unlock, Sparkles } from 'lucide-react';
+import { Shield, ShieldAlert, Users, UserCheck, UserX, CheckCircle, RefreshCw, Key, Lock, Unlock, Sparkles, UserPlus, X, Boxes } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -10,6 +10,20 @@ export default function ManagerAdminPage() {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
   const [toastMsg, setToastMsg] = useState('');
+
+  // Staff Account Creation State
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [staffForm, setStaffForm] = useState({
+    role: 'ROLE_SALES_STAFF',
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    phone: '',
+    address: ''
+  });
+  const [creatingStaff, setCreatingStaff] = useState(false);
+  const [createError, setCreateError] = useState('');
 
   useEffect(() => {
     fetchAdminData();
@@ -63,6 +77,46 @@ export default function ManagerAdminPage() {
     }
   };
 
+  const handleCreateStaff = async (e) => {
+    e.preventDefault();
+    setCreateError('');
+    setCreatingStaff(true);
+    try {
+      const created = await api.createStaffUser(staffForm);
+      showToast(`Created staff account for ${created.fullName} (${staffForm.role.replace('ROLE_', '')}) successfully!`);
+      setShowCreateModal(false);
+      setStaffForm({
+        role: 'ROLE_SALES_STAFF',
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        phone: '',
+        address: ''
+      });
+      fetchAdminData();
+    } catch (err) {
+      console.error("Failed to create staff account:", err);
+      let msg = 'Failed to create staff account. Please check inputs.';
+      if (err.response?.status === 404) {
+        msg = 'Backend endpoint not found (HTTP 404). Please restart the Spring Boot backend in your terminal so it registers the new API.';
+      } else if (err.response?.data?.message) {
+        msg = err.response.data.message;
+      } else if (err.response?.data?.errors) {
+        if (Array.isArray(err.response.data.errors)) {
+          msg = err.response.data.errors.map(e => e.defaultMessage || e.message).join(', ');
+        } else if (typeof err.response.data.errors === 'object') {
+          msg = Object.values(err.response.data.errors).join(', ');
+        }
+      } else if (err.message) {
+        msg = err.message;
+      }
+      setCreateError(msg);
+    } finally {
+      setCreatingStaff(false);
+    }
+  };
+
   const showToast = (msg) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 4500);
@@ -95,6 +149,7 @@ export default function ManagerAdminPage() {
   const getRoleBadgeClass = (roleName) => {
     if (roleName?.includes('MANAGER')) return 'badge-role-manager';
     if (roleName?.includes('SALES')) return 'badge-role-sales';
+    if (roleName?.includes('INVENTORY')) return 'badge-role-inventory';
     return 'badge-role-customer';
   };
 
@@ -131,20 +186,28 @@ export default function ManagerAdminPage() {
           </p>
         </div>
 
-        <button 
-          onClick={fetchAdminData}
-          className="btn btn-secondary btn-sm"
-        >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh System RBAC
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <button 
+            onClick={() => { setShowCreateModal(true); setCreateError(''); }}
+            className="btn btn-primary btn-sm"
+          >
+            <UserPlus size={15} /> Create Staff Account
+          </button>
+          <button 
+            onClick={fetchAdminData}
+            className="btn btn-secondary btn-sm"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh System RBAC
+          </button>
+        </div>
       </div>
 
       {/* RBAC Stats Cards */}
       {stats && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.25rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
           <div className="glass-card" style={{ padding: '1.25rem' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Total System Users
+              Total Users
             </span>
             <div className="metric-value" style={{ fontSize: '1.75rem', fontWeight: 800, color: '#FFFFFF', marginTop: '0.2rem' }}>
               {stats.totalUsers}
@@ -153,7 +216,7 @@ export default function ManagerAdminPage() {
 
           <div className="glass-card" style={{ padding: '1.25rem' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Customers (ROLE_CUSTOMER)
+              Customers
             </span>
             <div className="metric-value" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--accent-cyan)', marginTop: '0.2rem' }}>
               {stats.customerCount}
@@ -162,7 +225,7 @@ export default function ManagerAdminPage() {
 
           <div className="glass-card" style={{ padding: '1.25rem' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Sales Staff (ROLE_SALES_STAFF)
+              Sales Staff
             </span>
             <div className="metric-value" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--accent-emerald)', marginTop: '0.2rem' }}>
               {stats.salesStaffCount}
@@ -171,7 +234,16 @@ export default function ManagerAdminPage() {
 
           <div className="glass-card" style={{ padding: '1.25rem' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Managers (ROLE_MANAGER)
+              Inventory Staff
+            </span>
+            <div className="metric-value" style={{ fontSize: '1.75rem', fontWeight: 800, color: '#FBBF24', marginTop: '0.2rem' }}>
+              {stats.inventoryStaffCount || 0}
+            </div>
+          </div>
+
+          <div className="glass-card" style={{ padding: '1.25rem' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Managers
             </span>
             <div className="metric-value" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--accent-indigo)', marginTop: '0.2rem' }}>
               {stats.managerCount}
@@ -255,6 +327,7 @@ export default function ManagerAdminPage() {
                         >
                           <option value="ROLE_CUSTOMER">ROLE_CUSTOMER</option>
                           <option value="ROLE_SALES_STAFF">ROLE_SALES_STAFF</option>
+                          <option value="ROLE_INVENTORY_STAFF">ROLE_INVENTORY_STAFF</option>
                           <option value="ROLE_MANAGER">ROLE_MANAGER</option>
                         </select>
                       </td>
@@ -285,6 +358,189 @@ export default function ManagerAdminPage() {
           </div>
         )}
       </div>
+
+      {/* Create Staff Account Modal */}
+      {showCreateModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '1rem'
+        }}>
+          <div className="glass-card animate-pop-in" style={{
+            width: '100%',
+            maxWidth: '520px',
+            padding: '2rem',
+            backgroundColor: '#0F172A',
+            border: '1px solid rgba(56, 189, 248, 0.3)',
+            boxShadow: 'var(--shadow-lg)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  color: 'var(--accent-cyan)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <UserPlus size={20} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#FFFFFF' }}>Create Staff Account</h3>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Provision credentials for sales or inventory staff</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowCreateModal(false)}
+                className="btn btn-secondary btn-sm"
+                style={{ padding: '0.35rem 0.6rem' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {createError && (
+              <div style={{
+                background: 'rgba(244, 63, 94, 0.15)',
+                border: '1px solid #F43F5E',
+                color: '#FB7185',
+                padding: '0.75rem 1rem',
+                borderRadius: 'var(--radius-md)',
+                marginBottom: '1rem',
+                fontSize: '0.8125rem'
+              }}>
+                {createError}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateStaff}>
+              <div className="form-group">
+                <label className="form-label">Staff Role *</label>
+                <select 
+                  className="form-select"
+                  value={staffForm.role}
+                  onChange={(e) => setStaffForm({ ...staffForm, role: e.target.value })}
+                  required
+                >
+                  <option value="ROLE_SALES_STAFF">Sales Staff (ROLE_SALES_STAFF)</option>
+                  <option value="ROLE_INVENTORY_STAFF">Inventory Staff (ROLE_INVENTORY_STAFF)</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="form-group">
+                  <label className="form-label">First Name *</label>
+                  <input 
+                    className="form-input"
+                    type="text"
+                    placeholder="e.g. Kasun"
+                    value={staffForm.firstName}
+                    onChange={(e) => setStaffForm({ ...staffForm, firstName: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Last Name *</label>
+                  <input 
+                    className="form-input"
+                    type="text"
+                    placeholder="e.g. Perera"
+                    value={staffForm.lastName}
+                    onChange={(e) => setStaffForm({ ...staffForm, lastName: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Username / Email *</label>
+                <input 
+                  className="form-input"
+                  type="text"
+                  placeholder="e.g. kasun_sales or staff@sparehub.com"
+                  value={staffForm.email}
+                  onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Password * (Min 6 chars)</label>
+                <input 
+                  className="form-input"
+                  type="password"
+                  placeholder="Enter initial staff password"
+                  value={staffForm.password}
+                  onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })}
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Phone Number</label>
+                  <input 
+                    className="form-input"
+                    type="tel"
+                    placeholder="e.g. 0771234567"
+                    value={staffForm.phone}
+                    onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Branch / Warehouse</label>
+                  <input 
+                    className="form-input"
+                    type="text"
+                    placeholder="e.g. Colombo Warehouse"
+                    value={staffForm.address}
+                    onChange={(e) => setStaffForm({ ...staffForm, address: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setShowCreateModal(false)}
+                  disabled={creatingStaff}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  disabled={creatingStaff}
+                >
+                  {creatingStaff ? (
+                    <>
+                      <RefreshCw size={14} className="animate-spin" /> Creating Account...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus size={15} /> Create Account
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

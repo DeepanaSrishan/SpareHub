@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogIn, ArrowRight, Shield, User, Award, CheckCircle } from 'lucide-react';
+import { LogIn, ArrowRight, Shield, User, Award, Boxes, Key, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage({ onSwitchToRegister, onLoginSuccess }) {
@@ -161,6 +161,19 @@ export default function LoginPage({ onSwitchToRegister, onLoginSuccess }) {
               type="button"
               className="btn btn-secondary btn-sm"
               style={{ justifyContent: 'space-between', padding: '0.5rem 0.875rem' }}
+              onClick={() => handleQuickLogin('inventory@sparehub.com', 'inventory123')}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Boxes size={14} color="var(--accent-amber)" />
+                <span>Inventory Staff (Kamal Wickramasinghe)</span>
+              </div>
+              <span className="badge badge-role-inventory" style={{ fontSize: '0.65rem' }}>Inventory Staff</span>
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              style={{ justifyContent: 'space-between', padding: '0.5rem 0.875rem' }}
               onClick={() => handleQuickLogin('customer@sparehub.com', 'customer123')}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -169,6 +182,27 @@ export default function LoginPage({ onSwitchToRegister, onLoginSuccess }) {
               </div>
               <span className="badge badge-role-customer" style={{ fontSize: '0.65rem' }}>Customer</span>
             </button>
+          </div>
+
+          {/* Demo Passwords Reference Card */}
+          <div style={{
+            marginTop: '1.25rem',
+            padding: '0.875rem 1rem',
+            background: 'rgba(15, 23, 42, 0.75)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            fontSize: '0.75rem',
+            lineHeight: 1.6
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem', color: '#FFFFFF', fontWeight: 600 }}>
+              <Key size={13} color="var(--accent-cyan)" /> Demo Accounts & Passwords:
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem', color: 'var(--text-secondary)' }}>
+              <div>Manager: <strong style={{ color: '#FFFFFF' }}>manager123</strong></div>
+              <div>Sales: <strong style={{ color: '#FFFFFF' }}>sales123</strong></div>
+              <div>Inventory: <strong style={{ color: '#FFFFFF' }}>inventory123</strong></div>
+              <div>Customer: <strong style={{ color: '#FFFFFF' }}>customer123</strong></div>
+            </div>
           </div>
         </div>
 

@@ -56,6 +56,9 @@ export const AuthProvider = ({ children }) => {
       if (roleType === 'SALES_STAFF') {
         email = 'sales@sparehub.com';
         password = 'sales123';
+      } else if (roleType === 'INVENTORY_STAFF') {
+        email = 'inventory@sparehub.com';
+        password = 'inventory123';
       } else if (roleType === 'MANAGER') {
         email = 'manager@sparehub.com';
         password = 'manager123';

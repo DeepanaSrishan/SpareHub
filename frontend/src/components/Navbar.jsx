@@ -161,6 +161,15 @@ export default function Navbar({ activeTab, setActiveTab }) {
                 Sales Staff
               </button>
               <button
+                onClick={() => handleSwitchPersona('INVENTORY_STAFF')}
+                disabled={switching}
+                className={`btn btn-sm ${currentRole === 'ROLE_INVENTORY_STAFF' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ borderRadius: 'var(--radius-full)', fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}
+                title="Log in as Inventory Staff (Kamal)"
+              >
+                Inventory
+              </button>
+              <button
                 onClick={() => handleSwitchPersona('MANAGER')}
                 disabled={switching}
                 className={`btn btn-sm ${currentRole === 'ROLE_MANAGER' ? 'btn-primary' : 'btn-secondary'}`}
