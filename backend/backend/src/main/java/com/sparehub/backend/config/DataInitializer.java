@@ -46,6 +46,8 @@ public class DataInitializer implements CommandLineRunner {
                 roleRepository.save(new Role("ROLE_CUSTOMER", "Registered Customer")));
         Role salesStaffRole = roleRepository.findByName("ROLE_SALES_STAFF").orElseGet(() ->
                 roleRepository.save(new Role("ROLE_SALES_STAFF", "Sales & Counter Staff")));
+        Role inventoryStaffRole = roleRepository.findByName("ROLE_INVENTORY_STAFF").orElseGet(() ->
+                roleRepository.save(new Role("ROLE_INVENTORY_STAFF", "Inventory & Warehouse Staff")));
         Role managerRole = roleRepository.findByName("ROLE_MANAGER").orElseGet(() ->
                 roleRepository.save(new Role("ROLE_MANAGER", "System Manager & Administrator")));
 
@@ -70,6 +72,12 @@ public class DataInitializer implements CommandLineRunner {
             User salesStaff = new User("sales@sparehub.com", passwordEncoder.encode("sales123"), "Nalaka", "Perera", "0773344556", "Main Branch, Colombo 10, Sri Lanka");
             salesStaff.setRoles(new HashSet<>(Collections.singletonList(salesStaffRole)));
             userRepository.save(salesStaff);
+        }
+
+        if (!userRepository.existsByEmail("inventory@sparehub.com")) {
+            User inventoryStaff = new User("inventory@sparehub.com", passwordEncoder.encode("inventory123"), "Kamal", "Wickramasinghe", "0774455667", "Central Warehouse, Colombo 15, Sri Lanka");
+            inventoryStaff.setRoles(new HashSet<>(Collections.singletonList(inventoryStaffRole)));
+            userRepository.save(inventoryStaff);
         }
 
         User customer = null;

@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 INSERT INTO roles (name, description) VALUES
 ('ROLE_CUSTOMER', 'Registered Automotive Spare Parts Customer'),
 ('ROLE_SALES_STAFF', 'Sales & Counter Staff Member'),
+('ROLE_INVENTORY_STAFF', 'Inventory & Warehouse Staff Member'),
 ('ROLE_MANAGER', 'System Manager & Administrator')
 ON DUPLICATE KEY UPDATE description = VALUES(description);
 
@@ -106,8 +107,11 @@ INSERT INTO loyalty_tiers (tier_name, min_spend_amount, discount_percentage) VAL
 ('Platinum', 150000.00, 15.00)
 ON DUPLICATE KEY UPDATE min_spend_amount = VALUES(min_spend_amount), discount_percentage = VALUES(discount_percentage);
 
--- Demo Passwords (All pre-hashed with BCrypt):
--- manager123  -> $2a$10$eE7nF3qf92k8eXy4t5Z.eeu9wBw1R3XnL9r5Qe8o8K.w2T3s4U5Ve (or generated on startup)
--- sales123    -> $2a$10$eE7nF3qf92k8eXy4t5Z.eeu9wBw1R3XnL9r5Qe8o8K.w2T3s4U5Ve
--- customer123 -> $2a$10$eE7nF3qf92k8eXy4t5Z.eeu9wBw1R3XnL9r5Qe8o8K.w2T3s4U5Ve
+-- Demo Passwords for All Roles (Pre-hashed with BCrypt on startup):
+-- 1. Manager:         manager@sparehub.com       -> manager123
+-- 2. Sales Staff:     sales@sparehub.com         -> sales123
+-- 3. Inventory Staff: inventory@sparehub.com     -> inventory123
+-- 4. Customer:        customer@sparehub.com      -> customer123
+-- 5. Customer 2:      kasun.fernando@example.com -> kasun123
+-- 6. Customer 3:      anura.silva@example.com    -> anura123
 -- (Note: Spring Boot's DataInitializer automatically ensures demo users, passwords, orders, and welcome notifications are seeded on application launch).

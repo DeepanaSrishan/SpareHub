@@ -1,11 +1,13 @@
 package com.sparehub.backend.service;
 
+import com.sparehub.backend.dto.CreateStaffRequest;
 import com.sparehub.backend.dto.UpdateProfileRequest;
 import com.sparehub.backend.dto.UserProfileDto;
 import com.sparehub.backend.entity.Role;
 import com.sparehub.backend.entity.User;
 import com.sparehub.backend.repository.RoleRepository;
 import com.sparehub.backend.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
@@ -81,12 +84,44 @@ public class UserService {
         return mapToProfileDto(updated);
     }
 
-    // US-07: System RBAC statistics
+    // Manager creates staff accounts (Sales or Inventory)
+    @Transactional
+    public UserProfileDto createStaffUser(CreateStaffRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("An account with email/username '" + email + "' already exists.");
+        }
+
+        String roleName = request.getRole().trim().toUpperCase();
+        if (!roleName.startsWith("ROLE_")) {
+            roleName = "ROLE_" + roleName;
+        }
+
+        final String finalRoleName = roleName;
+        Role role = roleRepository.findByName(finalRoleName).orElseGet(() ->
+                roleRepository.save(new Role(finalRoleName, finalRoleName.replace("ROLE_", "") + " Staff")));
+
+        User user = new User();
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setFirstName(request.getFirstName().trim());
+        user.setLastName(request.getLastName().trim());
+        user.setPhone(request.getPhone());
+        user.setAddress(request.getAddress());
+        user.setIsActive(true);
+        user.setRoles(new HashSet<>(Collections.singletonList(role)));
+
+        User saved = userRepository.save(user);
+        return mapToProfileDto(saved);
+    }
+
+    // System RBAC statistics
     public Map<String, Object> getSystemStats() {
         List<User> users = userRepository.findAll();
         long totalUsers = users.size();
         long customerCount = users.stream().filter(u -> u.getRoles().stream().anyMatch(r -> "ROLE_CUSTOMER".equals(r.getName()))).count();
         long salesStaffCount = users.stream().filter(u -> u.getRoles().stream().anyMatch(r -> "ROLE_SALES_STAFF".equals(r.getName()))).count();
+        long inventoryStaffCount = users.stream().filter(u -> u.getRoles().stream().anyMatch(r -> "ROLE_INVENTORY_STAFF".equals(r.getName()))).count();
         long managerCount = users.stream().filter(u -> u.getRoles().stream().anyMatch(r -> "ROLE_MANAGER".equals(r.getName()))).count();
         long activeCount = users.stream().filter(u -> Boolean.TRUE.equals(u.getIsActive())).count();
 
@@ -94,6 +129,7 @@ public class UserService {
         stats.put("totalUsers", totalUsers);
         stats.put("customerCount", customerCount);
         stats.put("salesStaffCount", salesStaffCount);
+        stats.put("inventoryStaffCount", inventoryStaffCount);
         stats.put("managerCount", managerCount);
         stats.put("activeCount", activeCount);
         stats.put("deactivatedCount", totalUsers - activeCount);

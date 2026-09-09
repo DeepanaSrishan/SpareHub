@@ -1,5 +1,6 @@
 package com.sparehub.backend.controller;
 
+import com.sparehub.backend.dto.CreateStaffRequest;
 import com.sparehub.backend.dto.UpdateUserRolesRequest;
 import com.sparehub.backend.dto.UpdateUserStatusRequest;
 import com.sparehub.backend.dto.UserProfileDto;
@@ -21,11 +22,19 @@ public class AdminController {
         this.userService = userService;
     }
 
-    // US-07: Manager views all users for RBAC management
+    // Manager views all users for RBAC management
     @GetMapping("/users")
     public ResponseEntity<List<UserProfileDto>> getAllUsers() {
         List<UserProfileDto> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
+    }
+
+    // Manager creates sales or inventory staff account
+    @PostMapping("/users/staff")
+    public ResponseEntity<UserProfileDto> createStaffAccount(
+            @Valid @RequestBody CreateStaffRequest request) {
+        UserProfileDto created = userService.createStaffUser(request);
+        return ResponseEntity.ok(created);
     }
 
     // US-07: Manager updates user roles
