@@ -1,0 +1,12 @@
+package com.sparehub;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SpareHubApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpareHubApplication.class, args);
+    }
+}
