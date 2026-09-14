@@ -1,0 +1,49 @@
+package com.sparehub.service.supplier;
+
+
+
+import com.sparehub.dto.supplier.CancelSupplierPurchaseRequest;
+import com.sparehub.dto.supplier.CreateSupplierPurchaseRequest;
+import com.sparehub.dto.supplier.ReceiveSupplierPurchaseRequest;
+import com.sparehub.dto.supplier.SupplierPurchaseResponse;
+import com.sparehub.dto.supplier.SupplierTransactionResponse;
+import com.sparehub.entity.supplier.PurchaseStatus;
+import com.sparehub.entity.supplier.SupplierTransactionType;
+
+import java.time.LocalDate;
+import java.util.List;
+
+public interface SupplierPurchaseService {
+
+    SupplierPurchaseResponse createPurchase(
+            Long supplierId,
+            CreateSupplierPurchaseRequest request
+    );
+
+    List<SupplierPurchaseResponse> getPurchases(
+            Long supplierId,
+            PurchaseStatus status
+    );
+
+    SupplierPurchaseResponse getPurchaseById(
+            Long purchaseId
+    );
+
+    SupplierPurchaseResponse receivePurchase(
+            Long purchaseId,
+            ReceiveSupplierPurchaseRequest request
+    );
+
+    SupplierPurchaseResponse cancelPurchase(
+            Long purchaseId,
+            CancelSupplierPurchaseRequest request
+    );
+
+    List<SupplierTransactionResponse>
+    getSupplierTransactionHistory(
+            Long supplierId,
+            LocalDate startDate,
+            LocalDate endDate,
+            SupplierTransactionType type
+    );
+}

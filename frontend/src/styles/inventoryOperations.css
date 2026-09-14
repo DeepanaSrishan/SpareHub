@@ -1,0 +1,477 @@
+.stock-page {
+    width: min(1280px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 28px 0 50px;
+}
+
+.stock-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.stock-heading h1 {
+    margin: 0 0 6px;
+    color: #172033;
+}
+
+.stock-heading p {
+    margin: 0;
+    color: #64748b;
+}
+
+.stock-back-link,
+.stock-secondary-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.stock-back-link {
+    margin-bottom: 18px;
+}
+
+.stock-alert {
+    margin-bottom: 18px;
+    border-radius: 9px;
+    padding: 13px 15px;
+}
+
+.stock-alert.error {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.stock-alert.success {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.stock-product-status,
+.stock-type,
+.stock-alert-status {
+    display: inline-flex;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.stock-product-status.active {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.stock-product-status.inactive {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.stock-product-status.discontinued {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.stock-stat-grid {
+    display: grid;
+    grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+    gap: 17px;
+    margin-bottom: 22px;
+}
+
+.stock-stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0 5px 17px
+    rgba(15, 23, 42, 0.06);
+}
+
+.stock-stat-card span {
+    color: #64748b;
+}
+
+.stock-stat-card strong {
+    color: #172033;
+    font-size: 26px;
+}
+
+.stock-stat-card small {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.stock-stat-card.warning {
+    border-left: 5px solid #f59e0b;
+    color: #92400e;
+    background: #fffbeb;
+}
+
+.stock-stat-card.danger {
+    border-left: 5px solid #dc2626;
+    color: #991b1b;
+    background: #fef2f2;
+}
+
+.negative-value {
+    color: #dc2626 !important;
+}
+
+.stock-operation-grid {
+    display: grid;
+    grid-template-columns:
+    minmax(0, 1.5fr)
+    minmax(280px, 0.8fr);
+    gap: 22px;
+}
+
+.stock-card {
+    margin-bottom: 22px;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    padding: 22px;
+    background: #ffffff;
+    box-shadow: 0 6px 20px
+    rgba(15, 23, 42, 0.06);
+}
+
+.stock-card-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 18px;
+}
+
+.stock-card-title h2 {
+    margin: 0;
+}
+
+.stock-card-description {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.stock-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.stock-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.stock-form-group label {
+    color: #334155;
+    font-weight: 650;
+}
+
+.stock-form-group input,
+.stock-form-group select,
+.stock-form-group textarea,
+.stock-alert-filters select {
+    box-sizing: border-box;
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 11px 12px;
+    background: #ffffff;
+    font: inherit;
+}
+
+.stock-form-group input:focus,
+.stock-form-group select:focus,
+.stock-form-group textarea:focus {
+    border-color: #2563eb;
+    outline: 3px solid
+    rgba(37, 99, 235, 0.1);
+}
+
+.stock-preview,
+.stock-rule-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 9px;
+    padding: 13px;
+    background: #f1f5f9;
+}
+
+.stock-preview strong {
+    color: #2563eb;
+    font-size: 20px;
+}
+
+.stock-rule-box {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.stock-rule-box span {
+    color: #64748b;
+}
+
+.stock-primary-button,
+.stock-secondary-button,
+.stock-pagination button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 0;
+    border-radius: 8px;
+    padding: 11px 15px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.stock-primary-button {
+    color: #ffffff;
+    background: #2563eb;
+}
+
+.stock-secondary-button,
+.stock-pagination button {
+    color: #1e293b;
+    background: #e2e8f0;
+}
+
+.stock-primary-button:disabled,
+.stock-secondary-button:disabled,
+.stock-pagination button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.stock-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.stock-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stock-table th,
+.stock-table td {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 10px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.stock-table th {
+    color: #475569;
+    background: #f8fafc;
+}
+
+.stock-type {
+    color: #334155;
+    background: #e2e8f0;
+}
+
+.stock-change.increase {
+    color: #16a34a;
+}
+
+.stock-change.decrease {
+    color: #dc2626;
+}
+
+.stock-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 17px;
+    margin-top: 20px;
+}
+
+.stock-page-message,
+.stock-empty {
+    padding: 40px 15px;
+    color: #64748b;
+    text-align: center;
+}
+
+.stock-alert-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.stock-alert-filters h2 {
+    margin: 0;
+}
+
+.stock-alert-filters select {
+    width: 210px;
+}
+
+.stock-alert-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.stock-alert-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 15px;
+    border: 1px solid #e2e8f0;
+    border-left: 5px solid #f59e0b;
+    border-radius: 11px;
+    padding: 17px;
+}
+
+.stock-alert-card.acknowledged {
+    border-left-color: #2563eb;
+    background: #eff6ff;
+}
+
+.stock-alert-card.resolved {
+    border-left-color: #16a34a;
+    background: #f0fdf4;
+}
+
+.stock-alert-icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 50%;
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.stock-alert-title {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.stock-alert-title h3 {
+    margin: 0 0 4px;
+}
+
+.stock-alert-title > div > span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.stock-alert-content p {
+    color: #475569;
+}
+
+.stock-alert-content small {
+    display: block;
+    margin-top: 8px;
+    color: #64748b;
+}
+
+.stock-alert-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.stock-alert-status.open {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.stock-alert-status.acknowledged {
+    color: #1d4ed8;
+    background: #dbeafe;
+}
+
+.stock-alert-status.resolved {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.stock-alert-actions {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.stock-spinning {
+    animation: stock-spin 0.8s linear infinite;
+}
+
+@keyframes stock-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 900px) {
+    .stock-stat-grid {
+        grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    }
+
+    .stock-operation-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stock-alert-card {
+        grid-template-columns: auto 1fr;
+    }
+
+    .stock-alert-actions {
+        grid-column: 1 / -1;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 600px) {
+    .stock-page {
+        width: min(100% - 20px, 1280px);
+    }
+
+    .stock-heading,
+    .stock-alert-filters,
+    .stock-alert-title {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .stock-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stock-alert-filters select {
+        width: 100%;
+    }
+
+    .stock-alert-card {
+        grid-template-columns: 1fr;
+    }
+
+    .stock-alert-actions {
+        grid-column: auto;
+    }
+}
