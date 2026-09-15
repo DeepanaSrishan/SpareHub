@@ -3,7 +3,7 @@ package com.sparehub.controller.supplier;
 
 
 import com.sparehub.dto.response.ApiResponse;
-import com.sparehub.dto.supplier.SupplierTransactionResponse;
+import com.sparehub.dto.response.supplier.SupplierTransactionResponse;
 import com.sparehub.entity.supplier.SupplierTransactionType;
 import com.sparehub.service.supplier.SupplierPurchaseService;
 import lombok.RequiredArgsConstructor;

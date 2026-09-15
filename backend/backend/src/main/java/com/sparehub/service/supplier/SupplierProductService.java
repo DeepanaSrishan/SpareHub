@@ -2,10 +2,10 @@ package com.sparehub.service.supplier;
 
 
 
-import com.sparehub.dto.supplier.AssignSupplierProductRequest;
-import com.sparehub.dto.supplier.PriceComparisonResponse;
-import com.sparehub.dto.supplier.SupplierProductResponse;
-import com.sparehub.dto.supplier.UpdateSupplierProductRequest;
+import com.sparehub.dto.request.supplier.AssignSupplierProductRequest;
+import com.sparehub.dto.request.supplier.UpdateSupplierProductRequest;
+import com.sparehub.dto.response.supplier.PriceComparisonResponse;
+import com.sparehub.dto.response.supplier.SupplierProductResponse;
 
 import java.util.List;
 

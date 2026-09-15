@@ -2,8 +2,13 @@ package com.sparehub.controller.supplier;
 
 
 
+import com.sparehub.dto.request.supplier.CancelSupplierPurchaseRequest;
+import com.sparehub.dto.request.supplier.CreateSupplierPurchaseRequest;
+import com.sparehub.dto.request.supplier.ReceiveSupplierPurchaseRequest;
 import com.sparehub.dto.response.ApiResponse;
-import com.sparehub.dto.supplier.*;
+import com.sparehub.dto.response.supplier.SupplierPurchaseResponse;
+import com.sparehub.dto.request.*;
+import com.sparehub.dto.response.*;
 import com.sparehub.entity.supplier.PurchaseStatus;
 import com.sparehub.service.supplier.SupplierPurchaseService;
 import jakarta.validation.Valid;

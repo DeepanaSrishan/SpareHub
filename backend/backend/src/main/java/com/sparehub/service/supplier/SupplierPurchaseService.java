@@ -2,11 +2,11 @@ package com.sparehub.service.supplier;
 
 
 
-import com.sparehub.dto.supplier.CancelSupplierPurchaseRequest;
-import com.sparehub.dto.supplier.CreateSupplierPurchaseRequest;
-import com.sparehub.dto.supplier.ReceiveSupplierPurchaseRequest;
-import com.sparehub.dto.supplier.SupplierPurchaseResponse;
-import com.sparehub.dto.supplier.SupplierTransactionResponse;
+import com.sparehub.dto.request.supplier.CancelSupplierPurchaseRequest;
+import com.sparehub.dto.request.supplier.CreateSupplierPurchaseRequest;
+import com.sparehub.dto.request.supplier.ReceiveSupplierPurchaseRequest;
+import com.sparehub.dto.response.supplier.SupplierPurchaseResponse;
+import com.sparehub.dto.response.supplier.SupplierTransactionResponse;
 import com.sparehub.entity.supplier.PurchaseStatus;
 import com.sparehub.entity.supplier.SupplierTransactionType;
 

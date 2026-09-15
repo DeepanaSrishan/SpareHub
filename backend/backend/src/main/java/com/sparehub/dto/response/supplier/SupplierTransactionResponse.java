@@ -1,4 +1,6 @@
-package com.sparehub.dto.supplier;
+package com.sparehub.dto.response.supplier;
+
+
 
 
 

@@ -2,8 +2,8 @@ package com.sparehub.service.supplier;
 
 
 
-import com.sparehub.dto.supplier.SupplierPerformanceRankingResponse;
-import com.sparehub.dto.supplier.SupplierPerformanceResponse;
+import com.sparehub.dto.response.supplier.SupplierPerformanceRankingResponse;
+import com.sparehub.dto.response.supplier.SupplierPerformanceResponse;
 
 import java.time.LocalDate;
 

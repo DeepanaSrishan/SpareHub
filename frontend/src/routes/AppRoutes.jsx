@@ -85,6 +85,21 @@ import StockAdjustmentPage from
 import LowStockAlertsPage from
         "../pages/inventory/LowStockAlertsPage";
 
+import SuppliersPage from
+        "../pages/suppliers/SuppliersPage";
+
+import SupplierProductsPage from
+        "../pages/suppliers/SupplierProductsPage";
+
+import SupplierPurchasesPage from
+        "../pages/suppliers/SupplierPurchasesPage";
+
+import SupplierAnalyticsPage from
+        "../pages/suppliers/SupplierAnalyticsPage";
+
+import ManagementReportsPage from
+        "../pages/reports/ManagementReportsPage";
+
 import ManagerDashboardPage from
         "../pages/manager/ManagerDashboardPage";
 
@@ -333,6 +348,26 @@ export default function AppRoutes() {
                                 <LowStockAlertsPage />
                             }
                         />
+
+                        {/* Supplier management route */}
+                        <Route
+                            path="/suppliers"
+                            element={<SuppliersPage />}
+                        />
+
+                        <Route
+                            path="/suppliers/:supplierId/products"
+                            element={
+                                <SupplierProductsPage />
+                            }
+                        />
+
+                        <Route
+                            path="/supplier-purchases"
+                            element={
+                                <SupplierPurchasesPage />
+                            }
+                        />
                     </Route>
 
                     {/* Manager-only routes */}
@@ -377,6 +412,20 @@ export default function AppRoutes() {
                             path="/manager/order-reports"
                             element={
                                 <OrderReportsPage />
+                            }
+                        />
+
+                        <Route
+                            path="/supplier-analytics"
+                            element={
+                                <SupplierAnalyticsPage />
+                            }
+                        />
+
+                        <Route
+                            path="/manager/reports"
+                            element={
+                                <ManagementReportsPage />
                             }
                         />
                     </Route>
