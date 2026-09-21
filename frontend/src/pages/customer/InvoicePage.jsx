@@ -246,6 +246,22 @@ const InvoicePage = () => {
                         </strong>
                     </div>
 
+                    {Number(invoice.taxAmount || 0) > 0 && (
+                        <div>
+                            <span>
+                                Tax (
+                                {invoice.taxRate ?? 0}%)
+                            </span>
+
+                            <strong>
+                                +{" "}
+                                {formatCurrency(
+                                    invoice.taxAmount
+                                )}
+                            </strong>
+                        </div>
+                    )}
+
                     <div className="invoice-grand-total">
                         <span>Total amount</span>
                         <strong>

@@ -661,5 +661,67 @@ public class InventoryTransactionService {
             String supplierCode,
             Long purchaseId,
             String purchaseNumber
-    );
+    ) {
+        if (quantity == null || quantity <= 0) {
+            throw new BadRequestException(
+                    "Received quantity must be greater than zero"
+            );
+        }
+
+        SparePart sparePart =
+                findSparePartForStockUpdate(
+                        sparePartId
+                );
+
+        if (
+                sparePart.getStatus()
+                        == SparePartStatus.DISCONTINUED
+        ) {
+            throw new BadRequestException(
+                    "Stock cannot be received for a discontinued spare part"
+            );
+        }
+
+        int quantityBefore =
+                sparePart.getStockQuantity();
+
+        sparePart.increaseStock(quantity);
+
+        SparePart updatedSparePart =
+                sparePartRepository.save(
+                        sparePart
+                );
+
+        String supplierReference =
+                supplierCode == null ||
+                        supplierCode.isBlank()
+                        ? "Supplier ID " + supplierId
+                        : supplierCode.trim();
+
+        InventoryTransaction transaction =
+                createTransaction(
+                        updatedSparePart,
+                        InventoryTransactionType.PURCHASE,
+                        quantity,
+                        quantityBefore,
+                        updatedSparePart
+                                .getStockQuantity(),
+                        "Stock received from supplier "
+                                + supplierReference,
+                        normalizeOptionalText(
+                                purchaseNumber
+                        ),
+                        "SUPPLIER_PURCHASE",
+                        purchaseId,
+                        getAuthenticatedEmail()
+                );
+
+        inventoryTransactionRepository.save(
+                transaction
+        );
+
+        lowStockAlertService.evaluateLowStock(
+                updatedSparePart
+        );
+    }
 }

@@ -2,6 +2,7 @@ package com.sparehub.service.order;
 
 
 
+import com.sparehub.dto.request.order.CustomerPaymentRequest;
 import com.sparehub.dto.request.order.RecordPaymentRequest;
 import com.sparehub.dto.response.order.InvoiceResponse;
 import com.sparehub.dto.response.order.PaymentRecordResponse;
@@ -21,6 +22,11 @@ public interface BillingService {
     PaymentRecordResponse recordPayment(
             Long orderId,
             RecordPaymentRequest request
+    );
+
+    PaymentRecordResponse processCustomerPayment(
+            Long orderId,
+            CustomerPaymentRequest request
     );
 
     List<PaymentResponse> getPaymentsForStaff(

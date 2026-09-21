@@ -24,10 +24,15 @@ public record ChangePasswordRequest(
         )
         String newPassword,
 
-        @NotBlank(
-                message =
-                        "New password confirmation is required"
-        )
-        String confirmNewPassword
+        String confirmNewPassword,
+
+        String confirmPassword
 ) {
+
+    public String resolveConfirmPassword() {
+        if (confirmNewPassword != null && !confirmNewPassword.isBlank()) {
+            return confirmNewPassword;
+        }
+        return confirmPassword;
+    }
 }

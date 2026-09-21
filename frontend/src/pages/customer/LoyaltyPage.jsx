@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import loyaltyService from "../../services/loyaltyService";
+import { useAutoScrollReveal } from "../../hooks/useScrollReveal";
 import "../../styles/customer.css";
 
 function LoyaltyPage() {
     const [loyalty, setLoyalty] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    useAutoScrollReveal([loyalty]);
 
     useEffect(() => {
         loadLoyaltyDetails();
@@ -36,7 +39,8 @@ function LoyaltyPage() {
         return <div className="alert alert-error">{error}</div>;
     }
 
-    const currentPoints = loyalty?.rewardPoints ?? 0;
+    const currentPoints = loyalty?.currentPoints ?? loyalty?.rewardPoints ?? 0;
+    const currentTier = loyalty?.currentTier ?? loyalty?.loyaltyTier ?? "Bronze";
     const minimumPoints = loyalty?.currentTierMinimumPoints ?? 0;
     const nextTierPoints = loyalty?.nextTierMinimumPoints ?? currentPoints;
 
@@ -60,10 +64,10 @@ function LoyaltyPage() {
                 </div>
             </div>
 
-            <div className="stat-card-grid">
+            <div className="stat-card-grid scroll-reveal scroll-stagger">
                 <article className="stat-card">
                     <span>Current Tier</span>
-                    <strong>{loyalty?.loyaltyTier ?? "BRONZE"}</strong>
+                    <strong>{currentTier}</strong>
                 </article>
 
                 <article className="stat-card">
@@ -82,13 +86,13 @@ function LoyaltyPage() {
                 </article>
             </div>
 
-            <section className="content-card loyalty-progress-card">
+            <section className="content-card loyalty-progress-card scroll-reveal">
                 <h2>Tier Progress</h2>
 
                 {loyalty?.nextTier ? (
                     <>
                         <div className="progress-label">
-                            <span>{loyalty.loyaltyTier}</span>
+                            <span>{currentTier}</span>
                             <span>{loyalty.nextTier}</span>
                         </div>
 
@@ -99,14 +103,13 @@ function LoyaltyPage() {
                             />
                         </div>
 
-                        <p>
-                            You need{" "}
+                        <div className="progress-hint">
+                            Earn{" "}
                             <strong>
-                                {loyalty.pointsToNextTier ??
-                                    Math.max(nextTierPoints - currentPoints, 0)}
+                                {nextTierPoints - currentPoints} more points
                             </strong>{" "}
-                            more points to reach {loyalty.nextTier}.
-                        </p>
+                            to reach {loyalty.nextTier}
+                        </div>
                     </>
                 ) : (
                     <div className="alert alert-success">
@@ -116,7 +119,7 @@ function LoyaltyPage() {
                 )}
             </section>
 
-            <section className="content-card">
+            <section className="content-card scroll-reveal">
                 <h2>Your Benefits</h2>
 
                 <ul className="benefit-list">

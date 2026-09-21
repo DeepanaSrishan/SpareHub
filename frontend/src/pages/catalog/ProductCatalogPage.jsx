@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
     Filter,
     PackageSearch,
@@ -9,6 +10,7 @@ import {
 
 import catalogService from "../../services/catalogService";
 import ProductCard from "../../components/catalog/ProductCard";
+import { useAutoScrollReveal } from "../../hooks/useScrollReveal";
 import "../../styles/catalog.css";
 
 const initialFilters = {
@@ -22,17 +24,47 @@ const initialFilters = {
 };
 
 export default function ProductCatalogPage() {
-    const [filters, setFilters] =
-        useState(initialFilters);
+    const [searchParams] = useSearchParams();
+    const initialSearch = searchParams.get("search") || "";
+    const initialBrand = searchParams.get("brand") || "";
 
-    const [appliedFilters, setAppliedFilters] =
-        useState(initialFilters);
+    const [filters, setFilters] = useState({
+        ...initialFilters,
+        search: initialSearch,
+        brand: initialBrand,
+    });
+
+    const [appliedFilters, setAppliedFilters] = useState({
+        ...initialFilters,
+        search: initialSearch,
+        brand: initialBrand,
+    });
 
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
 
     const [page, setPage] = useState(0);
+
+    useAutoScrollReveal([products]);
+
+    useEffect(() => {
+        const paramSearch = searchParams.get("search") || "";
+        const paramBrand = searchParams.get("brand") || "";
+        if (paramSearch !== appliedFilters.search || paramBrand !== appliedFilters.brand) {
+            setFilters((prev) => ({
+                ...prev,
+                search: paramSearch,
+                brand: paramBrand,
+            }));
+            setAppliedFilters((prev) => ({
+                ...prev,
+                search: paramSearch,
+                brand: paramBrand,
+            }));
+            setPage(0);
+        }
+    }, [searchParams]);
     const [totalPages, setTotalPages] =
         useState(0);
     const [totalElements, setTotalElements] =
@@ -380,7 +412,7 @@ export default function ProductCatalogPage() {
                     </button>
                 </section>
             ) : (
-                <section className="catalog-product-grid">
+                <section className="catalog-product-grid scroll-reveal is-revealed scroll-stagger">
                     {products.map((product) => (
                         <ProductCard
                             key={product.id}

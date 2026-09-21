@@ -16,5 +16,7 @@ public enum InventoryTransactionType {
 
     SALE,
 
-    SALE_REVERSAL
+    SALE_REVERSAL,
+
+    PURCHASE
 }

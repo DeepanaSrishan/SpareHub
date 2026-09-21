@@ -1,4 +1,6 @@
-package com.sparehub.dto.supplier;
+package com.sparehub.dto.request.supplier;
+
+
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

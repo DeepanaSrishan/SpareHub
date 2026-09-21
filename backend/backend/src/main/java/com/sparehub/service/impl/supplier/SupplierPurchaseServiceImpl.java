@@ -2,7 +2,8 @@ package com.sparehub.service.impl.supplier;
 
 
 
-import com.sparehub.dto.supplier.*;
+import com.sparehub.dto.request.supplier.*;
+import com.sparehub.dto.response.supplier.*;
 import com.sparehub.entity.inventory.SparePart;
 import com.sparehub.entity.supplier.*;
 import com.sparehub.entity.supplier.PurchaseStatus;
@@ -448,7 +449,9 @@ public class SupplierPurchaseServiceImpl
         }
 
         return userRepository
-                .findByEmail(authentication.getName())
+                .findByEmailIgnoreCase(
+                        authentication.getName()
+                )
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Authenticated user was not found"
@@ -570,16 +573,10 @@ public class SupplierPurchaseServiceImpl
             return null;
         }
 
-        String firstName = user.getFirstName() == null
-                ? ""
-                : user.getFirstName().trim();
-
-        String lastName = user.getLastName() == null
-                ? ""
-                : user.getLastName().trim();
-
         String fullName =
-                (firstName + " " + lastName).trim();
+                user.getFullName() == null
+                        ? ""
+                        : user.getFullName().trim();
 
         return fullName.isBlank()
                 ? user.getEmail()

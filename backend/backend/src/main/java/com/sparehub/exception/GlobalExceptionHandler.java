@@ -237,10 +237,12 @@ public class GlobalExceptionHandler {
             Exception exception,
             HttpServletRequest request
     ) {
+        exception.printStackTrace();
+        String message = exception.getMessage() != null ? exception.getMessage() : "An unexpected error occurred";
         ErrorResponse response = ErrorResponse.of(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                "An unexpected error occurred",
+                message,
                 request.getRequestURI()
         );
 

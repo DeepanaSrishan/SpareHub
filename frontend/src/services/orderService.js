@@ -1,11 +1,25 @@
 import api from "./api";
 
 const orderService = {
-    async placeOrder(customerNote = "") {
-        const response = await api.post("/orders", {
-            customerNote: customerNote.trim() || null,
-        });
+    async placeOrder(customerNote = "", paymentMethod = null, paymentDetails = null) {
+        const payload = {
+            customerNote: customerNote?.trim() || null,
+        };
 
+        if (paymentMethod) {
+            payload.paymentMethod = paymentMethod;
+            payload.paymentDetails = paymentDetails;
+        }
+
+        const response = await api.post("/orders", payload);
+        return response.data.data;
+    },
+
+    async payOrder(orderId, paymentData) {
+        const response = await api.post(
+            `/orders/${orderId}/payments`,
+            paymentData
+        );
         return response.data.data;
     },
 

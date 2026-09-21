@@ -41,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
             authenticationManager;
 
     private final JwtService jwtService;
+    private final com.sparehub.service.NotificationService notificationService;
 
     @Override
     @Transactional
@@ -81,6 +82,13 @@ public class AuthServiceImpl implements AuthService {
 
         User savedCustomer =
                 userRepository.save(customer);
+
+        notificationService.createNotification(
+                savedCustomer,
+                com.sparehub.enums.NotificationType.WELCOME,
+                "Welcome to SpareHub!",
+                "Welcome " + savedCustomer.getFullName() + "! Your SpareHub account has been created successfully."
+        );
 
         return mapToRegisterResponse(savedCustomer);
     }

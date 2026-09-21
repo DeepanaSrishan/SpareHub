@@ -2,10 +2,8 @@ package com.sparehub.service.impl.supplier;
 
 
 
-import com.sparehub.dto.supplier.AssignSupplierProductRequest;
-import com.sparehub.dto.supplier.PriceComparisonResponse;
-import com.sparehub.dto.supplier.SupplierProductResponse;
-import com.sparehub.dto.supplier.UpdateSupplierProductRequest;
+import com.sparehub.dto.request.supplier.*;
+import com.sparehub.dto.response.supplier.*;
 import com.sparehub.entity.inventory.SparePart;
 import com.sparehub.entity.supplier.Supplier;
 import com.sparehub.entity.supplier.SupplierProduct;

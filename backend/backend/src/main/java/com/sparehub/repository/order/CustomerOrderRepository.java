@@ -2,8 +2,12 @@ package com.sparehub.repository.order;
 
 import com.sparehub.entity.order.CustomerOrder;
 import com.sparehub.enums.order.OrderStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,6 +84,21 @@ public interface CustomerOrderRepository
     })
     Optional<CustomerOrder> findDetailedById(
             Long id
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @EntityGraph(attributePaths = {
+            "customer",
+            "items",
+            "items.sparePart"
+    })
+    @Query("""
+            SELECT co
+            FROM CustomerOrder co
+            WHERE co.id = :id
+            """)
+    Optional<CustomerOrder> findDetailedByIdForUpdate(
+            @Param("id") Long id
     );
 
     @EntityGraph(attributePaths = {

@@ -4,11 +4,19 @@ import {
     useLocation,
     useNavigate,
 } from "react-router-dom";
-import { CarFront, LogIn } from "lucide-react";
+import {
+    Award,
+    CarFront,
+    CreditCard,
+    Eye,
+    EyeOff,
+    LogIn,
+    ShieldCheck,
+    Truck,
+} from "lucide-react";
 
 import useAuth from "../../hooks/useAuth";
-import { getApiError } from
-        "../../utils/getApiError";
+import { getApiError } from "../../utils/getApiError";
 
 function getHomeRoute(role) {
     switch (role) {
@@ -32,9 +40,9 @@ export default function LoginPage() {
         password: "",
     });
 
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
-    const [submitting, setSubmitting] =
-        useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -60,12 +68,10 @@ export default function LoginPage() {
         try {
             const user = await login(form);
 
-            const requestedPage =
-                location.state?.from;
+            const requestedPage = location.state?.from;
 
             navigate(
-                requestedPage ||
-                getHomeRoute(user.role),
+                requestedPage || getHomeRoute(user.role),
                 {
                     replace: true,
                 }
@@ -74,7 +80,7 @@ export default function LoginPage() {
             setError(
                 getApiError(
                     requestError,
-                    "Login failed"
+                    "Login failed. Please verify your credentials."
                 )
             );
         } finally {
@@ -85,15 +91,39 @@ export default function LoginPage() {
     return (
         <main className="auth-page">
             <section className="auth-info">
-                <CarFront size={54} />
-
-                <span>SPAREHUB</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                    <div className="brand-icon-wrapper" style={{ width: "48px", height: "48px" }}>
+                        <CarFront size={26} />
+                    </div>
+                    <span className="brand-label">SPAREHUB AUTO</span>
+                </div>
 
                 <h1>
-                    Automotive parts,
-                    inventory and orders in
-                    one connected system.
+                    Genuine Auto Parts & Integrated Management.
                 </h1>
+
+                <p>
+                    Access Sri Lanka's leading automotive spare parts catalog, track customer orders, and manage inventory with high precision.
+                </p>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginTop: "36px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#cbd5e1", fontSize: "0.95rem" }}>
+                        <ShieldCheck size={20} style={{ color: "#38bdf8" }} />
+                        <span>100% Genuine certified OEM & aftermarket parts</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#cbd5e1", fontSize: "0.95rem" }}>
+                        <Truck size={20} style={{ color: "#38bdf8" }} />
+                        <span>Island-wide rapid dispatch and tracking</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#cbd5e1", fontSize: "0.95rem" }}>
+                        <CreditCard size={20} style={{ color: "#38bdf8" }} />
+                        <span>Card, Direct Bank & Cash on Delivery payments</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#cbd5e1", fontSize: "0.95rem" }}>
+                        <Award size={20} style={{ color: "#38bdf8" }} />
+                        <span>Loyalty rewards tier discounts on every order</span>
+                    </div>
+                </div>
             </section>
 
             <section className="auth-form-section">
@@ -101,11 +131,10 @@ export default function LoginPage() {
                     className="auth-card"
                     onSubmit={handleSubmit}
                 >
-                    <h2>Welcome back</h2>
+                    <h2>Welcome Back</h2>
 
                     <p>
-                        Sign in to access your
-                        SpareHub account.
+                        Sign in to access your SpareHub account.
                     </p>
 
                     {message && (
@@ -122,10 +151,10 @@ export default function LoginPage() {
 
                     <label>
                         Email address
-
                         <input
                             type="email"
                             name="email"
+                            placeholder="name@example.com"
                             value={form.email}
                             onChange={handleChange}
                             autoComplete="email"
@@ -135,33 +164,53 @@ export default function LoginPage() {
 
                     <label>
                         Password
-
-                        <input
-                            type="password"
-                            name="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            autoComplete="current-password"
-                            required
-                        />
+                        <div style={{ position: "relative" }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                placeholder="••••••••"
+                                value={form.password}
+                                onChange={handleChange}
+                                autoComplete="current-password"
+                                style={{ paddingRight: "44px" }}
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                    position: "absolute",
+                                    right: "12px",
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    background: "transparent",
+                                    border: 0,
+                                    color: "#94a3b8",
+                                    cursor: "pointer",
+                                    display: "grid",
+                                    placeItems: "center",
+                                    padding: 0,
+                                }}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
                     </label>
 
                     <button
                         className="primary-button"
+                        style={{ marginTop: "16px" }}
                         disabled={submitting}
                     >
                         <LogIn size={18} />
-
-                        {submitting
-                            ? "Signing in..."
-                            : "Sign in"}
+                        <span>{submitting ? "Signing in..." : "Sign in to SpareHub"}</span>
                     </button>
 
                     <p className="auth-link">
-                        New customer?{" "}
-
+                        Don't have an account?{" "}
                         <Link to="/register">
-                            Create an account
+                            Create customer account
                         </Link>
                     </p>
                 </form>

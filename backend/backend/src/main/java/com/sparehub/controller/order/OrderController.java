@@ -6,6 +6,7 @@ package com.sparehub.controller.order;
 
 import com.sparehub.dto.response.ApiResponse;
 import com.sparehub.dto.request.order.CancellationRequest;
+import com.sparehub.dto.request.order.CustomerPaymentRequest;
 import com.sparehub.dto.request.order.PlaceOrderRequest;
 import com.sparehub.dto.response.order.*;
 import com.sparehub.service.order.BillingService;
@@ -178,6 +179,26 @@ public class OrderController {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         "Payment history retrieved successfully",
+                        response
+                )
+        );
+    }
+
+    /*
+     * Customer pay for order (Card or Bank Transfer)
+     */
+    @PostMapping("/{orderId}/payments")
+    public ResponseEntity<ApiResponse<PaymentRecordResponse>>
+    payOrder(
+            @PathVariable Long orderId,
+            @Valid @RequestBody CustomerPaymentRequest request
+    ) {
+        PaymentRecordResponse response =
+                billingService.processCustomerPayment(orderId, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Payment processed successfully",
                         response
                 )
         );

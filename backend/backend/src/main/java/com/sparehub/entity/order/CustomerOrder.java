@@ -83,6 +83,22 @@ public class CustomerOrder {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal discountAmount;
 
+    @Column(
+            name = "tax_rate",
+            nullable = false,
+            precision = 5,
+            scale = 2
+    )
+    private BigDecimal taxRate = BigDecimal.ZERO;
+
+    @Column(
+            name = "tax_amount",
+            nullable = false,
+            precision = 12,
+            scale = 2
+    )
+    private BigDecimal taxAmount = BigDecimal.ZERO;
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 

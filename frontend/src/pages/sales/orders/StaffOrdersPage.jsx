@@ -1,4 +1,5 @@
 import {
+    useCallback,
     useEffect,
     useMemo,
     useState,
@@ -59,7 +60,7 @@ const StaffOrdersPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const loadOrders = async () => {
+    const loadOrders = useCallback(async () => {
         try {
             setLoading(true);
             setError("");
@@ -82,11 +83,12 @@ const StaffOrdersPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [statusFilter]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadOrders();
-    }, [statusFilter]);
+    }, [loadOrders]);
 
     const displayedOrders = useMemo(() => {
         const query = searchText

@@ -51,6 +51,8 @@ public class OrderResponseMapper {
                 order.getSubtotal(),
                 order.getDiscountPercentage(),
                 order.getDiscountAmount(),
+                order.getTaxRate() != null ? order.getTaxRate() : java.math.BigDecimal.ZERO.setScale(2, java.math.RoundingMode.HALF_UP),
+                order.getTaxAmount() != null ? order.getTaxAmount() : java.math.BigDecimal.ZERO.setScale(2, java.math.RoundingMode.HALF_UP),
                 order.getTotalAmount(),
 
                 order.getOrderStatus(),

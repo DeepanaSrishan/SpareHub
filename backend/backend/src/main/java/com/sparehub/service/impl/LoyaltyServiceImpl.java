@@ -191,9 +191,7 @@ public class LoyaltyServiceImpl
                         );
 
         if (alreadyAwarded) {
-            throw new ConflictException(
-                    "Loyalty points have already been awarded for this order"
-            );
+            return 0;
         }
 
         int earnedPoints = eligibleAmount

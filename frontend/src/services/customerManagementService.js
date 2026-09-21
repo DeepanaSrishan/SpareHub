@@ -6,9 +6,10 @@ const customerManagementService = {
                              page = 0,
                              size = 10,
                          } = {}) => {
-        const response = await apiClient.get("/staff/customers", {
+        const response = await apiClient.get("/customers", {
             params: {
                 search,
+                keyword: search,
                 page,
                 size,
             },
@@ -19,7 +20,7 @@ const customerManagementService = {
 
     getCustomerById: async (customerId) => {
         const response = await apiClient.get(
-            `/staff/customers/${customerId}`
+            `/customers/${customerId}`
         );
 
         return response.data.data;
@@ -31,7 +32,7 @@ const customerManagementService = {
         size = 10
     ) => {
         const response = await apiClient.get(
-            `/staff/customers/${customerId}/history`,
+            `/customers/${customerId}/transactions`,
             {
                 params: {
                     page,
@@ -49,9 +50,10 @@ const customerManagementService = {
                                      size = 10,
                                  } = {}) => {
         const response = await apiClient.get(
-            "/staff/customers/inactive",
+            "/customers/inactive",
             {
                 params: {
+                    days: inactiveDays,
                     inactiveDays,
                     page,
                     size,
@@ -64,9 +66,10 @@ const customerManagementService = {
 
     updateLoyaltyTier: async (customerId, loyaltyTier) => {
         const response = await apiClient.patch(
-            `/staff/customers/${customerId}/loyalty-tier`,
+            `/customers/${customerId}/loyalty-tier`,
             {
                 loyaltyTier,
+                reason: "Tier updated by sales staff",
             }
         );
 

@@ -12,15 +12,20 @@ import {
     CarFront,
     ChartColumn,
     ClipboardList,
+    FileBarChart,
     LogOut,
     PackagePlus,
     PackageSearch,
+    ShoppingBag,
     ShoppingCart,
+    TrendingUp,
+    Truck,
     UserRound,
 } from "lucide-react";
 
 import useAuth from "../../hooks/useAuth";
 import useCart from "../../hooks/useCart";
+import useScrollProgress from "../../hooks/useScrollProgress";
 
 export default function Navbar() {
     const {
@@ -56,13 +61,34 @@ export default function Navbar() {
     const cartQuantity =
         cart?.totalQuantity ?? 0;
 
+    const { scrollProgress, isScrolled } = useScrollProgress(25);
+
+    const getNavLinkClass = ({
+                                 isActive,
+                             }) =>
+        isActive
+            ? "nav-link active"
+            : "nav-link";
+
     return (
-        <header className="navbar">
+        <>
+            <div className="scroll-progress-track" aria-hidden="true">
+                <div
+                    className="scroll-progress-fill"
+                    style={{ width: `${scrollProgress}%` }}
+                >
+                    {scrollProgress > 0.5 && <div className="scroll-progress-glow" />}
+                </div>
+            </div>
+
+            <header className={`navbar ${isScrolled ? "is-scrolled" : ""}`}>
             <Link
                 to="/"
                 className="navbar-brand"
             >
-                <CarFront />
+                <div className="brand-icon-wrapper">
+                    <CarFront size={22} />
+                </div>
 
                 <span>
                     SPARE<strong>HUB</strong>
@@ -72,26 +98,52 @@ export default function Navbar() {
             <nav>
                 {isAuthenticated && (
                     <>
-                        <NavLink to="/products">
-                            <PackageSearch size={18} />
+                        {/* All authenticated users */}
+                        <NavLink
+                            to="/products"
+                            className={
+                                getNavLinkClass
+                            }
+                        >
+                            <PackageSearch
+                                size={18}
+                            />
+
                             <span>Products</span>
                         </NavLink>
 
                         {/* Sales Staff සහ Manager links */}
                         {canManageCustomers && (
                             <>
-                                <NavLink to="/sales/customers">
-                                    <UserRound size={18} />
-                                    <span>Customers</span>
+                                <NavLink
+                                    to="/sales/customers"
+                                    className={
+                                        getNavLinkClass
+                                    }
+                                >
+                                    <UserRound
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        Customers
+                                    </span>
                                 </NavLink>
 
-                                <Link
+                                <NavLink
                                     to="/sales/orders"
-                                    className="nav-link"
+                                    className={
+                                        getNavLinkClass
+                                    }
                                 >
-                                    <ClipboardList size={18} />
-                                    <span>Orders</span>
-                                </Link>
+                                    <ClipboardList
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        Orders
+                                    </span>
+                                </NavLink>
                             </>
                         )}
 
@@ -100,38 +152,77 @@ export default function Navbar() {
                             <>
                                 <NavLink
                                     to="/inventory/products"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "nav-link active"
-                                            : "nav-link"
+                                    className={
+                                        getNavLinkClass
                                     }
                                 >
-                                    <PackagePlus size={18} />
-                                    <span>Manage Products</span>
+                                    <PackagePlus
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        Manage Products
+                                    </span>
                                 </NavLink>
 
                                 <NavLink
                                     to="/inventory/categories"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "nav-link active"
-                                            : "nav-link"
+                                    className={
+                                        getNavLinkClass
                                     }
                                 >
-                                    <Boxes size={18} />
-                                    <span>Categories</span>
+                                    <Boxes
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        Categories
+                                    </span>
                                 </NavLink>
 
                                 <NavLink
                                     to="/inventory/low-stock-alerts"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "nav-link active"
-                                            : "nav-link"
+                                    className={
+                                        getNavLinkClass
                                     }
                                 >
-                                    <AlertTriangle size={18} />
-                                    <span>Stock Alerts</span>
+                                    <AlertTriangle
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        Stock Alerts
+                                    </span>
+                                </NavLink>
+
+                                <NavLink
+                                    to="/suppliers"
+                                    className={
+                                        getNavLinkClass
+                                    }
+                                >
+                                    <Truck
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        Suppliers
+                                    </span>
+                                </NavLink>
+
+                                <NavLink
+                                    to="/supplier-purchases"
+                                    className={
+                                        getNavLinkClass
+                                    }
+                                >
+                                    <ShoppingBag
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        Purchases
+                                    </span>
                                 </NavLink>
                             </>
                         )}
@@ -139,33 +230,89 @@ export default function Navbar() {
                         {/* Manager-only links */}
                         {isManager && (
                             <>
-                                <NavLink to="/manager/users">
-                                    <UserRound size={18} />
+                                <NavLink
+                                    to="/manager/users"
+                                    className={
+                                        getNavLinkClass
+                                    }
+                                >
+                                    <UserRound
+                                        size={18}
+                                    />
+
                                     <span>
                                         User Accounts
                                     </span>
                                 </NavLink>
 
-                                <NavLink to="/manager/reports/inventory">
-                                    <ChartColumn size={18} />
+                                <NavLink
+                                    to="/manager/reports/inventory"
+                                    className={
+                                        getNavLinkClass
+                                    }
+                                >
+                                    <ChartColumn
+                                        size={18}
+                                    />
+
                                     <span>
                                         Inventory Reports
                                     </span>
                                 </NavLink>
 
-                                <Link
+                                <NavLink
                                     to="/manager/order-reports"
-                                    className="nav-link"
+                                    className={
+                                        getNavLinkClass
+                                    }
                                 >
-                                    <BarChart3 size={18} />
+                                    <BarChart3
+                                        size={18}
+                                    />
+
                                     <span>
                                         Sales Reports
                                     </span>
-                                </Link>
+                                </NavLink>
+
+                                <NavLink
+                                    to="/supplier-analytics"
+                                    className={
+                                        getNavLinkClass
+                                    }
+                                >
+                                    <TrendingUp
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        Supplier Analytics
+                                    </span>
+                                </NavLink>
+
+                                <NavLink
+                                    to="/manager/reports"
+                                    className={
+                                        getNavLinkClass
+                                    }
+                                >
+                                    <FileBarChart
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        Management Reports
+                                    </span>
+                                </NavLink>
                             </>
                         )}
 
-                        <NavLink to="/profile">
+                        <NavLink
+                            to="/profile"
+                            className={
+                                getNavLinkClass
+                            }
+                        >
                             <UserRound size={18} />
                             <span>Profile</span>
                         </NavLink>
@@ -173,42 +320,83 @@ export default function Navbar() {
                         {/* Customer-only links */}
                         {isCustomer && (
                             <>
-                                <NavLink to="/loyalty">
-                                    <Award size={18} />
-                                    <span>Loyalty</span>
+                                <NavLink
+                                    to="/loyalty"
+                                    className={
+                                        getNavLinkClass
+                                    }
+                                >
+                                    <Award
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        Loyalty
+                                    </span>
                                 </NavLink>
 
                                 <NavLink
                                     to="/customer/orders"
-                                    className="nav-link"
+                                    className={
+                                        getNavLinkClass
+                                    }
                                 >
-                                    <ClipboardList size={18} />
-                                    <span>My Orders</span>
+                                    <ClipboardList
+                                        size={18}
+                                    />
+
+                                    <span>
+                                        My Orders
+                                    </span>
                                 </NavLink>
 
-                                <Link
+                                <NavLink
                                     to="/customer/cart"
-                                    className="navbar-cart-link"
+                                    className={({
+                                                    isActive,
+                                                }) =>
+                                        isActive
+                                            ? "navbar-cart-link active"
+                                            : "navbar-cart-link"
+                                    }
                                     aria-label="Open shopping cart"
                                 >
-                                    <ShoppingCart size={21} />
+                                    <ShoppingCart
+                                        size={21}
+                                    />
+
                                     <span>Cart</span>
 
-                                    {cartQuantity > 0 && (
-                                        <span className="cart-count-badge">
-                                            {cartQuantity > 99
+                                    {cartQuantity >
+                                        0 && (
+                                            <span className="cart-count-badge">
+                                            {cartQuantity >
+                                            99
                                                 ? "99+"
                                                 : cartQuantity}
                                         </span>
-                                    )}
-                                </Link>
+                                        )}
+                                </NavLink>
                             </>
                         )}
 
-                        <NavLink to="/notifications">
+                        <NavLink
+                            to="/notifications"
+                            className={
+                                getNavLinkClass
+                            }
+                        >
                             <Bell size={18} />
-                            <span>Notifications</span>
+
+                            <span>
+                                Notifications
+                            </span>
                         </NavLink>
+
+                        <div className="nav-user-badge">
+                            <UserRound size={14} />
+                            <span>{user?.name || user?.fullName || normalizedRole}</span>
+                        </div>
 
                         <button
                             type="button"
@@ -216,6 +404,7 @@ export default function Navbar() {
                             className="logout-button"
                         >
                             <LogOut size={18} />
+
                             <span>Logout</span>
                         </button>
                     </>
@@ -223,21 +412,40 @@ export default function Navbar() {
 
                 {!isAuthenticated && (
                     <>
-                        <NavLink to="/products">
-                            <PackageSearch size={18} />
+                        <NavLink
+                            to="/products"
+                            className={
+                                getNavLinkClass
+                            }
+                        >
+                            <PackageSearch
+                                size={18}
+                            />
+
                             <span>Products</span>
                         </NavLink>
 
-                        <NavLink to="/login">
+                        <NavLink
+                            to="/login"
+                            className={
+                                getNavLinkClass
+                            }
+                        >
                             Login
                         </NavLink>
 
-                        <NavLink to="/register">
+                        <NavLink
+                            to="/register"
+                            className={
+                                getNavLinkClass
+                            }
+                        >
                             Register
                         </NavLink>
                     </>
                 )}
             </nav>
         </header>
+        </>
     );
 }

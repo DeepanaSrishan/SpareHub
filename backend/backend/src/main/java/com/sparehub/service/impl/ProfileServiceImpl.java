@@ -43,13 +43,18 @@ public class ProfileServiceImpl
         User user =
                 currentUserService.getCurrentUser();
 
-        user.setFullName(
-                request.fullName().trim()
-        );
+        String resolvedName = request.resolveFullName();
+        if (resolvedName == null || resolvedName.length() < 2) {
+            throw new BadRequestException(
+                    "Full name must contain between 2 and 120 characters"
+            );
+        }
+
+        user.setFullName(resolvedName);
 
         user.setPhone(
                 normalizeOptionalValue(
-                        request.phone()
+                        request.resolvePhone()
                 )
         );
 
@@ -114,11 +119,14 @@ public class ProfileServiceImpl
     private void validateNewPasswordsMatch(
             ChangePasswordRequest request
     ) {
-        if (!request.newPassword()
-                .equals(
-                        request.confirmNewPassword()
-                )) {
+        String confirm = request.resolveConfirmPassword();
+        if (confirm == null || confirm.isBlank()) {
+            throw new BadRequestException(
+                    "New password confirmation is required"
+            );
+        }
 
+        if (!request.newPassword().equals(confirm)) {
             throw new BadRequestException(
                     "New password and password confirmation do not match"
             );

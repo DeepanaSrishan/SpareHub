@@ -11,13 +11,21 @@ import {
 } from "react-router-dom";
 
 import {
+    AlertCircle,
     ArrowLeft,
     Ban,
+    Check,
+    CheckCircle2,
+    Copy,
     CreditCard,
     FileText,
+    Landmark,
+    Lock,
     Package,
     RefreshCcw,
     RotateCcw,
+    ShieldCheck,
+    X,
 } from "lucide-react";
 
 import orderService from "../../services/orderService";
@@ -44,6 +52,51 @@ const formatDateTime = (value) => {
         timeStyle: "short",
     }).format(new Date(value));
 };
+
+const formatCardNumber = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 16);
+    return digits.replace(/(\d{4})(?=\d)/g, "$1 ");
+};
+
+const formatExpiry = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 4);
+    if (digits.length >= 3) {
+        return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    }
+    return digits;
+};
+
+const getCardBrand = (cardNumber) => {
+    const digits = cardNumber.replace(/\D/g, "");
+    if (digits.startsWith("4")) return "Visa";
+    if (/^5[1-5]/.test(digits) || /^2[2-7]/.test(digits)) return "Mastercard";
+    if (/^3[47]/.test(digits)) return "American Express";
+    return "";
+};
+
+const bankAccounts = [
+    {
+        id: "combank",
+        bankName: "Commercial Bank of Ceylon",
+        accountName: "SpareHub Auto (Pvt) Ltd",
+        accountNumber: "1000 4589 7234",
+        branch: "Colombo City Branch",
+    },
+    {
+        id: "boc",
+        bankName: "Bank of Ceylon (BOC)",
+        accountName: "SpareHub Auto (Pvt) Ltd",
+        accountNumber: "0089 1234 5678",
+        branch: "Kollupitiya Branch",
+    },
+    {
+        id: "hnb",
+        bankName: "Hatton National Bank (HNB)",
+        accountName: "SpareHub Auto (Pvt) Ltd",
+        accountNumber: "0450 2000 8912",
+        branch: "Head Office Branch",
+    },
+];
 
 const OrderDetailsPage = () => {
     const { orderId } = useParams();
@@ -87,6 +140,110 @@ const OrderDetailsPage = () => {
 
     const [cancelling, setCancelling] =
         useState(false);
+
+    // Online payment modal state
+    const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState("CARD");
+    const [paying, setPaying] = useState(false);
+    const [paymentError, setPaymentError] = useState("");
+    const [paymentSuccess, setPaymentSuccess] = useState("");
+
+    const [cardDetails, setCardDetails] = useState({
+        cardHolderName: "",
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+    });
+
+    const [bankDetails, setBankDetails] = useState({
+        bankName: "Commercial Bank of Ceylon",
+        depositSlipReference: "",
+        transferDate: new Date().toISOString().split("T")[0],
+    });
+
+    const [copiedAccount, setCopiedAccount] = useState("");
+
+    const handleCopyAccount = (accountNumber, id) => {
+        navigator.clipboard.writeText(accountNumber.replace(/\s+/g, ""));
+        setCopiedAccount(id);
+        setTimeout(() => setCopiedAccount(""), 2000);
+    };
+
+    const validatePaymentDetails = () => {
+        if (paymentMethod === "CARD") {
+            const digits = cardDetails.cardNumber.replace(/\D/g, "");
+            if (digits.length !== 16) {
+                return "Please enter a valid 16-digit card number.";
+            }
+            if (!cardDetails.cardHolderName.trim()) {
+                return "Please enter the cardholder's full name.";
+            }
+            if (!cardDetails.expiryDate || cardDetails.expiryDate.length < 5) {
+                return "Please enter a valid expiry date in MM/YY format.";
+            }
+            const [month] = cardDetails.expiryDate.split("/").map(Number);
+            if (!month || month < 1 || month > 12) {
+                return "Invalid expiry month. Month must be between 01 and 12.";
+            }
+            if (!cardDetails.cvv || cardDetails.cvv.length < 3) {
+                return "Please enter a valid 3 or 4 digit CVV/CVC.";
+            }
+        }
+
+        if (paymentMethod === "BANK_TRANSFER") {
+            if (!bankDetails.depositSlipReference.trim()) {
+                return "Please enter the deposit slip reference or transaction ID.";
+            }
+        }
+
+        return null;
+    };
+
+    const handleProcessPayment = async (event) => {
+        event.preventDefault();
+        const validationError = validatePaymentDetails();
+        if (validationError) {
+            setPaymentError(validationError);
+            return;
+        }
+
+        try {
+            setPaying(true);
+            setPaymentError("");
+
+            let paymentData = null;
+            if (paymentMethod === "CARD") {
+                paymentData = {
+                    paymentMethod: "CARD",
+                    cardNumber: cardDetails.cardNumber.replace(/\s+/g, ""),
+                    cardHolderName: cardDetails.cardHolderName.trim(),
+                    expiryDate: cardDetails.expiryDate.trim(),
+                    cvv: cardDetails.cvv.trim(),
+                    note: "Online card payment by " + cardDetails.cardHolderName.trim(),
+                };
+            } else if (paymentMethod === "BANK_TRANSFER") {
+                paymentData = {
+                    paymentMethod: "BANK_TRANSFER",
+                    bankName: bankDetails.bankName,
+                    depositSlipReference: bankDetails.depositSlipReference.trim(),
+                    transferDate: bankDetails.transferDate,
+                    note: "Direct bank deposit to " + bankDetails.bankName,
+                };
+            }
+
+            await orderService.payOrder(orderId, paymentData);
+            setPaymentSuccess("Payment processed successfully! Your order is now paid.");
+            setTimeout(async () => {
+                setPaymentModalOpen(false);
+                setPaymentSuccess("");
+                await loadOrderDetails(false);
+            }, 1200);
+        } catch (err) {
+            setPaymentError(getApiError(err, "Payment failed. Please check your payment details."));
+        } finally {
+            setPaying(false);
+        }
+    };
 
     const loadOrderDetails = useCallback(
         async (showMainLoader = true) => {
@@ -529,6 +686,34 @@ const OrderDetailsPage = () => {
                             </p>
                         )}
 
+                        {order.paymentStatus === "PENDING" &&
+                            order.orderStatus !== "CANCELLED" &&
+                            remainingAmount > 0 && (
+                                <div className="pending-payment-alert">
+                                    <div className="pending-payment-info">
+                                        <div className="pending-payment-title">
+                                            <CreditCard size={18} />
+                                            <strong>Online Payment Available</strong>
+                                        </div>
+                                        <p>
+                                            This order is pending payment. Pay securely with Credit/Debit Card or Direct Bank Transfer to process your order faster.
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="primary-button pay-alert-btn"
+                                        onClick={() => {
+                                            setPaymentModalOpen(true);
+                                            setPaymentError("");
+                                            setPaymentSuccess("");
+                                        }}
+                                    >
+                                        <CreditCard size={16} />
+                                        Pay Now ({formatCurrency(remainingAmount)})
+                                    </button>
+                                </div>
+                            )}
+
                         {refund && (
                             <div className="refund-information">
                                 <RotateCcw
@@ -607,6 +792,23 @@ const OrderDetailsPage = () => {
                             </strong>
                         </div>
 
+                        {Number(order.taxAmount || 0) > 0 && (
+                            <div className="price-summary-row tax">
+                                <span>
+                                    Tax (
+                                    {order.taxRate ?? 0}
+                                    %)
+                                </span>
+
+                                <strong>
+                                    +{" "}
+                                    {formatCurrency(
+                                        order.taxAmount
+                                    )}
+                                </strong>
+                            </div>
+                        )}
+
                         <div className="price-summary-row total">
                             <span>Total</span>
 
@@ -616,6 +818,25 @@ const OrderDetailsPage = () => {
                                 )}
                             </strong>
                         </div>
+
+                        {order.paymentStatus === "PENDING" &&
+                            order.orderStatus !== "CANCELLED" &&
+                            remainingAmount > 0 && (
+                                <div className="order-pay-sidebar-action">
+                                    <button
+                                        type="button"
+                                        className="primary-button full-width-button pay-sidebar-btn"
+                                        onClick={() => {
+                                            setPaymentModalOpen(true);
+                                            setPaymentError("");
+                                            setPaymentSuccess("");
+                                        }}
+                                    >
+                                        <CreditCard size={18} />
+                                        Pay Now ({formatCurrency(remainingAmount)})
+                                    </button>
+                                </div>
+                            )}
                     </section>
 
                     <section className="order-panel">
@@ -790,6 +1011,339 @@ const OrderDetailsPage = () => {
                     )}
                 </aside>
             </div>
+
+            {paymentModalOpen && (
+                <div
+                    className="modal-backdrop"
+                    onClick={() => {
+                        if (!paying) {
+                            setPaymentModalOpen(false);
+                            setPaymentError("");
+                        }
+                    }}
+                >
+                    <div
+                        className="payment-modal-card"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="payment-modal-header">
+                            <div>
+                                <h2>Pay for Order</h2>
+                                <p>
+                                    Order #{order.orderNumber} · Balance:{" "}
+                                    <strong>{formatCurrency(remainingAmount)}</strong>
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                className="modal-close-icon-btn"
+                                disabled={paying}
+                                onClick={() => {
+                                    setPaymentModalOpen(false);
+                                    setPaymentError("");
+                                }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {paymentError && (
+                            <div className="alert alert-error">
+                                <AlertCircle size={16} />
+                                <span>{paymentError}</span>
+                            </div>
+                        )}
+
+                        {paymentSuccess && (
+                            <div className="alert alert-success">
+                                <CheckCircle2 size={16} />
+                                <span>{paymentSuccess}</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleProcessPayment}>
+                            {/* Payment Method Selector Tabs */}
+                            <div className="modal-payment-methods">
+                                <button
+                                    type="button"
+                                    className={`modal-method-btn ${
+                                        paymentMethod === "CARD" ? "active" : ""
+                                    }`}
+                                    onClick={() => setPaymentMethod("CARD")}
+                                >
+                                    <CreditCard size={18} />
+                                    <span>Credit / Debit Card</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`modal-method-btn ${
+                                        paymentMethod === "BANK_TRANSFER" ? "active" : ""
+                                    }`}
+                                    onClick={() => setPaymentMethod("BANK_TRANSFER")}
+                                >
+                                    <Landmark size={18} />
+                                    <span>Direct Bank Transfer</span>
+                                </button>
+                            </div>
+
+                            {/* Card Form */}
+                            {paymentMethod === "CARD" && (
+                                <div className="payment-modal-section">
+                                    <div className="form-group">
+                                        <label htmlFor="modalCardHolder">
+                                            Cardholder Name *
+                                        </label>
+                                        <input
+                                            id="modalCardHolder"
+                                            type="text"
+                                            placeholder="e.g. S. A. Perera"
+                                            value={cardDetails.cardHolderName}
+                                            onChange={(e) =>
+                                                setCardDetails((prev) => ({
+                                                    ...prev,
+                                                    cardHolderName: e.target.value,
+                                                }))
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="modalCardNumber">
+                                            Card Number *
+                                        </label>
+                                        <div className="card-input-wrapper">
+                                            <input
+                                                id="modalCardNumber"
+                                                type="text"
+                                                placeholder="4000 1234 5678 9010"
+                                                maxLength={19}
+                                                value={cardDetails.cardNumber}
+                                                onChange={(e) =>
+                                                    setCardDetails((prev) => ({
+                                                        ...prev,
+                                                        cardNumber: formatCardNumber(
+                                                            e.target.value
+                                                        ),
+                                                    }))
+                                                }
+                                            />
+                                            {getCardBrand(cardDetails.cardNumber) && (
+                                                <span className="card-brand-badge">
+                                                    {getCardBrand(cardDetails.cardNumber)}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="card-fields-row">
+                                        <div className="form-group">
+                                            <label htmlFor="modalExpiry">
+                                                Expiry Date *
+                                            </label>
+                                            <input
+                                                id="modalExpiry"
+                                                type="text"
+                                                placeholder="MM/YY"
+                                                maxLength={5}
+                                                value={cardDetails.expiryDate}
+                                                onChange={(e) =>
+                                                    setCardDetails((prev) => ({
+                                                        ...prev,
+                                                        expiryDate: formatExpiry(
+                                                            e.target.value
+                                                        ),
+                                                    }))
+                                                }
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label htmlFor="modalCvv">
+                                                CVV / CVC *
+                                            </label>
+                                            <div className="card-input-wrapper">
+                                                <input
+                                                    id="modalCvv"
+                                                    type="password"
+                                                    placeholder="123"
+                                                    maxLength={4}
+                                                    value={cardDetails.cvv}
+                                                    onChange={(e) =>
+                                                        setCardDetails((prev) => ({
+                                                            ...prev,
+                                                            cvv: e.target.value.replace(
+                                                                /\D/g,
+                                                                ""
+                                                            ),
+                                                        }))
+                                                    }
+                                                />
+                                                <Lock
+                                                    size={15}
+                                                    style={{
+                                                        position: "absolute",
+                                                        right: "12px",
+                                                        top: "50%",
+                                                        transform: "translateY(-50%)",
+                                                        color: "#64748b",
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="security-notice">
+                                        <ShieldCheck size={16} />
+                                        <span>
+                                            Payments are simulated with 256-bit encryption for demo & testing.
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Bank Transfer Form */}
+                            {paymentMethod === "BANK_TRANSFER" && (
+                                <div className="payment-modal-section">
+                                    <p className="bank-instructions">
+                                        Transfer <strong>{formatCurrency(remainingAmount)}</strong> to one of our corporate bank accounts below and enter your deposit slip number or reference:
+                                    </p>
+
+                                    <div className="bank-accounts-list">
+                                        {bankAccounts.map((acc) => (
+                                            <div
+                                                key={acc.id}
+                                                className="bank-account-item"
+                                            >
+                                                <div className="bank-account-header">
+                                                    <div>
+                                                        <span className="bank-badge">
+                                                            {acc.bankName}
+                                                        </span>
+                                                        <p className="account-holder">
+                                                            {acc.accountName} ·{" "}
+                                                            {acc.branch}
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        className="bank-copy-btn"
+                                                        onClick={() =>
+                                                            handleCopyAccount(
+                                                                acc.accountNumber,
+                                                                acc.id
+                                                            )
+                                                        }
+                                                    >
+                                                        {copiedAccount === acc.id ? (
+                                                            <>
+                                                                <Check size={14} />
+                                                                Copied
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Copy size={14} />
+                                                                Copy No
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                <div className="bank-account-details">
+                                                    <code>{acc.accountNumber}</code>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="form-group" style={{ marginTop: "14px" }}>
+                                        <label htmlFor="modalTransferBank">
+                                            Transfer Deposited To *
+                                        </label>
+                                        <select
+                                            id="modalTransferBank"
+                                            value={bankDetails.bankName}
+                                            onChange={(e) =>
+                                                setBankDetails((prev) => ({
+                                                    ...prev,
+                                                    bankName: e.target.value,
+                                                }))
+                                            }
+                                        >
+                                            {bankAccounts.map((acc) => (
+                                                <option
+                                                    key={acc.id}
+                                                    value={acc.bankName}
+                                                >
+                                                    {acc.bankName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="modalDepositSlip">
+                                            Deposit Slip Number / Transaction ID *
+                                        </label>
+                                        <input
+                                            id="modalDepositSlip"
+                                            type="text"
+                                            placeholder="e.g. SLIP-892341 or TXN10293847"
+                                            value={bankDetails.depositSlipReference}
+                                            onChange={(e) =>
+                                                setBankDetails((prev) => ({
+                                                    ...prev,
+                                                    depositSlipReference: e.target.value,
+                                                }))
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="modalTransferDate">
+                                            Transfer Date
+                                        </label>
+                                        <input
+                                            id="modalTransferDate"
+                                            type="date"
+                                            value={bankDetails.transferDate}
+                                            onChange={(e) =>
+                                                setBankDetails((prev) => ({
+                                                    ...prev,
+                                                    transferDate: e.target.value,
+                                                }))
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="modal-actions">
+                                <button
+                                    type="button"
+                                    className="secondary-button"
+                                    disabled={paying}
+                                    onClick={() => {
+                                        setPaymentModalOpen(false);
+                                        setPaymentError("");
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="primary-button"
+                                    disabled={paying}
+                                >
+                                    {paying
+                                        ? "Processing..."
+                                        : paymentMethod === "CARD"
+                                        ? `Pay ${formatCurrency(remainingAmount)}`
+                                        : "Confirm Bank Transfer"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </main>
     );
 };

@@ -2,6 +2,7 @@ package com.sparehub.service.impl.order;
 
 
 
+import com.sparehub.enums.Role;
 import com.sparehub.dto.response.order.*;
 import com.sparehub.entity.order.Refund;
 import com.sparehub.exception.BadRequestException;
@@ -33,6 +34,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import com.sparehub.dto.request.order.CustomerPaymentRequest;
+import com.sparehub.enums.order.PaymentMethod;
+import com.sparehub.service.NotificationService;
+import com.sparehub.enums.NotificationType;
 import com.sparehub.dto.response.order.RefundResponse;
 
 @Service
@@ -45,6 +50,8 @@ public class BillingServiceImpl implements BillingService {
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
     private final RefundRepository refundRepository;
+    private final com.sparehub.service.LoyaltyService loyaltyService;
+    private final NotificationService notificationService;
 
 
     /*
@@ -162,79 +169,75 @@ public class BillingServiceImpl implements BillingService {
     }
 
     /*
-     * US-34: Sales Staff customer payment record කිරීම.
+     * US-34: Sales Staff customer payment record කිරීම (Full-Payment-Only).
      */
     @Override
     public PaymentRecordResponse recordPayment(
             Long orderId,
             RecordPaymentRequest request
     ) {
-        CustomerOrder order = getRequiredOrder(orderId);
-
-        validatePaymentEligibility(order);
-
-        BigDecimal paymentAmount = money(request.amount());
-
-        BigDecimal paidBefore =
-                getPaidAmount(order.getId());
-
-        BigDecimal remainingBefore = money(
-                order.getTotalAmount().subtract(paidBefore)
-        );
-
-        if (remainingBefore.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestException(
-                    "This order has already been fully paid"
-            );
-        }
-
-        if (paymentAmount.compareTo(remainingBefore) > 0) {
-            throw new BadRequestException(
-                    "Payment amount exceeds the remaining order amount. "
-                            + "Remaining amount: "
-                            + remainingBefore
-            );
+        if (request == null || request.paymentMethod() == null) {
+            throw new BadRequestException("Payment method is required");
         }
 
         User staff = getCurrentUser();
+        if (staff.getRole() != Role.SALES_STAFF && staff.getRole() != Role.MANAGER) {
+            throw new BadRequestException("Only sales staff or managers are authorized to record payments");
+        }
+
+        CustomerOrder order = customerOrderRepository
+                .findDetailedByIdForUpdate(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Order was not found with ID: "
+                                + orderId
+                ));
+
+        validatePaymentEligibility(order);
+
+        if (order.getPaymentStatus() == PaymentStatus.PAID) {
+            throw new BadRequestException("This order has already been fully paid");
+        }
+        if (order.getPaymentStatus() == PaymentStatus.REFUNDED) {
+            throw new BadRequestException("Payment cannot be recorded for a refunded order");
+        }
+
+        BigDecimal orderTotal = money(order.getTotalAmount());
+        BigDecimal paidBefore = getPaidAmount(order.getId());
+        BigDecimal remainingAmount = money(orderTotal.subtract(paidBefore));
+
+        if (remainingAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("This order has already been fully paid");
+        }
 
         Payment payment = new Payment();
-        payment.setPaymentReference(
-                generatePaymentReference()
-        );
+        payment.setPaymentReference(generatePaymentReference());
         payment.setOrder(order);
-        payment.setAmount(paymentAmount);
-        payment.setPaymentMethod(
-                request.paymentMethod()
-        );
+        payment.setAmount(remainingAmount);
+        payment.setPaymentMethod(request.paymentMethod());
         payment.setStatus(PaymentStatus.PAID);
-        payment.setExternalReference(
-                cleanText(request.externalReference())
-        );
+        payment.setExternalReference(cleanText(request.externalReference()));
         payment.setNote(cleanText(request.note()));
         payment.setRecordedBy(staff);
         payment.setPaidAt(LocalDateTime.now());
 
-        Payment savedPayment =
-                paymentRepository.save(payment);
+        Payment savedPayment = paymentRepository.save(payment);
 
-        BigDecimal paidAfter =
-                money(paidBefore.add(paymentAmount));
+        BigDecimal paidAfter = money(paidBefore.add(remainingAmount));
+        BigDecimal remainingAfter = money(BigDecimal.ZERO);
 
-        BigDecimal remainingAfter = money(
-                order.getTotalAmount().subtract(paidAfter)
-        );
-
-        if (remainingAfter.compareTo(BigDecimal.ZERO) <= 0) {
-            remainingAfter = money(BigDecimal.ZERO);
-            order.setPaymentStatus(PaymentStatus.PAID);
-        } else {
-            order.setPaymentStatus(
-                    PaymentStatus.PARTIALLY_PAID
-            );
-        }
-
+        order.setPaymentStatus(PaymentStatus.PAID);
         customerOrderRepository.save(order);
+
+        if (order.getCustomer() != null) {
+            try {
+                loyaltyService.awardPurchasePoints(
+                        order.getCustomer().getId(),
+                        order.getId(),
+                        order.getTotalAmount()
+                );
+            } catch (Exception ignored) {
+            }
+        }
 
         PaymentResponse paymentResponse =
                 mapToPaymentResponse(savedPayment);
@@ -243,7 +246,7 @@ public class BillingServiceImpl implements BillingService {
                 new PaymentStatusResponse(
                         order.getId(),
                         order.getOrderNumber(),
-                        money(order.getTotalAmount()),
+                        orderTotal,
                         paidAfter,
                         remainingAfter,
                         order.getPaymentStatus()
@@ -253,6 +256,152 @@ public class BillingServiceImpl implements BillingService {
                 paymentResponse,
                 summary
         );
+    }
+
+    /*
+     * Customer payment processing for CARD and BANK_TRANSFER
+     */
+    @Override
+    public PaymentRecordResponse processCustomerPayment(
+            Long orderId,
+            CustomerPaymentRequest request
+    ) {
+        if (request == null || request.paymentMethod() == null) {
+            throw new BadRequestException("Payment method is required");
+        }
+
+        User customer = getCurrentUser();
+
+        CustomerOrder order = customerOrderRepository
+                .findDetailedByIdForUpdate(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Order was not found with ID: " + orderId
+                ));
+
+        // Validate customer authorization
+        if (customer.getRole() == Role.CUSTOMER) {
+            if (order.getCustomer() == null || !order.getCustomer().getId().equals(customer.getId())) {
+                throw new BadRequestException("You are not authorized to make payment for this order");
+            }
+        }
+
+        if (order.getOrderStatus() == OrderStatus.CANCELLED) {
+            throw new BadRequestException("Payment cannot be processed for a cancelled order");
+        }
+
+        if (order.getOrderStatus() == OrderStatus.REJECTED) {
+            throw new BadRequestException("Payment cannot be processed for a rejected order");
+        }
+
+        if (order.getPaymentStatus() == PaymentStatus.PAID) {
+            throw new BadRequestException("This order has already been fully paid");
+        }
+        if (order.getPaymentStatus() == PaymentStatus.REFUNDED) {
+            throw new BadRequestException("Payment cannot be recorded for a refunded order");
+        }
+
+        BigDecimal orderTotal = money(order.getTotalAmount());
+        BigDecimal paidBefore = getPaidAmount(order.getId());
+        BigDecimal remainingAmount = money(orderTotal.subtract(paidBefore));
+
+        if (remainingAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("This order has already been fully paid");
+        }
+
+        String externalRef;
+        String note;
+
+        if (request.paymentMethod() == PaymentMethod.CARD) {
+            String cardNum = cleanText(request.cardNumber());
+            if (cardNum == null || cardNum.replaceAll("\\s+", "").length() < 12) {
+                throw new BadRequestException("Valid 16-digit card number is required for card payment");
+            }
+            if (cleanText(request.cardHolderName()) == null) {
+                throw new BadRequestException("Cardholder name is required");
+            }
+            if (cleanText(request.expiryDate()) == null) {
+                throw new BadRequestException("Card expiry date (MM/YY) is required");
+            }
+            if (cleanText(request.cvv()) == null || cleanText(request.cvv()).length() < 3) {
+                throw new BadRequestException("Valid 3 or 4 digit CVV/CVC is required");
+            }
+
+            String digitsOnly = cardNum.replaceAll("\\s+", "");
+            String last4 = digitsOnly.length() >= 4 ? digitsOnly.substring(digitsOnly.length() - 4) : digitsOnly;
+            String authCode = UUID.randomUUID().toString().substring(0, 6).toUpperCase(Locale.ROOT);
+            externalRef = "CARD-****-" + last4 + " (AUTH:" + authCode + ")";
+            note = request.note() != null && !request.note().isBlank()
+                    ? request.note().trim()
+                    : "Online Card Payment by " + request.cardHolderName().trim();
+
+        } else if (request.paymentMethod() == PaymentMethod.BANK_TRANSFER) {
+            String slipRef = cleanText(request.depositSlipReference());
+            if (slipRef == null || slipRef.isBlank()) {
+                throw new BadRequestException("Deposit slip / transaction reference is required for bank transfer");
+            }
+            String bank = cleanText(request.bankName()) != null ? cleanText(request.bankName()) : "Bank Transfer";
+            externalRef = bank + " - Ref: " + slipRef;
+            note = request.note() != null && !request.note().isBlank()
+                    ? request.note().trim()
+                    : "Direct Bank Deposit (" + bank + ")";
+        } else {
+            externalRef = "Cash Payment Reference";
+            note = request.note() != null && !request.note().isBlank() ? request.note().trim() : "Cash on Delivery / In-Store";
+        }
+
+        Payment payment = new Payment();
+        payment.setPaymentReference(generatePaymentReference());
+        payment.setOrder(order);
+        payment.setAmount(remainingAmount);
+        payment.setPaymentMethod(request.paymentMethod());
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setExternalReference(externalRef);
+        payment.setNote(note);
+        payment.setRecordedBy(customer);
+        payment.setPaidAt(LocalDateTime.now());
+
+        Payment savedPayment = paymentRepository.save(payment);
+
+        BigDecimal paidAfter = money(paidBefore.add(remainingAmount));
+        BigDecimal remainingAfter = money(BigDecimal.ZERO);
+
+        order.setPaymentStatus(PaymentStatus.PAID);
+        customerOrderRepository.save(order);
+
+        if (order.getCustomer() != null) {
+            try {
+                loyaltyService.awardPurchasePoints(
+                        order.getCustomer().getId(),
+                        order.getId(),
+                        order.getTotalAmount()
+                );
+            } catch (Exception ignored) {
+            }
+
+            try {
+                if (notificationService != null) {
+                    notificationService.createNotification(
+                            order.getCustomer(),
+                            NotificationType.PAYMENT_STATUS,
+                            "Payment Received",
+                            "Payment of LKR " + remainingAmount + " for order #" + order.getOrderNumber() + " via " + request.paymentMethod() + " was successfully processed."
+                    );
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        PaymentResponse paymentResponse = mapToPaymentResponse(savedPayment);
+        PaymentStatusResponse summary = new PaymentStatusResponse(
+                order.getId(),
+                order.getOrderNumber(),
+                orderTotal,
+                paidAfter,
+                remainingAfter,
+                order.getPaymentStatus()
+        );
+
+        return new PaymentRecordResponse(paymentResponse, summary);
     }
 
     @Override
@@ -423,6 +572,8 @@ public class BillingServiceImpl implements BillingService {
                 money(order.getSubtotal()),
                 money(order.getDiscountPercentage()),
                 money(order.getDiscountAmount()),
+                money(order.getTaxRate()),
+                money(order.getTaxAmount()),
                 money(order.getTotalAmount()),
 
                 paidAmount,

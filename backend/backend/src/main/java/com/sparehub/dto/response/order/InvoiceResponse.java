@@ -28,6 +28,8 @@ public record InvoiceResponse(
         BigDecimal subtotal,
         BigDecimal discountPercentage,
         BigDecimal discountAmount,
+        BigDecimal taxRate,
+        BigDecimal taxAmount,
         BigDecimal totalAmount,
 
         BigDecimal paidAmount,

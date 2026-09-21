@@ -22,6 +22,7 @@ import com.sparehub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.sparehub.mapper.order.OrderResponseMapper;
@@ -34,7 +35,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import com.sparehub.repository.order.OrderStatusHistoryRepository;
-
+import com.sparehub.service.order.BillingService;
+import com.sparehub.dto.request.order.CustomerPaymentRequest;
+import com.sparehub.enums.order.PaymentMethod;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +47,9 @@ public class OrderServiceImpl implements OrderService {
     private static final BigDecimal ONE_HUNDRED =
             new BigDecimal("100");
 
+    @Value("${sparehub.order.tax-rate:8.00}")
+    private BigDecimal defaultTaxRate;
+
     private final CartRepository cartRepository;
     private final CustomerOrderRepository customerOrderRepository;
     private final UserRepository userRepository;
@@ -51,6 +57,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderResponseMapper orderResponseMapper;
     private final OrderStatusHistoryRepository
             orderStatusHistoryRepository;
+    private final BillingService billingService;
 
     @Override
     public OrderResponse placeOrder(PlaceOrderRequest request) {
@@ -121,8 +128,25 @@ public class OrderServiceImpl implements OrderService {
 
         discountAmount = money(discountAmount);
 
+        BigDecimal taxableAmount = money(subtotal.subtract(discountAmount));
+        if (taxableAmount.compareTo(BigDecimal.ZERO) < 0) {
+            taxableAmount = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        /*
+         * US-32: Tax calculation
+         */
+        BigDecimal taxRate = defaultTaxRate != null
+                ? money(defaultTaxRate)
+                : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal taxAmount = taxableAmount
+                .multiply(taxRate)
+                .divide(ONE_HUNDRED, 2, RoundingMode.HALF_UP);
+        taxAmount = money(taxAmount);
+
         BigDecimal totalAmount =
-                money(subtotal.subtract(discountAmount));
+                money(taxableAmount.add(taxAmount));
 
         if (totalAmount.compareTo(BigDecimal.ZERO) < 0) {
             throw new BadRequestException(
@@ -133,6 +157,8 @@ public class OrderServiceImpl implements OrderService {
         order.setSubtotal(subtotal);
         order.setDiscountPercentage(discountPercentage);
         order.setDiscountAmount(discountAmount);
+        order.setTaxRate(taxRate);
+        order.setTaxAmount(taxAmount);
         order.setTotalAmount(totalAmount);
 
         CustomerOrder savedOrder =
@@ -144,6 +170,18 @@ public class OrderServiceImpl implements OrderService {
          */
         cart.clearItems();
         cartRepository.save(cart);
+
+        if (request != null && request.paymentMethod() != null && request.paymentMethod() != PaymentMethod.CASH) {
+            CustomerPaymentRequest paymentReq = request.paymentDetails() != null
+                    ? request.paymentDetails()
+                    : new CustomerPaymentRequest(
+                            request.paymentMethod(),
+                            null, null, null, null, null, null, null,
+                            "Checkout online payment"
+                    );
+            billingService.processCustomerPayment(savedOrder.getId(), paymentReq);
+            savedOrder = customerOrderRepository.findById(savedOrder.getId()).orElse(savedOrder);
+        }
 
         return mapToOrderResponse(savedOrder);
     }
@@ -216,10 +254,13 @@ public class OrderServiceImpl implements OrderService {
             return BigDecimal.ZERO;
         }
 
-        String tierName = String
-                .valueOf(customer.getLoyaltyTier())
-                .trim()
-                .toUpperCase(Locale.ROOT);
+        if (customer.getLoyaltyTier().getDiscountPercentage() != null) {
+            return customer.getLoyaltyTier().getDiscountPercentage();
+        }
+
+        String tierName = customer.getLoyaltyTier().getName() != null
+                ? customer.getLoyaltyTier().getName().trim().toUpperCase(Locale.ROOT)
+                : "";
 
         return switch (tierName) {
             case "SILVER" -> new BigDecimal("5.00");
@@ -320,6 +361,8 @@ public class OrderServiceImpl implements OrderService {
                 order.getSubtotal(),
                 order.getDiscountPercentage(),
                 order.getDiscountAmount(),
+                money(order.getTaxRate()),
+                money(order.getTaxAmount()),
                 order.getTotalAmount(),
 
                 order.getOrderStatus(),

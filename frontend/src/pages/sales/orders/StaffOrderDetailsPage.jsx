@@ -11,15 +11,25 @@ import {
 } from "react-router-dom";
 
 import {
+    AlertCircle,
     ArrowLeft,
+    Banknote,
+    Calendar,
     Check,
     CheckCircle2,
+    Clock,
     CreditCard,
     FilePlus2,
+    Landmark,
+    Lock,
+    Mail,
     PackageCheck,
     Printer,
+    Receipt,
     RefreshCcw,
     RotateCcw,
+    ShieldCheck,
+    UserCheck,
     X,
 } from "lucide-react";
 
@@ -80,7 +90,6 @@ const StaffOrderDetailsPage = () => {
         useState("");
 
     const [paymentForm, setPaymentForm] = useState({
-        amount: "",
         paymentMethod: "CASH",
         externalReference: "",
         note: "",
@@ -168,6 +177,7 @@ const StaffOrderDetailsPage = () => {
     }, [navigate, orderId]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadOrder();
     }, [loadOrder]);
 
@@ -323,12 +333,13 @@ const StaffOrderDetailsPage = () => {
     const handlePaymentSubmit = (event) => {
         event.preventDefault();
 
-        const amount = Number(paymentForm.amount);
+        if (remainingAmount <= 0 || order.paymentStatus === "PAID") {
+            setError("This order has already been fully paid.");
+            return;
+        }
 
-        if (!Number.isFinite(amount) || amount <= 0) {
-            setError(
-                "Enter a valid payment amount."
-            );
+        if (["CANCELLED", "REJECTED"].includes(order.orderStatus)) {
+            setError("Payment cannot be recorded for this order status.");
             return;
         }
 
@@ -337,7 +348,6 @@ const StaffOrderDetailsPage = () => {
                 staffOrderService.recordPayment(
                     orderId,
                     {
-                        amount,
                         paymentMethod:
                         paymentForm.paymentMethod,
                         externalReference:
@@ -348,11 +358,10 @@ const StaffOrderDetailsPage = () => {
                             null,
                     }
                 ),
-            "Payment recorded successfully."
+            "Full payment recorded successfully."
         );
 
         setPaymentForm({
-            amount: "",
             paymentMethod: "CASH",
             externalReference: "",
             note: "",
@@ -426,11 +435,7 @@ const StaffOrderDetailsPage = () => {
     ].includes(order.orderStatus);
 
     const totalPaid = payments
-        .filter((payment) =>
-            ["PAID", "REFUNDED"].includes(
-                payment.status
-            )
-        )
+        .filter((payment) => payment.status === "PAID")
         .reduce(
             (total, payment) =>
                 total + Number(payment.amount ?? 0),
@@ -478,16 +483,23 @@ const StaffOrderDetailsPage = () => {
 
             <header className="staff-order-detail-header">
                 <div>
-                    <span>Order number</span>
+                    <span>Order management</span>
                     <h1>{order.orderNumber}</h1>
 
-                    <p>
-                        {order.customerName}
-                        {" · "}
-                        {order.customerEmail}
-                        {" · "}
-                        {formatDateTime(order.createdAt)}
-                    </p>
+                    <div className="staff-header-meta">
+                        <span className="staff-meta-pill">
+                            <UserCheck size={14} />
+                            {order.customerName}
+                        </span>
+                        <span className="staff-meta-pill">
+                            <Mail size={14} />
+                            {order.customerEmail}
+                        </span>
+                        <span className="staff-meta-pill">
+                            <Calendar size={14} />
+                            {formatDateTime(order.createdAt)}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="staff-header-statuses">
@@ -573,6 +585,23 @@ const StaffOrderDetailsPage = () => {
                                     )}
                                 </strong>
                             </div>
+
+                            {Number(order.taxAmount || 0) > 0 && (
+                                <div>
+                                    <span>
+                                        Tax (
+                                        {order.taxRate ?? 0}
+                                        %)
+                                    </span>
+
+                                    <strong>
+                                        +{" "}
+                                        {formatCurrency(
+                                            order.taxAmount
+                                        )}
+                                    </strong>
+                                </div>
+                            )}
 
                             <div className="grand-total">
                                 <span>Total</span>
@@ -862,200 +891,455 @@ const StaffOrderDetailsPage = () => {
                         <div className="staff-panel-title">
                             <div>
                                 <CreditCard size={19} />
-                                <h2>Payments</h2>
+                                <h2>Payment Details</h2>
+                            </div>
+                            <OrderStatusBadge
+                                status={order.paymentStatus}
+                            />
+                        </div>
+
+                        <div className="staff-payment-cards-grid">
+                            <div className="payment-stat-tile">
+                                <div className="payment-stat-tile-top">
+                                    <span className="tile-label">Order Total</span>
+                                    <Receipt size={15} className="tile-icon-dim" />
+                                </div>
+                                <strong className="tile-value">
+                                    {formatCurrency(order.totalAmount)}
+                                </strong>
+                            </div>
+
+                            <div className="payment-stat-tile">
+                                <div className="payment-stat-tile-top">
+                                    <span className="tile-label">Recorded Paid</span>
+                                    <CheckCircle2 size={15} className="tile-icon-emerald" />
+                                </div>
+                                <strong
+                                    className="tile-value"
+                                    style={{
+                                        color:
+                                            totalPaid > 0
+                                                ? "#4ade80"
+                                                : "#94a3b8",
+                                    }}
+                                >
+                                    {formatCurrency(totalPaid)}
+                                </strong>
+                            </div>
+
+                            <div
+                                className={`payment-stat-tile ${
+                                    order.paymentStatus === "PAID"
+                                        ? "paid-tile"
+                                        : "highlight-tile"
+                                }`}
+                            >
+                                <div className="payment-stat-tile-top">
+                                    <span className="tile-label">
+                                        {order.paymentStatus === "PAID"
+                                            ? "Balance Due"
+                                            : "Amount to Pay"}
+                                    </span>
+                                    <ShieldCheck
+                                        size={15}
+                                        className={
+                                            order.paymentStatus === "PAID"
+                                                ? "tile-icon-emerald"
+                                                : "tile-icon-blue"
+                                        }
+                                    />
+                                </div>
+                                <strong className="tile-value">
+                                    {formatCurrency(remainingAmount)}
+                                </strong>
                             </div>
                         </div>
 
-                        <div className="staff-payment-summary">
-                            <div>
-                                <span>Order total</span>
-                                <strong>
-                                    {formatCurrency(
-                                        order.totalAmount
-                                    )}
-                                </strong>
+                        {order.paymentStatus === "PAID" && (
+                            <div className="payment-status-notice success">
+                                <CheckCircle2
+                                    size={20}
+                                    style={{ flexShrink: 0, marginTop: 2 }}
+                                />
+                                <div>
+                                    <strong
+                                        style={{
+                                            display: "block",
+                                            marginBottom: 2,
+                                        }}
+                                    >
+                                        Order Fully Paid
+                                    </strong>
+                                    <span>
+                                        All dues for this order have been cleared in full.
+                                        No additional payment is required.
+                                    </span>
+                                </div>
                             </div>
+                        )}
 
-                            <div>
-                                <span>Recorded</span>
-                                <strong>
-                                    {formatCurrency(
-                                        totalPaid
-                                    )}
-                                </strong>
-                            </div>
+                        {order.orderStatus === "PENDING" &&
+                            order.paymentStatus !== "PAID" && (
+                                <div className="payment-status-notice info">
+                                    <AlertCircle
+                                        size={20}
+                                        style={{
+                                            flexShrink: 0,
+                                            marginTop: 2,
+                                        }}
+                                    />
+                                    <div>
+                                        <strong
+                                            style={{
+                                                display: "block",
+                                                marginBottom: 2,
+                                            }}
+                                        >
+                                            Pending Order Confirmation
+                                        </strong>
+                                        <span>
+                                            Verify stock and confirm the order before recording customer payment.
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
 
-                            <div>
-                                <span>Remaining</span>
-                                <strong>
-                                    {formatCurrency(
-                                        remainingAmount
-                                    )}
-                                </strong>
-                            </div>
-                        </div>
+                        {["CANCELLED", "REJECTED"].includes(
+                            order.orderStatus
+                        ) &&
+                            order.paymentStatus !== "PAID" && (
+                                <div className="payment-status-notice warning">
+                                    <AlertCircle
+                                        size={20}
+                                        style={{
+                                            flexShrink: 0,
+                                            marginTop: 2,
+                                        }}
+                                    />
+                                    <div>
+                                        <strong
+                                            style={{
+                                                display: "block",
+                                                marginBottom: 2,
+                                            }}
+                                        >
+                                            Order Inactive
+                                        </strong>
+                                        <span>
+                                            Payment cannot be recorded because this order has been {order.orderStatus.toLowerCase()}.
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
 
                         {canRecordPayment &&
-                            order.paymentStatus !==
-                            "PAID" && (
+                            order.paymentStatus !== "PAID" &&
+                            remainingAmount > 0 && (
                                 <form
                                     className="staff-payment-form"
-                                    onSubmit={
-                                        handlePaymentSubmit
-                                    }
+                                    onSubmit={handlePaymentSubmit}
                                 >
-                                    <label>
-                                        Payment amount
-                                    </label>
+                                    <div className="payment-amount-hero-card">
+                                        <div className="payment-amount-hero-top">
+                                            <span
+                                                style={{
+                                                    fontSize: "0.82rem",
+                                                    fontWeight: 600,
+                                                    color: "#94a3b8",
+                                                    textTransform: "uppercase",
+                                                    letterSpacing: "0.04em",
+                                                }}
+                                            >
+                                                Amount to Pay (Full Payment)
+                                            </span>
+                                            <span className="payment-amount-badge">
+                                                <Lock size={12} />
+                                                Auto-Calculated Balance
+                                            </span>
+                                        </div>
+                                        <div className="payment-amount-hero-value">
+                                            {formatCurrency(remainingAmount)}
+                                        </div>
+                                        <p className="payment-amount-hero-caption">
+                                            Sales Staff cannot edit the payment amount manually. System automatically records the full outstanding balance ({formatCurrency(order.totalAmount)} total − {formatCurrency(totalPaid)} paid).
+                                        </p>
+                                    </div>
 
-                                    <input
-                                        type="number"
-                                        min="0.01"
-                                        step="0.01"
-                                        max={
-                                            remainingAmount
-                                        }
-                                        required
-                                        value={
-                                            paymentForm.amount
-                                        }
-                                        onChange={(event) =>
-                                            setPaymentForm(
-                                                (
-                                                    current
-                                                ) => ({
+                                    <label className="payment-section-label">
+                                        Select Payment Method
+                                    </label>
+                                    <div className="payment-method-selector">
+                                        <button
+                                            type="button"
+                                            className={`payment-method-option ${
+                                                paymentForm.paymentMethod ===
+                                                "CASH"
+                                                    ? "active"
+                                                    : ""
+                                            }`}
+                                            onClick={() =>
+                                                setPaymentForm((current) => ({
                                                     ...current,
-                                                    amount:
-                                                    event
-                                                        .target
-                                                        .value,
-                                                })
-                                            )
-                                        }
-                                    />
+                                                    paymentMethod: "CASH",
+                                                }))
+                                            }
+                                        >
+                                            <div className="method-icon-wrap">
+                                                <Banknote size={20} />
+                                            </div>
+                                            <span>Cash</span>
+                                            {paymentForm.paymentMethod === "CASH" && (
+                                                <span className="payment-method-selected-check">
+                                                    <Check size={11} />
+                                                </span>
+                                            )}
+                                        </button>
 
-                                    <label>
-                                        Payment method
-                                    </label>
+                                        <button
+                                            type="button"
+                                            className={`payment-method-option ${
+                                                paymentForm.paymentMethod ===
+                                                "CARD"
+                                                    ? "active"
+                                                    : ""
+                                            }`}
+                                            onClick={() =>
+                                                setPaymentForm((current) => ({
+                                                    ...current,
+                                                    paymentMethod: "CARD",
+                                                }))
+                                            }
+                                        >
+                                            <div className="method-icon-wrap">
+                                                <CreditCard size={20} />
+                                            </div>
+                                            <span>Card</span>
+                                            {paymentForm.paymentMethod === "CARD" && (
+                                                <span className="payment-method-selected-check">
+                                                    <Check size={11} />
+                                                </span>
+                                            )}
+                                        </button>
 
-                                    <select
-                                        value={
-                                            paymentForm.paymentMethod
-                                        }
-                                        onChange={(event) =>
-                                            setPaymentForm(
-                                                (
-                                                    current
-                                                ) => ({
+                                        <button
+                                            type="button"
+                                            className={`payment-method-option ${
+                                                paymentForm.paymentMethod ===
+                                                "BANK_TRANSFER"
+                                                    ? "active"
+                                                    : ""
+                                            }`}
+                                            onClick={() =>
+                                                setPaymentForm((current) => ({
                                                     ...current,
                                                     paymentMethod:
-                                                    event
-                                                        .target
-                                                        .value,
-                                                })
-                                            )
-                                        }
-                                    >
-                                        <option value="CASH">
-                                            Cash
-                                        </option>
+                                                        "BANK_TRANSFER",
+                                                }))
+                                            }
+                                        >
+                                            <div className="method-icon-wrap">
+                                                <Landmark size={20} />
+                                            </div>
+                                            <span>Bank Transfer</span>
+                                            {paymentForm.paymentMethod === "BANK_TRANSFER" && (
+                                                <span className="payment-method-selected-check">
+                                                    <Check size={11} />
+                                                </span>
+                                            )}
+                                        </button>
+                                    </div>
 
-                                        <option value="CARD">
-                                            Card
-                                        </option>
-
-                                        <option value="BANK_TRANSFER">
-                                            Bank transfer
-                                        </option>
-                                    </select>
-
-                                    <label>
-                                        External reference
+                                    <label htmlFor="paymentExternalRef">
+                                        External Reference / Slip No.
                                     </label>
-
                                     <input
+                                        id="paymentExternalRef"
                                         type="text"
                                         maxLength="100"
-                                        value={
-                                            paymentForm.externalReference
+                                        placeholder={
+                                            paymentForm.paymentMethod === "CASH"
+                                                ? "Optional cash register receipt / drawer reference"
+                                                : paymentForm.paymentMethod ===
+                                                  "CARD"
+                                                ? "POS approval code / transaction reference"
+                                                : "Bank deposit slip number / reference"
                                         }
+                                        value={paymentForm.externalReference}
                                         onChange={(event) =>
-                                            setPaymentForm(
-                                                (
-                                                    current
-                                                ) => ({
-                                                    ...current,
-                                                    externalReference:
-                                                    event
-                                                        .target
-                                                        .value,
-                                                })
-                                            )
+                                            setPaymentForm((current) => ({
+                                                ...current,
+                                                externalReference:
+                                                    event.target.value,
+                                            }))
                                         }
                                     />
 
-                                    <label>
-                                        Note
+                                    <label htmlFor="paymentNote">
+                                        Payment Note
                                     </label>
-
                                     <textarea
-                                        rows="3"
+                                        id="paymentNote"
+                                        rows="2"
                                         maxLength="500"
-                                        value={
-                                            paymentForm.note
-                                        }
+                                        placeholder="Optional note (e.g. Counter payment received in full)"
+                                        value={paymentForm.note}
                                         onChange={(event) =>
-                                            setPaymentForm(
-                                                (
-                                                    current
-                                                ) => ({
-                                                    ...current,
-                                                    note: event
-                                                        .target
-                                                        .value,
-                                                })
-                                            )
+                                            setPaymentForm((current) => ({
+                                                ...current,
+                                                note: event.target.value,
+                                            }))
                                         }
                                     />
 
                                     <button
                                         type="submit"
                                         className="primary-button full-width-button"
-                                        disabled={working}
+                                        disabled={
+                                            working ||
+                                            remainingAmount <= 0 ||
+                                            order.paymentStatus === "PAID" ||
+                                            [
+                                                "CANCELLED",
+                                                "REJECTED",
+                                            ].includes(order.orderStatus)
+                                        }
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            gap: "8px",
+                                            padding: "13px",
+                                            fontSize: "0.95rem",
+                                            fontWeight: "700",
+                                        }}
                                     >
-                                        Record payment
+                                        {working ? (
+                                            <>
+                                                <RefreshCcw
+                                                    size={16}
+                                                    className="spinning-icon"
+                                                />
+                                                <span>
+                                                    Recording Payment...
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ShieldCheck size={18} />
+                                                <span>
+                                                    Record Full Payment •{" "}
+                                                    {formatCurrency(
+                                                        remainingAmount
+                                                    )}
+                                                </span>
+                                            </>
+                                        )}
                                     </button>
                                 </form>
                             )}
 
-                        <div className="staff-payment-history">
-                            {payments.map((payment) => (
-                                <article
-                                    key={
-                                        payment.paymentId
-                                    }
-                                >
-                                    <div>
-                                        <strong>
-                                            {formatCurrency(
-                                                payment.amount
+                        <div style={{ marginTop: "24px" }}>
+                            <h3
+                                style={{
+                                    fontSize: "0.85rem",
+                                    color: "#94a3b8",
+                                    textTransform: "uppercase",
+                                    letterSpacing: "0.05em",
+                                    marginBottom: "12px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "6px",
+                                }}
+                            >
+                                <Receipt size={16} />
+                                Payment History ({payments.length})
+                            </h3>
+
+                            {payments.length === 0 ? (
+                                <p className="empty-panel-text">
+                                    No payment records found for this order.
+                                </p>
+                            ) : (
+                                <div className="staff-payment-history-list">
+                                    {payments.map((payment) => (
+                                        <div
+                                            key={payment.paymentId}
+                                            className="payment-history-card"
+                                        >
+                                            <div className="payment-history-header">
+                                                <div>
+                                                    <span className="payment-history-amount">
+                                                        {formatCurrency(
+                                                            payment.amount
+                                                        )}
+                                                    </span>
+                                                    <span
+                                                        className={`payment-history-method-tag method-tag-${(
+                                                            payment.paymentMethod ||
+                                                            ""
+                                                        ).toLowerCase()}`}
+                                                    >
+                                                        {payment.paymentMethod ===
+                                                            "CASH" && (
+                                                            <Banknote size={12} />
+                                                        )}
+                                                        {payment.paymentMethod ===
+                                                            "CARD" && (
+                                                            <CreditCard
+                                                                size={12}
+                                                            />
+                                                        )}
+                                                        {payment.paymentMethod ===
+                                                            "BANK_TRANSFER" && (
+                                                            <Landmark
+                                                                size={12}
+                                                            />
+                                                        )}
+                                                        {payment.paymentMethod}
+                                                    </span>
+                                                </div>
+                                                <OrderStatusBadge
+                                                    status={payment.status}
+                                                />
+                                            </div>
+
+                                            <div className="payment-history-meta">
+                                                <span>
+                                                    <Receipt size={13} />
+                                                    {payment.paymentReference}
+                                                </span>
+                                                <span>
+                                                    <Clock size={13} />
+                                                    {formatDateTime(
+                                                        payment.paidAt ||
+                                                            payment.createdAt
+                                                    )}
+                                                </span>
+                                                {payment.recordedByName && (
+                                                    <span>
+                                                        <UserCheck size={13} />
+                                                        {payment.recordedByName}
+                                                    </span>
+                                                )}
+                                                {payment.externalReference && (
+                                                    <span>
+                                                        Ref:{" "}
+                                                        {
+                                                            payment.externalReference
+                                                        }
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {payment.note && (
+                                                <p className="payment-history-note">
+                                                    &ldquo;{payment.note}&rdquo;
+                                                </p>
                                             )}
-                                        </strong>
-
-                                        <span>
-                                            {
-                                                payment.paymentMethod
-                                            }
-                                        </span>
-                                    </div>
-
-                                    <OrderStatusBadge
-                                        status={
-                                            payment.status
-                                        }
-                                    />
-                                </article>
-                            ))}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </section>
 

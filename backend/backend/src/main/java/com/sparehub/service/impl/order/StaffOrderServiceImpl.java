@@ -59,6 +59,7 @@ public class StaffOrderServiceImpl implements StaffOrderService {
 
     private final InventoryTransactionService
             inventoryTransactionService;
+    private final com.sparehub.service.LoyaltyService loyaltyService;
 
 
 
@@ -524,6 +525,17 @@ public class StaffOrderServiceImpl implements StaffOrderService {
         order.setStockDeductedAt(now);
         order.setCompletedAt(now);
         order.setCompletedBy(salesStaff);
+
+        if (order.getCustomer() != null) {
+            try {
+                loyaltyService.awardPurchasePoints(
+                        order.getCustomer().getId(),
+                        order.getId(),
+                        order.getTotalAmount()
+                );
+            } catch (Exception ignored) {
+            }
+        }
     }
     private void saveStatusHistory(
             CustomerOrder order,
