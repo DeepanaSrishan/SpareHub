@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://localhost:8080/api",
+    baseURL:
+        import.meta.env.VITE_API_BASE_URL ||
+        "http://localhost:8080/api",
     headers: {
         "Content-Type": "application/json",
     },
@@ -10,8 +12,9 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         const token =
-            localStorage.getItem("token") ||
-            localStorage.getItem("accessToken");
+            localStorage.getItem("sparehub_access_token") ||
+            localStorage.getItem("accessToken") ||
+            localStorage.getItem("token");
 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -20,6 +23,19 @@ api.interceptors.request.use(
         return config;
     },
     (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (
+            error.response?.status === 401 &&
+            !error.config?.url?.includes("/auth/login")
+        ) {
+            console.warn("Authentication required or expired:", error.config?.url);
+        }
+        return Promise.reject(error);
+    }
 );
 
 export default api;

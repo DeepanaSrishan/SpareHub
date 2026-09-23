@@ -8,7 +8,8 @@ import LoadingSpinner from
         "../components/common/LoadingSpinner";
 
 function getHomeRoute(role) {
-    switch (role) {
+    const normalized = role?.replace("ROLE_", "")?.toUpperCase();
+    switch (normalized) {
         case "MANAGER":
             return "/manager/dashboard";
 

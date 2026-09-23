@@ -1,6 +1,6 @@
 /* ==========================================================================
    SpareHub Scroll-Driven UI & Scroll-Based Animations
-   Hardware-accelerated CSS + Progressive Scroll-Timeline Enhancements
+   Dark Forest Green & Electric Lime Hardware-Accelerated Effects
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -13,15 +13,15 @@
     right: 0;
     width: 100%;
     height: 4px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(7, 28, 20, 0.2);
     z-index: 9999;
     pointer-events: none;
 }
 
 .scroll-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #2563eb 0%, #38bdf8 50%, #06b6d4 100%);
-    box-shadow: 0 0 10px rgba(56, 189, 248, 0.6), 0 0 18px rgba(37, 99, 235, 0.4);
+    background: linear-gradient(90deg, #123C2B 0%, #2563EB 60%, #B8F34A 100%);
+    box-shadow: 0 0 12px rgba(184, 243, 74, 0.7);
     transition: width 0.1s cubic-bezier(0.25, 1, 0.5, 1);
     position: relative;
     border-radius: 0 2px 2px 0;
@@ -34,31 +34,13 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #38bdf8;
-    box-shadow: 0 0 12px 3px rgba(56, 189, 248, 0.9);
+    background: #B8F34A;
+    box-shadow: 0 0 12px 3px rgba(184, 243, 74, 0.95);
     filter: blur(1px);
 }
 
 /* --------------------------------------------------------------------------
-   2. Scroll-Aware Navbar Transformation
-   -------------------------------------------------------------------------- */
-.navbar.is-scrolled {
-    min-height: 62px;
-    background: rgba(9, 13, 22, 0.94);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(56, 189, 248, 0.25);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6),
-                0 4px 6px -2px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.navbar:not(.is-scrolled) {
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* --------------------------------------------------------------------------
-   3. Floating Circular "Scroll To Top" Action Button
+   2. Floating Circular "Scroll To Top" Action Button
    -------------------------------------------------------------------------- */
 .scroll-to-top-btn {
     position: fixed;
@@ -67,20 +49,19 @@
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    background: rgba(17, 24, 39, 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(56, 189, 248, 0.2);
+    background: #071C14;
+    border: 1.5px solid rgba(184, 243, 74, 0.4);
+    box-shadow: 0 10px 25px rgba(7, 28, 20, 0.35), 0 0 16px rgba(184, 243, 74, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #38bdf8;
+    color: #B8F34A;
     cursor: pointer;
     z-index: 1050;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
                 opacity 0.3s ease,
-                box-shadow 0.3s ease;
+                box-shadow 0.3s ease,
+                border-color 0.2s ease;
     opacity: 0;
     pointer-events: none;
     transform: translateY(20px) scale(0.9);
@@ -93,9 +74,10 @@
 }
 
 .scroll-to-top-btn:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 14px 30px rgba(56, 189, 248, 0.35), 0 6px 12px rgba(0, 0, 0, 0.3);
-    color: #7dd3fc;
+    transform: translateY(-4px) scale(1.06);
+    border-color: #B8F34A;
+    box-shadow: 0 14px 30px rgba(7, 28, 20, 0.45), 0 0 24px rgba(184, 243, 74, 0.4);
+    color: #FFFFFF;
 }
 
 .scroll-to-top-svg {
@@ -108,13 +90,13 @@
 
 .scroll-to-top-bg-circle {
     fill: transparent;
-    stroke: #1e293b;
+    stroke: rgba(255, 255, 255, 0.12);
     stroke-width: 3.5;
 }
 
 .scroll-to-top-prog-circle {
     fill: transparent;
-    stroke: url(#scrollGradient);
+    stroke: #B8F34A;
     stroke-width: 3.5;
     stroke-linecap: round;
     transition: stroke-dashoffset 0.15s ease-out;
@@ -131,7 +113,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   4. Scroll-Reveal Animation Core
+   3. Scroll-Reveal Animation Core
    -------------------------------------------------------------------------- */
 .scroll-reveal {
     opacity: 0;
@@ -193,15 +175,15 @@
 .scroll-stagger > *:nth-child(8) { transition-delay: 0.54s; }
 
 /* --------------------------------------------------------------------------
-   5. Interactive Quick-Nav Anchor Bar
+   4. Interactive Quick-Nav Anchor Bar
    -------------------------------------------------------------------------- */
 .scroll-quick-nav {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     overflow-x: auto;
     padding: 10px 4px 18px;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -214,37 +196,42 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
-    background: #111827;
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    padding: 9px 18px;
+    background: #FFFFFF;
+    border: 1.5px solid var(--border);
     border-radius: 999px;
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--text-main);
     text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 6px rgba(7, 28, 20, 0.04);
 }
 
 .quick-nav-pill:hover {
-    border-color: #38bdf8;
-    color: #38bdf8;
-    background: #162035;
+    border-color: var(--secondary-green);
+    color: var(--primary-dark);
+    background: #FAFCFA;
     transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(56, 189, 248, 0.2);
+    box-shadow: 0 4px 14px var(--accent-lime-glow);
 }
 
 .quick-nav-pill svg {
-    color: #38bdf8;
+    color: var(--secondary-green);
+    transition: transform 0.2s ease;
+}
+
+.quick-nav-pill:hover svg {
+    transform: scale(1.15);
+    color: var(--accent-blue);
 }
 
 /* --------------------------------------------------------------------------
-   6. Native CSS Scroll-Driven Animations (Modern Chromium / Safari Enhancements)
+   5. Native CSS Scroll-Driven Animations
    -------------------------------------------------------------------------- */
 @supports (animation-timeline: view()) {
-    /* Subtle parallax depth effect for heroes */
     .parallax-bg {
         animation: parallaxEffect linear both;
         animation-timeline: view();
@@ -256,7 +243,7 @@
             transform: translateY(0);
         }
         to {
-            transform: translateY(40px);
+            transform: translateY(35px);
         }
     }
 }

@@ -2,6 +2,7 @@
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+    color: var(--text-main);
 }
 
 .page-heading {
@@ -14,12 +15,13 @@
 
 .page-heading h1 {
     margin: 0 0 6px;
-    color: #f8fafc;
+    color: var(--text-main);
+    font-weight: 800;
 }
 
 .page-heading p {
     margin: 0;
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .customer-grid {
@@ -32,11 +34,11 @@
 .stat-card,
 .notification-card,
 .empty-state {
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 14px;
-    background: #111827;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-    color: #f1f5f9;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: var(--shadow-sm);
+    color: var(--text-main);
 }
 
 .content-card {
@@ -46,7 +48,8 @@
 
 .content-card h2 {
     margin-top: 0;
-    color: #f8fafc;
+    color: var(--text-main);
+    font-weight: 700;
 }
 
 .form-grid {
@@ -67,34 +70,37 @@
 }
 
 .form-group label {
-    font-weight: 600;
-    color: #cbd5e1;
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 0.88rem;
 }
 
 .form-group input,
 .form-group textarea {
     width: 100%;
     box-sizing: border-box;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
-    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 14px;
     font: inherit;
-    background: #162035;
-    color: #f8fafc;
+    background: #ffffff;
+    color: var(--text-main);
+    font-size: 0.92rem;
+    transition: all 0.2s ease;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-    border-color: #38bdf8;
-    background: #1a2742;
+    border-color: var(--secondary-green);
+    background: #ffffff;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    box-shadow: 0 0 0 3px rgba(18, 60, 43, 0.12);
 }
 
 .form-group input:disabled {
-    color: #64748b;
-    background: #0f172a;
-    border-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    background: #F3F7F4;
+    border-color: var(--border);
 }
 
 .form-group small {
@@ -118,9 +124,13 @@
 }
 
 .secondary-button {
-    color: #e2e8f0;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #10251C;
+    background: #E8EFEA;
+    border: 1px solid #D0DDD5;
+}
+
+.secondary-button:hover {
+    background: #DCE6E0;
 }
 
 .danger-button {
@@ -172,12 +182,16 @@
 }
 
 .stat-card span {
-    color: #94a3b8;
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    font-weight: 600;
 }
 
 .stat-card strong {
-    color: #f8fafc;
-    font-size: 24px;
+    color: var(--primary-dark);
+    font-size: 26px;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
 }
 
 .progress-label {
@@ -185,7 +199,7 @@
     justify-content: space-between;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #cbd5e1;
+    color: var(--text-main);
 }
 
 .progress-track {
@@ -193,19 +207,19 @@
     height: 14px;
     overflow: hidden;
     border-radius: 999px;
-    background: #1e293b;
+    background: #E2ECE7;
 }
 
 .progress-fill {
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #38bdf8, #22c55e);
+    background: linear-gradient(90deg, var(--secondary-green), var(--accent-lime));
     transition: width 0.3s ease;
 }
 
 .benefit-list {
     line-height: 2;
-    color: #cbd5e1;
+    color: var(--text-main);
 }
 
 .checkbox-label {

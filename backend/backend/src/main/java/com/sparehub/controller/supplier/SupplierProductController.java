@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/inventory/suppliers")
+@RequestMapping({"/api/inventory/suppliers", "/api/suppliers"})
 @RequiredArgsConstructor
 @PreAuthorize(
         "hasAnyRole('INVENTORY_STAFF', 'MANAGER')"

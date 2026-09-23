@@ -1,41 +1,75 @@
 import { Link } from "react-router-dom";
-import { ClipboardList } from "lucide-react";
+import {
+  ChevronRight,
+  ClipboardList,
+  PackageSearch,
+  UserCheck,
+  UserRound,
+} from "lucide-react";
 
 import useAuth from "../../hooks/useAuth";
+import PageHeader from "../../components/common/PageHeader";
+import AnimatedSection from "../../components/common/AnimatedSection";
 
 export default function SalesDashboardPage() {
-    const { user } = useAuth();
+  const { user } = useAuth();
+  const userName = user?.fullName || user?.name || user?.email || "Sales Team Member";
 
-    return (
-        <main className="dashboard-page">
-            <span className="brand-label">
-                SALES STAFF
-            </span>
+  const salesActions = [
+    {
+      title: "Customer Orders",
+      description: "Review, confirm, process status changes and complete customer orders and dispatches.",
+      to: "/sales/orders",
+      icon: ClipboardList,
+    },
+    {
+      title: "Customer Directory",
+      description: "Search customer profiles, purchase history, loyalty tier status and contact information.",
+      to: "/sales/customers",
+      icon: UserRound,
+    },
+    {
+      title: "Product Catalog & Inventory",
+      description: "Lookup real-time part numbers, specifications, available stock counts and pricing.",
+      to: "/products",
+      icon: PackageSearch,
+    },
+  ];
 
-            <h1>Sales Dashboard</h1>
+  return (
+    <main className="dashboard-page">
+      <PageHeader
+        title="Sales Dashboard"
+        subtitle={`Signed in as ${userName} — manage customer orders, verification and client relations.`}
+        icon={<UserCheck size={24} />}
+        badge={<span className="brand-label">SALES STAFF</span>}
+      />
 
-            <p>
-                Signed in as{" "}
-                {user?.fullName ?? user?.email}
-            </p>
-
-            <section className="dashboard-actions">
-                <Link
-                    to="/sales/orders"
-                    className="dashboard-action-card"
-                >
-                    <ClipboardList size={25} />
-
-                    <div>
-                        <h3>Customer Orders</h3>
-
-                        <p>
-                            Review, confirm, process and
-                            complete customer orders.
-                        </p>
-                    </div>
-                </Link>
-            </section>
-        </main>
-    );
+      <AnimatedSection direction="up" delay={0.1}>
+        <div className="dashboard-actions">
+          {salesActions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <Link
+                key={action.to}
+                to={action.to}
+                className="dashboard-action-card"
+              >
+                <div className="dashboard-action-card-icon">
+                  <Icon size={24} />
+                </div>
+                <div className="dashboard-action-card-info">
+                  <h3>{action.title}</h3>
+                  <p>{action.description}</p>
+                </div>
+                <div className="dashboard-action-card-arrow">
+                  <ChevronRight size={20} />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </AnimatedSection>
+    </main>
+  );
 }

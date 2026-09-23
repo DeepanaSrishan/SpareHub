@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
     Filter,
@@ -10,6 +10,7 @@ import {
 
 import catalogService from "../../services/catalogService";
 import ProductCard from "../../components/catalog/ProductCard";
+import EngineAssemblyBackground from "../../components/catalog/EngineAssemblyBackground";
 import { useAutoScrollReveal } from "../../hooks/useScrollReveal";
 import "../../styles/catalog.css";
 
@@ -24,6 +25,7 @@ const initialFilters = {
 };
 
 export default function ProductCatalogPage() {
+    const pageRef = useRef(null);
     const [searchParams] = useSearchParams();
     const initialSearch = searchParams.get("search") || "";
     const initialBrand = searchParams.get("brand") || "";
@@ -212,8 +214,12 @@ export default function ProductCatalogPage() {
     };
 
     return (
-        <main className="catalog-page">
-            <section className="catalog-hero">
+        <div className="catalog-page-root" ref={pageRef}>
+            {/* Full-Screen 3D Exploded Engine Assembly Canvas Background */}
+            <EngineAssemblyBackground targetRef={pageRef} />
+
+            <main className="catalog-page">
+                <section className="catalog-hero">
                 <div>
           <span className="catalog-eyebrow">
             SpareHub Product Catalog
@@ -450,5 +456,6 @@ export default function ProductCatalogPage() {
                 </nav>
             )}
         </main>
-    );
+    </div>
+);
 }

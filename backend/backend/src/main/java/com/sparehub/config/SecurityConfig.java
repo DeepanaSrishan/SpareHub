@@ -61,7 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login",
-                                "/api/test"
+                                "/api/test",
+                                "/api/catalog/**"
                         ).permitAll()
 
                         // Everything else needs a valid JWT

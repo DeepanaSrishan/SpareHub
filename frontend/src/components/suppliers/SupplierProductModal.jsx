@@ -21,7 +21,7 @@ function SupplierProductModal({
     const [form, setForm] = useState(initialForm);
     const [errors, setErrors] = useState({});
 
-    const editing = Boolean(assignment?.id);
+    const editing = Boolean(assignment?.supplierProductId ?? assignment?.id);
 
     useEffect(() => {
         if (assignment) {

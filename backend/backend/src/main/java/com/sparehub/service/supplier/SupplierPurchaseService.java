@@ -1,7 +1,5 @@
 package com.sparehub.service.supplier;
 
-
-
 import com.sparehub.dto.request.supplier.CancelSupplierPurchaseRequest;
 import com.sparehub.dto.request.supplier.CreateSupplierPurchaseRequest;
 import com.sparehub.dto.request.supplier.ReceiveSupplierPurchaseRequest;
@@ -20,7 +18,16 @@ public interface SupplierPurchaseService {
             CreateSupplierPurchaseRequest request
     );
 
+    SupplierPurchaseResponse createPurchaseDirect(
+            CreateSupplierPurchaseRequest request
+    );
+
     List<SupplierPurchaseResponse> getPurchases(
+            Long supplierId,
+            PurchaseStatus status
+    );
+
+    List<SupplierPurchaseResponse> getAllPurchases(
             Long supplierId,
             PurchaseStatus status
     );

@@ -83,9 +83,8 @@ public class SupplierPurchaseServiceImpl
             );
         }
 
-        if (request.quantity()
-                < supplierProduct
-                .getMinimumOrderQuantity()) {
+        Integer effectiveQuantity = request.getEffectiveQuantity();
+        if (effectiveQuantity < supplierProduct.getMinimumOrderQuantity()) {
             throw new BadRequestException(
                     "Quantity must be at least the supplier minimum order quantity: "
                             + supplierProduct
@@ -111,7 +110,7 @@ public class SupplierPurchaseServiceImpl
         BigDecimal total = money(
                 unitPrice.multiply(
                         BigDecimal.valueOf(
-                                request.quantity()
+                                effectiveQuantity
                         )
                 )
         );
@@ -127,7 +126,7 @@ public class SupplierPurchaseServiceImpl
         purchase.setSupplierProduct(supplierProduct);
         purchase.setSparePart(sparePart);
         purchase.setOrderedQuantity(
-                request.quantity()
+                effectiveQuantity
         );
         purchase.setReceivedQuantity(0);
         purchase.setUnitPurchasePrice(unitPrice);
@@ -136,6 +135,9 @@ public class SupplierPurchaseServiceImpl
         purchase.setExpectedDeliveryDate(
                 request.expectedDeliveryDate()
         );
+        if (request.supplierInvoiceNumber() != null && !request.supplierInvoiceNumber().isBlank()) {
+            purchase.setSupplierInvoiceNumber(request.supplierInvoiceNumber().trim());
+        }
         purchase.setNotes(
                 cleanText(request.notes())
         );
@@ -155,6 +157,22 @@ public class SupplierPurchaseServiceImpl
         );
 
         return toPurchaseResponse(saved);
+    }
+
+    @Override
+    public SupplierPurchaseResponse createPurchaseDirect(
+            CreateSupplierPurchaseRequest request
+    ) {
+        Long targetSupplierId = request.supplierId();
+        if (targetSupplierId == null) {
+            SupplierProduct sp = supplierProductRepository
+                    .findDetailedById(request.supplierProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Supplier product relationship was not found"
+                    ));
+            targetSupplierId = sp.getSupplier().getId();
+        }
+        return createPurchase(targetSupplierId, request);
     }
 
     @Override
@@ -182,6 +200,28 @@ public class SupplierPurchaseServiceImpl
                             item.getStatus() == status
                     )
                     .toList();
+        }
+
+        return purchases.stream()
+                .map(this::toPurchaseResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SupplierPurchaseResponse> getAllPurchases(
+            Long supplierId,
+            PurchaseStatus status
+    ) {
+        if (supplierId != null) {
+            return getPurchases(supplierId, status);
+        }
+
+        List<SupplierPurchase> purchases;
+        if (status == null) {
+            purchases = supplierPurchaseRepository.findAllByOrderByOrderedAtDesc();
+        } else {
+            purchases = supplierPurchaseRepository.findAllByStatusOrderByOrderedAtDesc(status);
         }
 
         return purchases.stream()
@@ -242,10 +282,10 @@ public class SupplierPurchaseServiceImpl
         purchase.setReceivedQuantity(
                 request.receivedQuantity()
         );
-        purchase.setSupplierInvoiceNumber(
-                request.supplierInvoiceNumber()
-                        .trim()
-        );
+        String invoiceNumber = (request.supplierInvoiceNumber() != null && !request.supplierInvoiceNumber().isBlank())
+                ? request.supplierInvoiceNumber().trim()
+                : "INV-" + purchase.getPurchaseNumber();
+        purchase.setSupplierInvoiceNumber(invoiceNumber);
         purchase.setStatus(PurchaseStatus.RECEIVED);
         purchase.setReceivedBy(currentUser);
         purchase.setReceivedAt(LocalDateTime.now());
@@ -263,7 +303,7 @@ public class SupplierPurchaseServiceImpl
         saveTransaction(
                 saved,
                 SupplierTransactionType.PURCHASE_RECEIVED,
-                request.supplierInvoiceNumber().trim(),
+                invoiceNumber,
                 saved.getTotalAmount(),
                 saved.getReceivedQuantity(),
                 "Supplier purchase received and stock updated",

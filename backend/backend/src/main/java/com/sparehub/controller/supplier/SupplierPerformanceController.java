@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/manager/suppliers")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('MANAGER')")
+@PreAuthorize("hasAnyRole('MANAGER', 'INVENTORY_STAFF')")
 public class SupplierPerformanceController {
 
     private final SupplierPerformanceService

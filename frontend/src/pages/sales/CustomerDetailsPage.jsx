@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import customerManagementService from "../../services/customerManagementService";
+import StatusBadge from "../../components/common/StatusBadge";
 import "../../styles/customerManagement.css";
 
 function CustomerDetailsPage() {
     const { customerId } = useParams();
 
     const [customer, setCustomer] = useState(null);
+    const [orders, setOrders] = useState([]);
     const [transactions, setTransactions] = useState([]);
+
+    const [activeTab, setActiveTab] = useState("orders"); // "orders" | "transactions"
 
     const [selectedTier, setSelectedTier] =
         useState("BRONZE");
@@ -17,6 +21,7 @@ function CustomerDetailsPage() {
         useState(0);
 
     const [loading, setLoading] = useState(true);
+    const [ordersLoading, setOrdersLoading] = useState(true);
     const [historyLoading, setHistoryLoading] =
         useState(true);
     const [tierSaving, setTierSaving] = useState(false);
@@ -27,6 +32,7 @@ function CustomerDetailsPage() {
 
     useEffect(() => {
         loadCustomer();
+        loadCustomerOrders();
     }, [customerId]);
 
     useEffect(() => {
@@ -52,6 +58,19 @@ function CustomerDetailsPage() {
             );
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadCustomerOrders = async () => {
+        try {
+            setOrdersLoading(true);
+            const data =
+                await customerManagementService.getCustomerOrders(customerId);
+            setOrders(Array.isArray(data) ? data : []);
+        } catch {
+            setOrders([]);
+        } finally {
+            setOrdersLoading(false);
         }
     };
 
@@ -162,15 +181,10 @@ function CustomerDetailsPage() {
                     <p>{customer.email}</p>
                 </div>
 
-                <span
-                    className={`status-badge ${
-                        customer.accountStatus === "ACTIVE"
-                            ? "active"
-                            : "inactive"
-                    }`}
-                >
-          {customer.accountStatus}
-        </span>
+                <StatusBadge
+                    status={customer.accountStatus}
+                    size="lg"
+                />
             </div>
 
             {error && (
@@ -190,13 +204,20 @@ function CustomerDetailsPage() {
                 </article>
 
                 <article className="summary-card">
+                    <span>Loyalty Tier</span>
+                    <strong style={{ color: "var(--primary-forest, #071C14)" }}>
+                        {customer.loyaltyTier || "BRONZE"}
+                    </strong>
+                </article>
+
+                <article className="summary-card">
                     <span>Reward Points</span>
                     <strong>{customer.rewardPoints ?? 0}</strong>
                 </article>
 
                 <article className="summary-card">
                     <span>Total Orders</span>
-                    <strong>{customer.totalOrders ?? 0}</strong>
+                    <strong>{orders.length > 0 ? orders.length : (customer.totalOrders ?? 0)}</strong>
                 </article>
 
                 <article className="summary-card">
@@ -224,7 +245,7 @@ function CustomerDetailsPage() {
 
                         <div>
                             <dt>Phone Number</dt>
-                            <dd>{customer.phoneNumber || "Not provided"}</dd>
+                            <dd>{customer.phoneNumber || customer.phone || "Not provided"}</dd>
                         </div>
 
                         <div>
@@ -246,9 +267,9 @@ function CustomerDetailsPage() {
                         <div>
                             <dt>Last Purchase Date</dt>
                             <dd>
-                                {customer.lastPurchaseDate
+                                {customer.lastPurchaseDate || customer.lastPurchaseAt
                                     ? new Date(
-                                        customer.lastPurchaseDate
+                                        customer.lastPurchaseDate || customer.lastPurchaseAt
                                     ).toLocaleDateString()
                                     : "No purchases"}
                             </dd>
@@ -266,13 +287,13 @@ function CustomerDetailsPage() {
                                 customer.loyaltyTier || "BRONZE"
                             ).toLowerCase()}`}
                         >
-              {customer.loyaltyTier || "BRONZE"}
-            </span>
+                            {customer.loyaltyTier || "BRONZE"}
+                        </span>
                     </p>
 
                     <div className="tier-update-form">
                         <label htmlFor="loyaltyTier">
-                            Assign Loyalty Tier
+                            Assign Loyalty Tier (US-05)
                         </label>
 
                         <select
@@ -282,10 +303,10 @@ function CustomerDetailsPage() {
                                 setSelectedTier(event.target.value)
                             }
                         >
-                            <option value="BRONZE">BRONZE</option>
-                            <option value="SILVER">SILVER</option>
-                            <option value="GOLD">GOLD</option>
-                            <option value="PLATINUM">PLATINUM</option>
+                            <option value="BRONZE">BRONZE (0% Discount)</option>
+                            <option value="SILVER">SILVER (5% Discount)</option>
+                            <option value="GOLD">GOLD (10% Discount)</option>
+                            <option value="PLATINUM">PLATINUM (15% Discount)</option>
                         </select>
 
                         <button
@@ -303,110 +324,180 @@ function CustomerDetailsPage() {
             </div>
 
             <section className="management-card transaction-section">
-                <h2>Order and Transaction History</h2>
-
-                {historyLoading ? (
-                    <div className="management-message">
-                        Loading transaction history...
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", flexWrap: "wrap", gap: "12px" }}>
+                    <h2>History & Transactions (US-09)</h2>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                            type="button"
+                            className={activeTab === "orders" ? "management-primary-button" : "management-secondary-button"}
+                            onClick={() => setActiveTab("orders")}
+                        >
+                            Previous Orders ({orders.length})
+                        </button>
+                        <button
+                            type="button"
+                            className={activeTab === "transactions" ? "management-primary-button" : "management-secondary-button"}
+                            onClick={() => setActiveTab("transactions")}
+                        >
+                            Loyalty & Points Activity
+                        </button>
                     </div>
-                ) : transactions.length === 0 ? (
-                    <div className="management-empty">
-                        No previous orders or transactions found.
-                    </div>
-                ) : (
-                    <div className="responsive-table">
-                        <table className="management-table">
-                            <thead>
-                            <tr>
-                                <th>Order Number</th>
-                                <th>Order Date</th>
-                                <th>Order Status</th>
-                                <th>Payment Status</th>
-                                <th>Total</th>
-                            </tr>
-                            </thead>
+                </div>
 
-                            <tbody>
-                            {transactions.map((transaction) => (
-                                <tr
-                                    key={
-                                        transaction.id ??
-                                        transaction.orderNumber
-                                    }
-                                >
-                                    <td>
-                                        {transaction.orderNumber ??
-                                            transaction.id}
-                                    </td>
-
-                                    <td>
-                                        {transaction.orderDate
-                                            ? new Date(
-                                                transaction.orderDate
-                                            ).toLocaleString()
-                                            : "—"}
-                                    </td>
-
-                                    <td>
-                      <span className="status-badge neutral">
-                        {transaction.orderStatus || "UNKNOWN"}
-                      </span>
-                                    </td>
-
-                                    <td>
-                      <span
-                          className={`status-badge ${
-                              transaction.paymentStatus === "PAID"
-                                  ? "active"
-                                  : "pending"
-                          }`}
-                      >
-                        {transaction.paymentStatus ||
-                            "PENDING"}
-                      </span>
-                                    </td>
-
-                                    <td>
-                                        {formatMoney(
-                                            transaction.totalAmount
-                                        )}
-                                    </td>
+                {activeTab === "orders" ? (
+                    ordersLoading ? (
+                        <div className="management-message">
+                            Loading customer orders...
+                        </div>
+                    ) : orders.length === 0 ? (
+                        <div className="management-empty">
+                            No previous orders recorded for this customer.
+                        </div>
+                    ) : (
+                        <div className="responsive-table">
+                            <table className="management-table">
+                                <thead>
+                                <tr>
+                                    <th>Order Number</th>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Order Status</th>
+                                    <th>Payment Status</th>
+                                    <th>Total Amount</th>
+                                    <th>Action</th>
                                 </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                                </thead>
+                                <tbody>
+                                {orders.map((order) => (
+                                    <tr key={order.id || order.orderNumber}>
+                                        <td>
+                                            <strong style={{ color: "var(--primary-forest, #071C14)" }}>
+                                                {order.orderNumber}
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            {order.createdAt
+                                                ? new Date(order.createdAt).toLocaleDateString()
+                                                : "—"}
+                                        </td>
+                                        <td>
+                                            {order.totalItemTypes || order.items?.length || 1} items ({order.totalQuantity ?? 1} units)
+                                        </td>
+                                        <td>
+                                            <StatusBadge status={order.orderStatus} size="sm" />
+                                        </td>
+                                        <td>
+                                            <StatusBadge status={order.paymentStatus} size="sm" />
+                                        </td>
+                                        <td>
+                                            <strong>{formatMoney(order.totalAmount)}</strong>
+                                        </td>
+                                        <td>
+                                            <Link
+                                                to={`/sales/orders/${order.id}`}
+                                                className="view-link"
+                                                style={{ fontSize: "13px" }}
+                                            >
+                                                Manage Order →
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )
+                ) : (
+                    historyLoading ? (
+                        <div className="management-message">
+                            Loading loyalty transaction history...
+                        </div>
+                    ) : transactions.length === 0 ? (
+                        <div className="management-empty">
+                            No loyalty points or tier transactions found.
+                        </div>
+                    ) : (
+                        <>
+                            <div className="responsive-table">
+                                <table className="management-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Activity Type</th>
+                                        <th>Points</th>
+                                        <th>Balance After</th>
+                                        <th>Description</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {transactions.map((tx) => (
+                                        <tr key={tx.id}>
+                                            <td>
+                                                {tx.createdAt
+                                                    ? new Date(tx.createdAt).toLocaleString()
+                                                    : "—"}
+                                            </td>
+                                            <td>
+                                                <StatusBadge
+                                                    status={tx.transactionType}
+                                                    label={tx.transactionType?.replace(/_/g, " ")}
+                                                    size="sm"
+                                                />
+                                            </td>
+                                            <td>
+                                                <strong
+                                                    style={{
+                                                        color: (tx.points ?? 0) >= 0 ? "#16a34a" : "#dc2626",
+                                                    }}
+                                                >
+                                                    {(tx.points ?? 0) > 0 ? `+${tx.points}` : tx.points ?? 0}
+                                                </strong>
+                                            </td>
+                                            <td>
+                                                <strong>{tx.balanceAfter ?? 0} pts</strong>
+                                            </td>
+                                            <td>
+                                                <span style={{ color: "#475569", fontSize: "13px" }}>
+                                                    {tx.description || "—"}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                {historyTotalPages > 1 && (
-                    <div className="management-pagination">
-                        <button
-                            className="management-secondary-button"
-                            disabled={historyPage === 0}
-                            onClick={() =>
-                                setHistoryPage((current) => current - 1)
-                            }
-                        >
-                            Previous
-                        </button>
+                            {historyTotalPages > 1 && (
+                                <div className="management-pagination">
+                                    <button
+                                        className="management-secondary-button"
+                                        disabled={historyPage === 0}
+                                        onClick={() =>
+                                            setHistoryPage((current) => current - 1)
+                                        }
+                                    >
+                                        Previous
+                                    </button>
 
-                        <span>
-              Page {historyPage + 1} of{" "}
-                            {historyTotalPages}
-            </span>
+                                    <span>
+                                        Page {historyPage + 1} of {historyTotalPages}
+                                    </span>
 
-                        <button
-                            className="management-secondary-button"
-                            disabled={
-                                historyPage + 1 >= historyTotalPages
-                            }
-                            onClick={() =>
-                                setHistoryPage((current) => current + 1)
-                            }
-                        >
-                            Next
-                        </button>
-                    </div>
+                                    <button
+                                        className="management-secondary-button"
+                                        disabled={
+                                            historyPage + 1 >= historyTotalPages
+                                        }
+                                        onClick={() =>
+                                            setHistoryPage((current) => current + 1)
+                                        }
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )
                 )}
             </section>
         </div>

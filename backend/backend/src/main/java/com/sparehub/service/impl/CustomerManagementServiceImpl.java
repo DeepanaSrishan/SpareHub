@@ -12,12 +12,15 @@ import com.sparehub.entity.User;
 import com.sparehub.enums.AccountStatus;
 import com.sparehub.enums.NotificationType;
 import com.sparehub.enums.Role;
+import com.sparehub.dto.response.order.OrderResponse;
 import com.sparehub.exception.BadRequestException;
 import com.sparehub.exception.ConflictException;
 import com.sparehub.exception.ResourceNotFoundException;
+import com.sparehub.mapper.order.OrderResponseMapper;
 import com.sparehub.repository.AccountStatusHistoryRepository;
 import com.sparehub.repository.LoyaltyTransactionRepository;
 import com.sparehub.repository.UserRepository;
+import com.sparehub.repository.order.CustomerOrderRepository;
 import com.sparehub.service.CustomerManagementService;
 import com.sparehub.service.NotificationService;
 import com.sparehub.specification.CustomerSpecification;
@@ -32,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +51,12 @@ public class CustomerManagementServiceImpl
 
     private final AccountStatusHistoryRepository
             accountStatusHistoryRepository;
+
+    private final CustomerOrderRepository
+            customerOrderRepository;
+
+    private final OrderResponseMapper
+            orderResponseMapper;
 
     private final CurrentUserService
             currentUserService;
@@ -240,6 +250,18 @@ public class CustomerManagementServiceImpl
                         pageable
                 )
                 .map(this::mapToStatusHistory);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getCustomerOrders(Long customerId) {
+        findCustomer(customerId);
+
+        return customerOrderRepository
+                .findAllByCustomerIdOrderByCreatedAtDesc(customerId)
+                .stream()
+                .map(orderResponseMapper::toResponse)
+                .toList();
     }
 
     private User findCustomer(Long customerId) {

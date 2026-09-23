@@ -41,4 +41,15 @@ public record SupplierPurchaseResponse(
         LocalDateTime receivedAt,
         LocalDateTime updatedAt
 ) {
+    public Long getId() {
+        return purchaseId;
+    }
+
+    public Long id() {
+        return purchaseId;
+    }
+
+    public String getSupplierName() {
+        return supplierCompanyName;
+    }
 }

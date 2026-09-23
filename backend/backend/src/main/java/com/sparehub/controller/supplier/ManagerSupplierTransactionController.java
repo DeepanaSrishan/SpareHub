@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/manager/suppliers")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('MANAGER')")
+@PreAuthorize("hasAnyRole('MANAGER', 'INVENTORY_STAFF')")
 public class ManagerSupplierTransactionController {
 
     private final SupplierPurchaseService

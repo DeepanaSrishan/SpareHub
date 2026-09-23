@@ -104,6 +104,20 @@ public class CustomerManagementController {
     }
 
     /*
+     * US-09: View customer previous orders
+     */
+    @GetMapping("/{customerId}/orders")
+    @PreAuthorize("hasAnyRole('SALES_STAFF', 'MANAGER')")
+    public ResponseEntity<ApiResponse<java.util.List<com.sparehub.dto.response.order.OrderResponse>>> getCustomerOrders(
+            @PathVariable Long customerId
+    ) {
+        java.util.List<com.sparehub.dto.response.order.OrderResponse> response =
+                customerManagementService.getCustomerOrders(customerId);
+
+        return ResponseEntity.ok(ApiResponse.success("Customer orders retrieved successfully", response));
+    }
+
+    /*
      * US-05: Assign loyalty tier by sales staff / manager
      */
     @PatchMapping({"/{customerId}/tier", "/{customerId}/loyalty-tier"})

@@ -38,7 +38,7 @@ function SupplierPurchaseModal({
         () =>
             supplierProducts.find(
                 (item) =>
-                    Number(item.id) ===
+                    Number(item.supplierProductId ?? item.id) ===
                     Number(form.supplierProductId)
             ),
         [supplierProducts, form.supplierProductId]
@@ -106,8 +106,12 @@ function SupplierPurchaseModal({
         if (!validate()) return;
 
         await onSubmit({
+            supplierId: Number(form.supplierId),
             supplierProductId: Number(
                 form.supplierProductId
+            ),
+            quantity: Number(
+                form.orderedQuantity
             ),
             orderedQuantity: Number(
                 form.orderedQuantity
@@ -198,19 +202,22 @@ function SupplierPurchaseModal({
                                         : "Select product"}
                                 </option>
 
-                                {supplierProducts.map((item) => (
-                                    <option
-                                        key={item.id}
-                                        value={item.id}
-                                    >
-                                        {getPartNumber(item)} -{" "}
-                                        {getProductName(item)} (
-                                        {formatCurrency(
-                                            getPurchasePrice(item)
-                                        )}
-                                        )
-                                    </option>
-                                ))}
+                                {supplierProducts.map((item) => {
+                                    const spId = item.supplierProductId ?? item.id;
+                                    return (
+                                        <option
+                                            key={spId}
+                                            value={spId}
+                                        >
+                                            {getPartNumber(item)} -{" "}
+                                            {getProductName(item)} (
+                                            {formatCurrency(
+                                                getPurchasePrice(item)
+                                            )}
+                                            )
+                                        </option>
+                                    );
+                                })}
                             </select>
                         </FormGroup>
 

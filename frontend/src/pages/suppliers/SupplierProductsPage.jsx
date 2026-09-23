@@ -152,10 +152,12 @@ function SupplierProductsPage() {
             setSaving(true);
             setError("");
 
-            if (editingAssignment?.id) {
+            const currentAssignmentId = getAssignmentId(editingAssignment);
+
+            if (currentAssignmentId) {
                 await updateSupplierProduct(
                     supplierId,
-                    editingAssignment.id,
+                    currentAssignmentId,
                     request
                 );
 
@@ -200,13 +202,15 @@ function SupplierProductsPage() {
 
         if (!confirmed) return;
 
+        const targetId = getAssignmentId(assignment);
+
         try {
-            setActionId(assignment.id);
+            setActionId(targetId);
             setError("");
 
             await markPreferredSupplier(
                 supplierId,
-                assignment.id
+                targetId
             );
 
             setSuccess(
@@ -231,13 +235,15 @@ function SupplierProductsPage() {
 
         if (!confirmed) return;
 
+        const targetId = getAssignmentId(assignment);
+
         try {
-            setActionId(assignment.id);
+            setActionId(targetId);
             setError("");
 
             await removeSupplierProduct(
                 supplierId,
-                assignment.id
+                targetId
             );
 
             setSuccess(
@@ -414,7 +420,7 @@ function SupplierProductsPage() {
                             <tbody>
                             {filteredAssignments.map(
                                 (assignment) => (
-                                    <tr key={assignment.id}>
+                                    <tr key={getAssignmentId(assignment)}>
                                         <td>
                         <span className="supplier-code">
                           {getPartNumber(assignment)}
@@ -458,7 +464,7 @@ function SupplierProductsPage() {
                                                     type="button"
                                                     className="set-preferred-button"
                                                     disabled={
-                                                        actionId === assignment.id
+                                                        actionId === getAssignmentId(assignment)
                                                     }
                                                     onClick={() =>
                                                         handlePreferred(assignment)

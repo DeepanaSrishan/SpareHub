@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import useCart from "../../hooks/useCart";
+import loyaltyService from "../../services/loyaltyService";
 import getApiError from "../../utils/getApiError";
 import "../../styles/cart.css";
 
@@ -34,6 +35,7 @@ const CartPage = () => {
     const [workingItemId, setWorkingItemId] =
         useState(null);
 
+    const [loyalty, setLoyalty] = useState(null);
     const [clearing, setClearing] = useState(false);
     const [error, setError] = useState("");
 
@@ -46,6 +48,11 @@ const CartPage = () => {
                 )
             );
         });
+
+        loyaltyService
+            .getMyLoyalty()
+            .then(setLoyalty)
+            .catch(() => setLoyalty(null));
     }, [loadCart]);
 
     const handleQuantityChange = async (
@@ -376,9 +383,37 @@ const CartPage = () => {
                         </strong>
                     </div>
 
+                    {loyalty && (
+                        <div className="summary-row" style={{ color: "#166534" }}>
+                            <span>
+                                Loyalty Discount ({loyalty.currentTier || "Tier"} {loyalty.discountPercentage ?? 0}%)
+                            </span>
+                            <strong>
+                                -{formatCurrency(((Number(cart.subtotal || 0)) * (Number(loyalty.discountPercentage || 0))) / 100)}
+                            </strong>
+                        </div>
+                    )}
+
+                    <div className="summary-row" style={{ color: "var(--text-muted, #64736B)", fontSize: "13px" }}>
+                        <span>Estimated Tax (8%)</span>
+                        <span>
+                            +{formatCurrency((Math.max((Number(cart.subtotal || 0)) - (((Number(cart.subtotal || 0)) * (Number(loyalty?.discountPercentage || 0))) / 100), 0) * 8) / 100)}
+                        </span>
+                    </div>
+
+                    <div className="summary-row" style={{ borderTop: "1px dashed var(--border, #E2E8F0)", paddingTop: "10px", marginTop: "6px" }}>
+                        <span style={{ fontWeight: "700" }}>Estimated Total</span>
+                        <strong style={{ fontSize: "1.2rem", color: "var(--primary-forest, #071C14)" }}>
+                            {formatCurrency(
+                                Math.max((Number(cart.subtotal || 0)) - (((Number(cart.subtotal || 0)) * (Number(loyalty?.discountPercentage || 0))) / 100), 0) * 1.08
+                            )}
+                        </strong>
+                    </div>
+
                     <p className="summary-help">
-                        Your loyalty discount will be
-                        calculated securely during checkout.
+                        {loyalty?.discountPercentage > 0
+                            ? `Enjoy your ${loyalty.discountPercentage}% discount as a valued ${loyalty.currentTier} member!`
+                            : "Earn reward points with this purchase to unlock higher tier discounts."}
                     </p>
 
                     <button

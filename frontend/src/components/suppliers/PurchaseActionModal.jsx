@@ -15,7 +15,8 @@ function PurchaseActionModal({
                              }) {
     const [receivedQuantity, setReceivedQuantity] =
         useState("");
-
+    const [supplierInvoiceNumber, setSupplierInvoiceNumber] =
+        useState("");
     const [notes, setNotes] = useState("");
     const [error, setError] = useState("");
 
@@ -26,7 +27,9 @@ function PurchaseActionModal({
             setReceivedQuantity(
                 String(purchase.orderedQuantity ?? "")
             );
-
+            setSupplierInvoiceNumber(
+                purchase.supplierInvoiceNumber || (purchase.purchaseNumber ? `INV-${purchase.purchaseNumber}` : "")
+            );
             setNotes("");
             setError("");
         }
@@ -61,10 +64,13 @@ function PurchaseActionModal({
                 return;
             }
 
+            const invoiceNo = supplierInvoiceNumber.trim() || `INV-${purchase.purchaseNumber || Date.now()}`;
+
             await onSubmit({
                 receivedQuantity: Number(
                     receivedQuantity
                 ),
+                supplierInvoiceNumber: invoiceNo,
                 notes: notes.trim() || null,
             });
         } else {
@@ -138,22 +144,40 @@ function PurchaseActionModal({
                     </div>
 
                     {receiving && (
-                        <div className="supplier-form-group">
-                            <label>Received Quantity *</label>
+                        <>
+                            <div className="supplier-form-group">
+                                <label>Received Quantity *</label>
 
-                            <input
-                                type="number"
-                                min="1"
-                                max={purchase.orderedQuantity}
-                                value={receivedQuantity}
-                                onChange={(event) => {
-                                    setReceivedQuantity(
-                                        event.target.value
-                                    );
-                                    setError("");
-                                }}
-                            />
-                        </div>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max={purchase.orderedQuantity}
+                                    value={receivedQuantity}
+                                    onChange={(event) => {
+                                        setReceivedQuantity(
+                                            event.target.value
+                                        );
+                                        setError("");
+                                    }}
+                                />
+                            </div>
+
+                            <div className="supplier-form-group">
+                                <label>Supplier Invoice Number *</label>
+
+                                <input
+                                    type="text"
+                                    value={supplierInvoiceNumber}
+                                    onChange={(event) => {
+                                        setSupplierInvoiceNumber(
+                                            event.target.value
+                                        );
+                                        setError("");
+                                    }}
+                                    placeholder="e.g. INV-2026-001"
+                                />
+                            </div>
+                        </>
                     )}
 
                     <div className="supplier-form-group purchase-notes">

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/inventory/supplier-purchases")
+@RequestMapping({"/api/inventory/supplier-purchases", "/api/supplier-purchases"})
 @RequiredArgsConstructor
 @PreAuthorize(
         "hasAnyRole('INVENTORY_STAFF', 'MANAGER')"
@@ -30,6 +30,49 @@ public class SupplierPurchaseController {
 
     private final SupplierPurchaseService
             supplierPurchaseService;
+
+    @GetMapping
+    public ResponseEntity<
+            ApiResponse<List<SupplierPurchaseResponse>>
+            > getAllSupplierPurchases(
+            @RequestParam(required = false) Long supplierId,
+            @RequestParam(required = false) PurchaseStatus status
+    ) {
+        List<SupplierPurchaseResponse> response =
+                supplierPurchaseService.getAllPurchases(
+                        supplierId,
+                        status
+                );
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Supplier purchases retrieved successfully",
+                        response
+                )
+        );
+    }
+
+    @PostMapping
+    public ResponseEntity<
+            ApiResponse<SupplierPurchaseResponse>
+            > createPurchaseDirect(
+            @Valid @RequestBody
+            CreateSupplierPurchaseRequest request
+    ) {
+        SupplierPurchaseResponse response =
+                supplierPurchaseService.createPurchaseDirect(
+                        request
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        ApiResponse.success(
+                                "Supplier purchase created successfully",
+                                response
+                        )
+                );
+    }
 
     @PostMapping("/supplier/{supplierId}")
     public ResponseEntity<
@@ -94,7 +137,10 @@ public class SupplierPurchaseController {
         );
     }
 
-    @PostMapping("/{purchaseId}/receive")
+    @RequestMapping(
+            value = "/{purchaseId}/receive",
+            method = {RequestMethod.POST, RequestMethod.PATCH}
+    )
     public ResponseEntity<
             ApiResponse<SupplierPurchaseResponse>
             > receivePurchase(
@@ -114,7 +160,10 @@ public class SupplierPurchaseController {
         );
     }
 
-    @PostMapping("/{purchaseId}/cancel")
+    @RequestMapping(
+            value = "/{purchaseId}/cancel",
+            method = {RequestMethod.POST, RequestMethod.PATCH}
+    )
     public ResponseEntity<
             ApiResponse<SupplierPurchaseResponse>
             > cancelPurchase(

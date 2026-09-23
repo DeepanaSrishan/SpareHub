@@ -44,6 +44,14 @@ const customerManagementService = {
         return response.data.data;
     },
 
+    getCustomerOrders: async (customerId) => {
+        const response = await apiClient.get(
+            `/customers/${customerId}/orders`
+        );
+
+        return response.data.data;
+    },
+
     getInactiveCustomers: async ({
                                      inactiveDays = 90,
                                      page = 0,

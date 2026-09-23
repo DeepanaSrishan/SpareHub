@@ -175,9 +175,11 @@ function SupplierPurchasesPage() {
             setSaving(true);
             setError("");
 
+            const pId = purchase?.purchaseId ?? purchase?.id;
+
             if (action.mode === "receive") {
                 await receiveSupplierPurchase(
-                    purchase.id,
+                    pId,
                     request
                 );
 
@@ -186,7 +188,7 @@ function SupplierPurchasesPage() {
                 );
             } else {
                 await cancelSupplierPurchase(
-                    purchase.id,
+                    pId,
                     request
                 );
 
@@ -442,8 +444,10 @@ function SupplierPurchasesPage() {
                                             purchase.status
                                         );
 
+                                    const pKey = purchase?.purchaseId ?? purchase?.id ?? purchase?.purchaseNumber;
+
                                     return (
-                                        <tr key={purchase.id}>
+                                        <tr key={pKey}>
                                             <td>
                           <span className="supplier-code">
                             {purchase.purchaseNumber}
@@ -604,11 +608,12 @@ function Message({ type, message, onClose }) {
 }
 
 function StatusBadge({ status }) {
+    const s = normalizeStatus(status);
     return (
         <span
-            className={`purchase-status ${status.toLowerCase()}`}
+            className={`purchase-status ${s.toLowerCase()}`}
         >
-      {status}
+      {s}
     </span>
     );
 }
@@ -628,6 +633,7 @@ function getSupplierName(supplier) {
 
 function getPurchaseSupplierName(purchase) {
     return (
+        purchase?.supplierCompanyName ||
         purchase?.supplierName ||
         purchase?.supplier?.name ||
         purchase?.supplier?.supplierName ||

@@ -479,9 +479,9 @@ public class SparePartService {
             );
         }
 
-        if (size < 1 || size > 100) {
+        if (size < 1 || size > 1000) {
             throw new BadRequestException(
-                    "Page size must be between 1 and 100"
+                    "Page size must be between 1 and 1000"
             );
         }
     }

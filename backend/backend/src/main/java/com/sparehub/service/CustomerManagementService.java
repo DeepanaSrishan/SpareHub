@@ -44,4 +44,7 @@ public interface CustomerManagementService {
             Long customerId,
             Pageable pageable
     );
+
+    java.util.List<com.sparehub.dto.response.order.OrderResponse>
+    getCustomerOrders(Long customerId);
 }

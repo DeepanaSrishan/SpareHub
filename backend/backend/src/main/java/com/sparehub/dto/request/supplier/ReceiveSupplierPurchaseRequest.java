@@ -18,9 +18,6 @@ public record ReceiveSupplierPurchaseRequest(
         )
         Integer receivedQuantity,
 
-        @NotBlank(
-                message = "Supplier invoice number is required"
-        )
         @Size(
                 max = 100,
                 message = "Invoice number cannot exceed 100 characters"

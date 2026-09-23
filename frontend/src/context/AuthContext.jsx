@@ -67,6 +67,14 @@ export function AuthProvider({ children }) {
                 "sparehub_access_token",
                 authData.accessToken
             );
+            localStorage.setItem(
+                "accessToken",
+                authData.accessToken
+            );
+            localStorage.setItem(
+                "token",
+                authData.accessToken
+            );
 
             localStorage.setItem(
                 "sparehub_user",
@@ -86,9 +94,17 @@ export function AuthProvider({ children }) {
         localStorage.removeItem(
             "sparehub_access_token"
         );
-
+        localStorage.removeItem(
+            "accessToken"
+        );
+        localStorage.removeItem(
+            "token"
+        );
         localStorage.removeItem(
             "sparehub_user"
+        );
+        localStorage.removeItem(
+            "user"
         );
 
         setUser(null);
