@@ -30,6 +30,8 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
+            localStorage.removeItem("sparehub_access_token");
+            localStorage.removeItem("sparehub_user");
             localStorage.removeItem("accessToken");
             localStorage.removeItem("token");
             localStorage.removeItem("user");

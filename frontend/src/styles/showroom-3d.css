@@ -1,0 +1,632 @@
+/* ==========================================================================
+   SPAREHUB 3D SHOWROOM & CINEMATIC LOGIN SYSTEM
+   Color Palette: Near-Black (#050505), Midnight Showroom (#070b0e),
+   Restrained Blue/Cyan (#38BDF8 / #1E40AF), Emerald (#10B981), White (#FFFFFF)
+   ========================================================================== */
+
+:root {
+  --showroom-bg: #0c0f14;
+  --showroom-surface: rgba(16, 21, 29, 0.92);
+  --showroom-border: rgba(255, 255, 255, 0.08);
+  --showroom-border-glow: rgba(16, 185, 129, 0.3);
+  --showroom-emerald: #10b981;
+  --showroom-text-primary: #ffffff;
+  --showroom-text-muted: #94a3b8;
+}
+
+/* Root Showroom Container */
+.showroom-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--showroom-bg);
+  color: var(--showroom-text-primary);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  user-select: none;
+}
+
+/* 3D Canvas Canvas Layer */
+.showroom-canvas-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* WebGL Loading Overlay */
+.showroom-loader-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: #050505;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #ffffff;
+}
+
+.showroom-loader-bar {
+  width: 240px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.showroom-loader-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #10b981);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+  transition: width 0.2s ease-out;
+}
+
+/* Fallback Container (No WebGL) */
+.showroom-fallback-view {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050505;
+}
+
+.showroom-fallback-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ==========================================================================
+   COMPACT TOP NAVBAR
+   ========================================================================== */
+.showroom-navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 36px;
+  background: linear-gradient(to bottom, rgba(5, 5, 5, 0.85) 0%, rgba(5, 5, 5, 0) 100%);
+  pointer-events: auto;
+}
+
+.showroom-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.showroom-brand-emblem {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--showroom-emerald);
+}
+
+.showroom-brand-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+}
+
+.showroom-brand-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--showroom-emerald);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.showroom-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.showroom-btn-secondary {
+  padding: 9px 18px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.showroom-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.showroom-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 10px;
+  background: #10b981;
+  color: #04140d;
+  font-size: 0.88rem;
+  font-weight: 800;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+  transition: all 0.2s ease;
+}
+
+.showroom-btn-primary:hover {
+  background: #059669;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   SHOWROOM HERO HEADLINE & TELEMETRY OVERLAY
+   ========================================================================== */
+.showroom-hero-overlay {
+  position: absolute;
+  top: 92px;
+  left: 36px;
+  z-index: 10;
+  max-width: 480px;
+  pointer-events: none;
+}
+
+.showroom-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--showroom-blue);
+  margin-bottom: 8px;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.showroom-hero-headline {
+  margin: 0 0 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.8rem, 3.2vw, 2.7rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: #ffffff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+.showroom-hero-sub {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--showroom-text-muted);
+  line-height: 1.5;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+/* Interaction Instruction Strip */
+.showroom-interactive-hints {
+  position: absolute;
+  bottom: 24px;
+  left: 36px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: rgba(10, 16, 22, 0.82);
+  border: 1px solid var(--showroom-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+}
+
+.showroom-hint-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.showroom-hint-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--showroom-blue);
+  box-shadow: 0 0 8px var(--showroom-blue);
+}
+
+.showroom-hint-divider {
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ==========================================================================
+   HOVER PART TOOLTIP (DYNAMIC FOLLOW)
+   ========================================================================== */
+.showroom-hover-tooltip {
+  position: absolute;
+  z-index: 25;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(8, 14, 20, 0.92);
+  border: 1px solid var(--showroom-blue);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(56, 189, 248, 0.3);
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+  transform: translate(-50%, -120%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.showroom-tooltip-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.showroom-tooltip-hint {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--showroom-blue);
+}
+
+/* ==========================================================================
+   PART DETAILS & INTERACTION CONTROLS DRAWER
+   ========================================================================== */
+.showroom-details-drawer {
+  position: absolute;
+  top: 90px;
+  right: 36px;
+  width: min(380px, calc(100vw - 40px));
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  z-index: 30;
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(10, 16, 22, 0.92);
+  border: 1px solid var(--showroom-border);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.12);
+  color: #ffffff;
+}
+
+.showroom-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.showroom-drawer-category {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--showroom-blue);
+}
+
+.showroom-drawer-title {
+  margin: 3px 0 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.showroom-drawer-close {
+  background: transparent;
+  border: 0;
+  color: var(--showroom-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.showroom-drawer-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.showroom-drawer-description {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+/* Interactive Controls inside Part Details */
+.showroom-control-box {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.showroom-control-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.showroom-slider-input {
+  width: 100%;
+  accent-color: var(--showroom-blue);
+  cursor: pointer;
+}
+
+.showroom-drawer-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.showroom-drawer-btn {
+  flex: 1;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--showroom-border);
+  background: rgba(56, 189, 248, 0.12);
+  color: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.showroom-drawer-btn:hover {
+  background: rgba(56, 189, 248, 0.22);
+  border-color: var(--showroom-blue);
+}
+
+/* ==========================================================================
+   FLOATING SIGN IN MODAL / DOCKED CARD
+   ========================================================================== */
+.showroom-auth-modal-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 80px 48px 24px;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.showroom-auth-card {
+  pointer-events: auto;
+  width: min(420px, 100%);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 32px 30px;
+  border-radius: 22px;
+  background: rgba(8, 14, 22, 0.88);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(56, 189, 248, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #ffffff;
+  position: relative;
+}
+
+.showroom-auth-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: var(--showroom-text-muted);
+  cursor: pointer;
+  padding: 5px;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s ease;
+}
+
+.showroom-auth-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.showroom-auth-header {
+  margin-bottom: 24px;
+}
+
+.showroom-auth-header h2 {
+  margin: 0 0 6px;
+  font-size: 1.85rem;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  color: #ffffff;
+}
+
+.showroom-auth-header p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--showroom-text-muted);
+}
+
+.showroom-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.showroom-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.showroom-input-label {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.showroom-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.showroom-input-icon {
+  position: absolute;
+  left: 14px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.showroom-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px 12px 42px;
+  border-radius: 12px;
+  background: #10141c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.92rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.showroom-input:focus {
+  border-color: var(--showroom-emerald);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.showroom-password-toggle {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: 0;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.showroom-password-toggle:hover {
+  color: #ffffff;
+}
+
+.showroom-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 20px;
+  margin-top: 6px;
+  border-radius: 12px;
+  background: #10b981;
+  color: #04140d;
+  font-size: 0.96rem;
+  font-weight: 800;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+  transition: all 0.2s ease;
+}
+
+.showroom-submit-btn:hover:not(:disabled) {
+  background: #059669;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+  transform: translateY(-1px);
+}
+
+.showroom-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN BREAKPOINTS
+   ========================================================================== */
+@media (max-width: 900px) {
+  .showroom-navbar {
+    padding: 14px 20px;
+  }
+
+  .showroom-hero-overlay {
+    top: 76px;
+    left: 20px;
+    right: 20px;
+    max-width: 100%;
+  }
+
+  .showroom-hero-headline {
+    font-size: 1.7rem;
+  }
+
+  .showroom-interactive-hints {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    justify-content: space-around;
+  }
+
+  .showroom-details-drawer {
+    top: auto;
+    bottom: 80px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-height: 48vh;
+  }
+
+  .showroom-auth-modal-overlay {
+    padding: 70px 16px 20px;
+    justify-content: center;
+    background: rgba(5, 5, 5, 0.45);
+    pointer-events: auto;
+  }
+}
+

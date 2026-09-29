@@ -1,0 +1,817 @@
+/* ==========================================================================
+   SPAREHUB CINEMATIC LOGIN - 3D AUTOMOTIVE DESIGN SYSTEM
+   Palette: Near-Black (#050505), Emerald (#10B981), Slate (#CBD5E1), White (#FFFFFF)
+   Dual-Panel Desktop Split + Responsive Mobile Stack
+   ========================================================================== */
+
+:root {
+  --cinematic-bg: #050505;
+  --cinematic-surface: rgba(13, 20, 16, 0.72);
+  --cinematic-surface-elevated: rgba(16, 26, 20, 0.88);
+  --cinematic-border: rgba(16, 185, 129, 0.2);
+  --cinematic-border-glow: rgba(16, 185, 129, 0.45);
+  --cinematic-emerald: #10b981;
+  --cinematic-emerald-glow: rgba(16, 185, 129, 0.35);
+  --cinematic-emerald-hover: #34d399;
+  --cinematic-text-main: #ffffff;
+  --cinematic-text-muted: #94a3b8;
+  --cinematic-input-bg: rgba(6, 11, 8, 0.92);
+}
+
+/* Page Container */
+.cinematic-login-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background-color: var(--cinematic-bg);
+  color: var(--cinematic-text-main);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Ambient Background Glow */
+.cinematic-bg-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 25%, rgba(16, 185, 129, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 82% 75%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+    #050505;
+}
+
+/* Subtle Automotive Technical Grid */
+.cinematic-grid-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(16, 185, 129, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.12) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Dual Panel Grid Wrapper */
+.cinematic-split-layout {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ==========================================================================
+   LEFT PANEL: CINEMATIC AUTOMOTIVE 3D VISUAL
+   ========================================================================== */
+.cinematic-visual-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 56px;
+  overflow: hidden;
+  background-color: #050505;
+  border-right: 1px solid rgba(16, 185, 129, 0.15);
+  perspective: 1200px;
+}
+
+/* 3D Tilt Wrapper */
+.cinematic-tilt-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+/* Canvas Display */
+.cinematic-canvas-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cinematic-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Edge Blending Vignettes */
+.cinematic-canvas-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at center, transparent 35%, rgba(5, 5, 5, 0.65) 75%, #050505 100%),
+    linear-gradient(to right, #050505 0%, transparent 12%, transparent 88%, #050505 100%),
+    linear-gradient(to bottom, #050505 0%, transparent 10%, transparent 88%, #050505 100%);
+}
+
+/* Pointer Spotlight */
+.cinematic-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Ambient Particles Canvas */
+.cinematic-particles-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Telemetry Badges & Overlays */
+.cinematic-telemetry-header {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cinematic-brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(13, 20, 16, 0.85);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.cinematic-brand-pill span {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cinematic-emerald);
+}
+
+.cinematic-brand-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cinematic-emerald);
+  box-shadow: 0 0 10px var(--cinematic-emerald);
+  animation: emeraldDotPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes emeraldDotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+}
+
+.cinematic-telemetry-badge {
+  font-family: monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Mid-Level Floating Parallax Cards */
+.cinematic-floating-card {
+  position: absolute;
+  z-index: 4;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(10, 18, 14, 0.82);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.65), 0 0 20px rgba(16, 185, 129, 0.08);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cinematic-floating-card.card-left {
+  top: 38%;
+  left: 36px;
+}
+
+.cinematic-floating-card.card-right {
+  top: 56%;
+  right: 36px;
+}
+
+.cinematic-card-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: var(--cinematic-emerald);
+}
+
+.cinematic-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cinematic-card-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.cinematic-card-value {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+/* Bottom Telemetry HUD Bar */
+.cinematic-telemetry-footer {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  border-radius: 16px;
+  background: rgba(10, 18, 14, 0.85);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.cinematic-hud-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cinematic-hud-radar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+}
+
+.cinematic-hud-radar-ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--cinematic-emerald);
+  opacity: 0.6;
+  animation: radarPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes radarPing {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  75%, 100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.cinematic-hud-radar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cinematic-emerald);
+  box-shadow: 0 0 8px var(--cinematic-emerald);
+}
+
+.cinematic-hud-title {
+  font-size: 0.82rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+}
+
+.cinematic-hud-subtitle {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.cinematic-hud-counter {
+  font-family: monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--cinematic-emerald);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+/* ==========================================================================
+   RIGHT PANEL: LOGIN CARD & FORM SECTION
+   ========================================================================== */
+.cinematic-form-panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 48px;
+  background-color: var(--cinematic-bg);
+  z-index: 10;
+}
+
+.cinematic-login-card {
+  width: min(440px, 100%);
+  padding: 44px 40px;
+  border-radius: 28px;
+  background: rgba(12, 20, 16, 0.85);
+  border: 1px solid rgba(16, 185, 129, 0.24);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.8),
+    0 0 35px rgba(16, 185, 129, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Card Subtle Top Accent Line */
+.cinematic-login-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cinematic-emerald), transparent);
+  opacity: 0.8;
+}
+
+/* Wordmark & Brand */
+.cinematic-card-header {
+  margin-bottom: 28px;
+}
+
+.cinematic-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.cinematic-brand-emblem {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.08) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: var(--cinematic-emerald);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
+}
+
+.cinematic-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.cinematic-brand-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+}
+
+.cinematic-brand-sub {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cinematic-emerald);
+}
+
+.cinematic-card-title {
+  margin: 0 0 8px;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+}
+
+.cinematic-card-subtitle {
+  margin: 0;
+  color: var(--cinematic-text-muted);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+/* Alert Messages */
+.cinematic-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 16px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.cinematic-alert.error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.cinematic-alert.success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+}
+
+/* Form Groups & Inputs */
+.cinematic-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cinematic-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.cinematic-label {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cinematic-input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cinematic-input-icon {
+  position: absolute;
+  left: 14px;
+  color: #64748b;
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.cinematic-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px 13px 44px;
+  background: var(--cinematic-input-bg);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 14px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.94rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.cinematic-input:focus {
+  border-color: var(--cinematic-emerald);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25), 0 0 16px rgba(16, 185, 129, 0.15);
+}
+
+.cinematic-input:focus + .cinematic-input-icon,
+.cinematic-input-box:focus-within .cinematic-input-icon {
+  color: var(--cinematic-emerald);
+}
+
+.cinematic-input::placeholder {
+  color: rgba(255, 255, 255, 0.28);
+}
+
+/* Show/Hide Password Button */
+.cinematic-password-toggle {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: 0;
+  color: #64748b;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s ease;
+}
+
+.cinematic-password-toggle:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cinematic-password-toggle:focus-visible {
+  outline: 2px solid var(--cinematic-emerald);
+}
+
+/* Utilities Row: Remember Me & Forgot Password */
+.cinematic-utils-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -2px;
+  margin-bottom: 4px;
+}
+
+.cinematic-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.cinematic-checkbox {
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+  accent-color: var(--cinematic-emerald);
+  cursor: pointer;
+}
+
+.cinematic-forgot-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--cinematic-emerald);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.cinematic-forgot-link:hover {
+  color: var(--cinematic-emerald-hover);
+  text-decoration: underline;
+}
+
+.cinematic-forgot-link:focus-visible {
+  outline: 2px solid var(--cinematic-emerald);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Primary Sign In Button with Ripple */
+.cinematic-submit-button {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 24px;
+  margin-top: 6px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #042519;
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35), 0 0 20px rgba(16, 185, 129, 0.15);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cinematic-submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  box-shadow: 0 8px 26px rgba(16, 185, 129, 0.5), 0 0 30px rgba(16, 185, 129, 0.25);
+  transform: translateY(-1.5px);
+  color: #021a11;
+}
+
+.cinematic-submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.cinematic-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.cinematic-submit-button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+/* Button Ripple Wave */
+.cinematic-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  transform: scale(0);
+  animation: cinematicRippleAnimation 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes cinematicRippleAnimation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Footer Link */
+.cinematic-card-footer {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.cinematic-signup-link {
+  color: var(--cinematic-emerald);
+  font-weight: 750;
+  text-decoration: none;
+  margin-left: 6px;
+  transition: all 0.2s ease;
+}
+
+.cinematic-signup-link:hover {
+  color: var(--cinematic-emerald-hover);
+  text-decoration: underline;
+}
+
+.cinematic-signup-link:focus-visible {
+  outline: 2px solid var(--cinematic-emerald);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Spin animation for loading state */
+.cinematic-spin {
+  animation: cinematicSpin 0.8s linear infinite;
+}
+
+@keyframes cinematicSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Forgot Password Modal Helper */
+.cinematic-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.cinematic-modal {
+  width: min(420px, 100%);
+  padding: 32px;
+  border-radius: 24px;
+  background: rgba(14, 24, 18, 0.96);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+  color: #ffffff;
+}
+
+.cinematic-modal h3 {
+  margin: 0 0 10px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.cinematic-modal p {
+  margin: 0 0 20px;
+  color: var(--cinematic-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN BREAKPOINTS
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .cinematic-split-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cinematic-visual-panel {
+    min-height: 380px;
+    height: 44vh;
+    padding: 24px 28px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+  }
+
+  .cinematic-floating-card {
+    display: none;
+  }
+
+  .cinematic-form-panel {
+    padding: 36px 20px 50px;
+  }
+
+  .cinematic-login-card {
+    padding: 36px 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .cinematic-visual-panel {
+    min-height: 260px;
+    height: 32vh;
+    padding: 18px 20px;
+  }
+
+  .cinematic-telemetry-header {
+    display: none;
+  }
+
+  .cinematic-telemetry-footer {
+    padding: 10px 14px;
+  }
+
+  .cinematic-hud-subtitle {
+    display: none;
+  }
+
+  .cinematic-form-panel {
+    padding: 24px 16px 40px;
+  }
+
+  .cinematic-login-card {
+    padding: 28px 20px;
+    border-radius: 20px;
+  }
+
+  .cinematic-card-title {
+    font-size: 1.7rem;
+  }
+
+  .cinematic-utils-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

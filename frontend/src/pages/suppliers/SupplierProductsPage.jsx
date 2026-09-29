@@ -560,6 +560,15 @@ function getSupplierName(supplier) {
     );
 }
 
+function getAssignmentId(assignment) {
+    return (
+        assignment?.id ??
+        assignment?.supplierProductId ??
+        assignment?.assignmentId ??
+        assignment?.sparePartId
+    );
+}
+
 function getProductId(assignment) {
     return (
         assignment?.sparePartId ??

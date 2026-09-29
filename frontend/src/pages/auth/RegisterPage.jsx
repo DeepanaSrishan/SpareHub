@@ -12,6 +12,7 @@ import {
 
 import authService from "../../services/authService";
 import { getApiError } from "../../utils/getApiError";
+import BikeAssemblyBackground from "../../components/common/BikeAssemblyBackground";
 
 const initialForm = {
     fullName: "",
@@ -81,8 +82,10 @@ export default function RegisterPage() {
     };
 
     return (
-        <main className="register-page">
-            <form
+        <div className="bike-page-root">
+            <BikeAssemblyBackground />
+            <main className="register-page bike-page-content-wrapper">
+                <form
                 className="register-card"
                 onSubmit={handleSubmit}
             >
@@ -240,5 +243,6 @@ export default function RegisterPage() {
                 </p>
             </form>
         </main>
-    );
+    </div>
+);
 }
