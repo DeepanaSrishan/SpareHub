@@ -2,22 +2,36 @@ package com.sparehub.service.impl.report;
 
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
 import com.sparehub.dto.report.ManagementDashboardResponse;
 import com.sparehub.dto.report.ManagementReportFilter;
 import com.sparehub.dto.report.ManagementReportResponse;
 import com.sparehub.entity.inventory.SparePart;
+<<<<<<< HEAD
 import com.sparehub.entity.order.CustomerOrder;
 import com.sparehub.entity.order.Payment;
+=======
+import com.sparehub.entity.Order;
+import com.sparehub.entity.payment.Payment;
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
 import com.sparehub.entity.report.ManagementReportType;
 import com.sparehub.entity.supplier.Supplier;
 import com.sparehub.entity.supplier.SupplierPurchase;
 import com.sparehub.entity.supplier.SupplierTransaction;
 import com.sparehub.exception.BadRequestException;
+<<<<<<< HEAD
 import com.sparehub.repository.SparePartRepository;
 import com.sparehub.repository.order.CustomerOrderRepository;
 import com.sparehub.repository.order.PaymentRepository;
+=======
+import com.sparehub.repository.inventory.SparePartRepository;
+import com.sparehub.repository.order.OrderRepository;
+import com.sparehub.repository.payment.PaymentRepository;
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
 import com.sparehub.repository.supplier.SupplierPurchaseRepository;
 import com.sparehub.repository.supplier.SupplierRepository;
 import com.sparehub.repository.supplier.SupplierTransactionRepository;
@@ -42,7 +56,11 @@ import java.util.Map;
 public class ManagementReportServiceImpl
         implements ManagementReportService {
 
+<<<<<<< HEAD
     private final CustomerOrderRepository orderRepository;
+=======
+    private final OrderRepository orderRepository;
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
     private final PaymentRepository paymentRepository;
     private final SparePartRepository sparePartRepository;
     private final SupplierRepository supplierRepository;
@@ -56,7 +74,11 @@ public class ManagementReportServiceImpl
     ) {
         DateRange range = resolveDateRange(startDate, endDate);
 
+<<<<<<< HEAD
         List<CustomerOrder> orders = orderRepository.findAll()
+=======
+        List<Order> orders = orderRepository.findAll()
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                 .stream()
                 .filter(order -> isWithinRange(
                         order.getCreatedAt(),
@@ -151,7 +173,11 @@ public class ManagementReportServiceImpl
 
         List<String> headers = new ArrayList<>(
                 report.records()
+<<<<<<< HEAD
                         .get(0)
+=======
+                        .getFirst()
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                         .keySet()
         );
 
@@ -185,13 +211,21 @@ public class ManagementReportServiceImpl
 
     private ManagementDashboardResponse.SalesSummary
     createSalesSummary(
+<<<<<<< HEAD
             List<CustomerOrder> orders,
+=======
+            List<Order> orders,
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
             List<Payment> payments
     ) {
         long completedSales = orders.stream()
                 .filter(order ->
                         statusEquals(
+<<<<<<< HEAD
                                 order.getOrderStatus(),
+=======
+                                order.getStatus(),
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                                 "COMPLETED"
                         ))
                 .count();
@@ -199,7 +233,11 @@ public class ManagementReportServiceImpl
         BigDecimal grossSales = orders.stream()
                 .filter(order ->
                         statusEquals(
+<<<<<<< HEAD
                                 order.getOrderStatus(),
+=======
+                                order.getStatus(),
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                                 "COMPLETED"
                         ))
                 .map(this::getOrderTotal)
@@ -208,7 +246,11 @@ public class ManagementReportServiceImpl
         BigDecimal discounts = orders.stream()
                 .filter(order ->
                         statusEquals(
+<<<<<<< HEAD
                                 order.getOrderStatus(),
+=======
+                                order.getStatus(),
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                                 "COMPLETED"
                         ))
                 .map(this::getOrderDiscount)
@@ -237,7 +279,11 @@ public class ManagementReportServiceImpl
     }
 
     private ManagementDashboardResponse.OrderSummary
+<<<<<<< HEAD
     createOrderSummary(List<CustomerOrder> orders) {
+=======
+    createOrderSummary(List<Order> orders) {
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
         return new ManagementDashboardResponse.OrderSummary(
                 orders.size(),
                 countOrderStatus(orders, "PENDING"),
@@ -275,7 +321,11 @@ public class ManagementReportServiceImpl
 
         BigDecimal estimatedStockValue = spareParts.stream()
                 .map(part ->
+<<<<<<< HEAD
                         safeBigDecimal(part.getSellingPrice())
+=======
+                        safeBigDecimal(part.getPrice())
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                                 .multiply(
                                         BigDecimal.valueOf(
                                                 safeInteger(
@@ -363,7 +413,11 @@ public class ManagementReportServiceImpl
                                 ))
                         .filter(order ->
                                 statusEquals(
+<<<<<<< HEAD
                                         order.getOrderStatus(),
+=======
+                                        order.getStatus(),
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                                         "COMPLETED"
                                 ))
                         .map(order -> {
@@ -393,7 +447,11 @@ public class ManagementReportServiceImpl
                             );
                             row.put(
                                     "status",
+<<<<<<< HEAD
                                     order.getOrderStatus()
+=======
+                                    order.getStatus()
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                             );
                             row.put(
                                     "createdAt",
@@ -437,7 +495,11 @@ public class ManagementReportServiceImpl
                                 filter.orderStatus() == null
                                         || filter.orderStatus().isBlank()
                                         || statusEquals(
+<<<<<<< HEAD
                                         order.getOrderStatus(),
+=======
+                                        order.getStatus(),
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                                         filter.orderStatus()
                                 ))
                         .map(order -> {
@@ -455,7 +517,11 @@ public class ManagementReportServiceImpl
                             );
                             row.put(
                                     "status",
+<<<<<<< HEAD
                                     order.getOrderStatus()
+=======
+                                    order.getStatus()
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                             );
                             row.put(
                                     "paymentStatus",
@@ -522,12 +588,20 @@ public class ManagementReportServiceImpl
                                     "reorderLevel",
                                     part.getReorderLevel()
                             );
+<<<<<<< HEAD
                             row.put("price", part.getSellingPrice());
+=======
+                            row.put("price", part.getPrice());
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                             row.put("status", part.getStatus());
 
                             row.put(
                                     "stockValue",
+<<<<<<< HEAD
                                     safeBigDecimal(part.getSellingPrice())
+=======
+                                    safeBigDecimal(part.getPrice())
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                                             .multiply(
                                                     BigDecimal.valueOf(
                                                             safeInteger(
@@ -643,7 +717,11 @@ public class ManagementReportServiceImpl
                             );
                             row.put(
                                     "referenceNumber",
+<<<<<<< HEAD
                                     payment.getPaymentReference()
+=======
+                                    payment.getReferenceNumber()
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                             );
                             row.put(
                                     "orderNumber",
@@ -864,12 +942,20 @@ public class ManagementReportServiceImpl
     }
 
     private long countOrderStatus(
+<<<<<<< HEAD
             List<CustomerOrder> orders,
+=======
+            List<Order> orders,
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
             String status
     ) {
         return orders.stream()
                 .filter(order ->
+<<<<<<< HEAD
                         statusEquals(order.getOrderStatus(), status))
+=======
+                        statusEquals(order.getStatus(), status))
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                 .count();
     }
 
@@ -948,6 +1034,7 @@ public class ManagementReportServiceImpl
      * names of your existing entities are different.
      */
 
+<<<<<<< HEAD
     private BigDecimal getOrderTotal(CustomerOrder order) {
         return safeBigDecimal(order.getTotalAmount());
     }
@@ -961,6 +1048,21 @@ public class ManagementReportServiceImpl
     }
 
     private String getCustomerName(CustomerOrder order) {
+=======
+    private BigDecimal getOrderTotal(Order order) {
+        return safeBigDecimal(order.getTotalAmount());
+    }
+
+    private BigDecimal getOrderSubtotal(Order order) {
+        return safeBigDecimal(order.getSubtotal());
+    }
+
+    private BigDecimal getOrderDiscount(Order order) {
+        return safeBigDecimal(order.getDiscountAmount());
+    }
+
+    private String getCustomerName(Order order) {
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
         if (order.getCustomer() == null) {
             return "";
         }
@@ -979,11 +1081,19 @@ public class ManagementReportServiceImpl
     }
 
     private boolean isSupplierActive(Supplier supplier) {
+<<<<<<< HEAD
         return Boolean.TRUE.equals(supplier.getActive());
     }
 
     private String getSupplierName(Supplier supplier) {
         return supplier.getCompanyName();
+=======
+        return supplier.isActive();
+    }
+
+    private String getSupplierName(Supplier supplier) {
+        return supplier.getName();
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
     }
 
     private record DateRange(
@@ -993,5 +1103,9 @@ public class ManagementReportServiceImpl
             LocalDateTime endDateTime
     ) {
     }
+<<<<<<< HEAD
 }
 
+=======
+}
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99

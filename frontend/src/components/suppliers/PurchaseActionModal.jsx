@@ -15,8 +15,12 @@ function PurchaseActionModal({
                              }) {
     const [receivedQuantity, setReceivedQuantity] =
         useState("");
+<<<<<<< HEAD
     const [supplierInvoiceNumber, setSupplierInvoiceNumber] =
         useState("");
+=======
+
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
     const [notes, setNotes] = useState("");
     const [error, setError] = useState("");
 
@@ -27,9 +31,13 @@ function PurchaseActionModal({
             setReceivedQuantity(
                 String(purchase.orderedQuantity ?? "")
             );
+<<<<<<< HEAD
             setSupplierInvoiceNumber(
                 purchase.supplierInvoiceNumber || (purchase.purchaseNumber ? `INV-${purchase.purchaseNumber}` : "")
             );
+=======
+
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
             setNotes("");
             setError("");
         }
@@ -64,13 +72,19 @@ function PurchaseActionModal({
                 return;
             }
 
+<<<<<<< HEAD
             const invoiceNo = supplierInvoiceNumber.trim() || `INV-${purchase.purchaseNumber || Date.now()}`;
 
+=======
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
             await onSubmit({
                 receivedQuantity: Number(
                     receivedQuantity
                 ),
+<<<<<<< HEAD
                 supplierInvoiceNumber: invoiceNo,
+=======
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                 notes: notes.trim() || null,
             });
         } else {
@@ -144,6 +158,7 @@ function PurchaseActionModal({
                     </div>
 
                     {receiving && (
+<<<<<<< HEAD
                         <>
                             <div className="supplier-form-group">
                                 <label>Received Quantity *</label>
@@ -178,6 +193,24 @@ function PurchaseActionModal({
                                 />
                             </div>
                         </>
+=======
+                        <div className="supplier-form-group">
+                            <label>Received Quantity *</label>
+
+                            <input
+                                type="number"
+                                min="1"
+                                max={purchase.orderedQuantity}
+                                value={receivedQuantity}
+                                onChange={(event) => {
+                                    setReceivedQuantity(
+                                        event.target.value
+                                    );
+                                    setError("");
+                                }}
+                            />
+                        </div>
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                     )}
 
                     <div className="supplier-form-group purchase-notes">

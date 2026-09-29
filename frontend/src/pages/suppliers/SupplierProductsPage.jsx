@@ -152,12 +152,19 @@ function SupplierProductsPage() {
             setSaving(true);
             setError("");
 
+<<<<<<< HEAD
             const currentAssignmentId = getAssignmentId(editingAssignment);
 
             if (currentAssignmentId) {
                 await updateSupplierProduct(
                     supplierId,
                     currentAssignmentId,
+=======
+            if (editingAssignment?.id) {
+                await updateSupplierProduct(
+                    supplierId,
+                    editingAssignment.id,
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                     request
                 );
 
@@ -202,15 +209,24 @@ function SupplierProductsPage() {
 
         if (!confirmed) return;
 
+<<<<<<< HEAD
         const targetId = getAssignmentId(assignment);
 
         try {
             setActionId(targetId);
+=======
+        try {
+            setActionId(assignment.id);
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
             setError("");
 
             await markPreferredSupplier(
                 supplierId,
+<<<<<<< HEAD
                 targetId
+=======
+                assignment.id
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
             );
 
             setSuccess(
@@ -235,15 +251,24 @@ function SupplierProductsPage() {
 
         if (!confirmed) return;
 
+<<<<<<< HEAD
         const targetId = getAssignmentId(assignment);
 
         try {
             setActionId(targetId);
+=======
+        try {
+            setActionId(assignment.id);
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
             setError("");
 
             await removeSupplierProduct(
                 supplierId,
+<<<<<<< HEAD
                 targetId
+=======
+                assignment.id
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
             );
 
             setSuccess(
@@ -420,7 +445,11 @@ function SupplierProductsPage() {
                             <tbody>
                             {filteredAssignments.map(
                                 (assignment) => (
+<<<<<<< HEAD
                                     <tr key={getAssignmentId(assignment)}>
+=======
+                                    <tr key={assignment.id}>
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                                         <td>
                         <span className="supplier-code">
                           {getPartNumber(assignment)}
@@ -464,7 +493,11 @@ function SupplierProductsPage() {
                                                     type="button"
                                                     className="set-preferred-button"
                                                     disabled={
+<<<<<<< HEAD
                                                         actionId === getAssignmentId(assignment)
+=======
+                                                        actionId === assignment.id
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                                                     }
                                                     onClick={() =>
                                                         handlePreferred(assignment)
@@ -560,6 +593,7 @@ function getSupplierName(supplier) {
     );
 }
 
+<<<<<<< HEAD
 function getAssignmentId(assignment) {
     return (
         assignment?.id ??
@@ -569,6 +603,8 @@ function getAssignmentId(assignment) {
     );
 }
 
+=======
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
 function getProductId(assignment) {
     return (
         assignment?.sparePartId ??
@@ -629,4 +665,8 @@ function formatCurrency(value) {
     }).format(Number(value || 0));
 }
 
+<<<<<<< HEAD
 export default SupplierProductsPage;
+=======
+export default SupplierProductsPage;
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99

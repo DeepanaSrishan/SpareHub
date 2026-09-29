@@ -38,7 +38,11 @@ function SupplierPurchaseModal({
         () =>
             supplierProducts.find(
                 (item) =>
+<<<<<<< HEAD
                     Number(item.supplierProductId ?? item.id) ===
+=======
+                    Number(item.id) ===
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                     Number(form.supplierProductId)
             ),
         [supplierProducts, form.supplierProductId]
@@ -106,6 +110,7 @@ function SupplierPurchaseModal({
         if (!validate()) return;
 
         await onSubmit({
+<<<<<<< HEAD
             supplierId: Number(form.supplierId),
             supplierProductId: Number(
                 form.supplierProductId
@@ -113,6 +118,11 @@ function SupplierPurchaseModal({
             quantity: Number(
                 form.orderedQuantity
             ),
+=======
+            supplierProductId: Number(
+                form.supplierProductId
+            ),
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
             orderedQuantity: Number(
                 form.orderedQuantity
             ),
@@ -202,6 +212,7 @@ function SupplierPurchaseModal({
                                         : "Select product"}
                                 </option>
 
+<<<<<<< HEAD
                                 {supplierProducts.map((item) => {
                                     const spId = item.supplierProductId ?? item.id;
                                     return (
@@ -218,6 +229,21 @@ function SupplierPurchaseModal({
                                         </option>
                                     );
                                 })}
+=======
+                                {supplierProducts.map((item) => (
+                                    <option
+                                        key={item.id}
+                                        value={item.id}
+                                    >
+                                        {getPartNumber(item)} -{" "}
+                                        {getProductName(item)} (
+                                        {formatCurrency(
+                                            getPurchasePrice(item)
+                                        )}
+                                        )
+                                    </option>
+                                ))}
+>>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                             </select>
                         </FormGroup>
 
