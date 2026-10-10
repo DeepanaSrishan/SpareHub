@@ -3,13 +3,8 @@ package com.sparehub.controller.supplier;
 
 
 import com.sparehub.dto.response.ApiResponse;
-<<<<<<< HEAD
 import com.sparehub.dto.response.supplier.SupplierPerformanceRankingResponse;
 import com.sparehub.dto.response.supplier.SupplierPerformanceResponse;
-=======
-import com.sparehub.dto.response.SupplierPerformanceRankingResponse;
-import com.sparehub.dto.response.SupplierPerformanceResponse;
->>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
 import com.sparehub.service.supplier.SupplierPerformanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,11 +17,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/manager/suppliers")
 @RequiredArgsConstructor
-<<<<<<< HEAD
 @PreAuthorize("hasAnyRole('MANAGER', 'INVENTORY_STAFF')")
-=======
-@PreAuthorize("hasRole('MANAGER')")
->>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
 public class SupplierPerformanceController {
 
     private final SupplierPerformanceService

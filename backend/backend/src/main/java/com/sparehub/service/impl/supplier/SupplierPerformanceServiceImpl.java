@@ -2,13 +2,8 @@ package com.sparehub.service.impl.supplier;
 
 
 
-<<<<<<< HEAD
 import com.sparehub.dto.response.supplier.SupplierPerformanceRankingResponse;
 import com.sparehub.dto.response.supplier.SupplierPerformanceResponse;
-=======
-import com.sparehub.dto.response.SupplierPerformanceRankingResponse;
-import com.sparehub.dto.response.SupplierPerformanceResponse;
->>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
 import com.sparehub.entity.supplier.PurchaseStatus;
 import com.sparehub.entity.supplier.Supplier;
 import com.sparehub.entity.supplier.SupplierPerformanceRating;
@@ -204,11 +199,7 @@ public class SupplierPerformanceServiceImpl
         return new SupplierPerformanceResponse(
                 supplier.getId(),
                 supplier.getSupplierCode(),
-<<<<<<< HEAD
                 supplier.getContactPerson(),
-=======
-                supplier.getName(),
->>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                 supplier.getCompanyName(),
 
                 startDate,

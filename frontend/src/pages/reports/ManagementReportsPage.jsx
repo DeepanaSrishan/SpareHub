@@ -977,8 +977,4 @@ function formatCellValue(column, value) {
     return String(value);
 }
 
-<<<<<<< HEAD
 export default ManagementReportsPage;
-=======
-export default ManagementReportsPage;
->>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99

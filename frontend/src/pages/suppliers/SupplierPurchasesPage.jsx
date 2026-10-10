@@ -175,17 +175,11 @@ function SupplierPurchasesPage() {
             setSaving(true);
             setError("");
 
-<<<<<<< HEAD
             const pId = purchase?.purchaseId ?? purchase?.id;
 
             if (action.mode === "receive") {
                 await receiveSupplierPurchase(
                     pId,
-=======
-            if (action.mode === "receive") {
-                await receiveSupplierPurchase(
-                    purchase.id,
->>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                     request
                 );
 
@@ -194,11 +188,7 @@ function SupplierPurchasesPage() {
                 );
             } else {
                 await cancelSupplierPurchase(
-<<<<<<< HEAD
                     pId,
-=======
-                    purchase.id,
->>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                     request
                 );
 
@@ -454,15 +444,10 @@ function SupplierPurchasesPage() {
                                             purchase.status
                                         );
 
-<<<<<<< HEAD
                                     const pKey = purchase?.purchaseId ?? purchase?.id ?? purchase?.purchaseNumber;
 
                                     return (
                                         <tr key={pKey}>
-=======
-                                    return (
-                                        <tr key={purchase.id}>
->>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
                                             <td>
                           <span className="supplier-code">
                             {purchase.purchaseNumber}
@@ -623,20 +608,12 @@ function Message({ type, message, onClose }) {
 }
 
 function StatusBadge({ status }) {
-<<<<<<< HEAD
     const s = normalizeStatus(status);
     return (
         <span
             className={`purchase-status ${s.toLowerCase()}`}
         >
       {s}
-=======
-    return (
-        <span
-            className={`purchase-status ${status.toLowerCase()}`}
-        >
-      {status}
->>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
     </span>
     );
 }
@@ -656,10 +633,7 @@ function getSupplierName(supplier) {
 
 function getPurchaseSupplierName(purchase) {
     return (
-<<<<<<< HEAD
         purchase?.supplierCompanyName ||
-=======
->>>>>>> af34a2e48a082232e60f2d1309ac7472f906ec99
         purchase?.supplierName ||
         purchase?.supplier?.name ||
         purchase?.supplier?.supplierName ||
