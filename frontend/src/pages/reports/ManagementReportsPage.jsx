@@ -6,14 +6,26 @@ import {
 } from "react";
 
 import {
+    AlertTriangle,
+    Award,
     Boxes,
+    Calendar,
+    CheckCircle2,
     ClipboardList,
+    Clock,
     CreditCard,
+    DollarSign,
     Download,
     FileBarChart,
+    FileSpreadsheet,
+    FileText,
+    Filter,
+    PackageCheck,
     PackageSearch,
+    Printer,
     RefreshCw,
-    ShoppingCart,
+    Search,
+    ShoppingBag,
     TrendingUp,
     Truck,
     X,
@@ -31,11 +43,10 @@ import { getActiveSpareParts } from "../../api/supplierProductApi";
 import "../../styles/ManagementReportsPage.css";
 
 const today = new Date().toISOString().split("T")[0];
-
 const yearStart = `${new Date().getFullYear()}-01-01`;
 
 const initialFilters = {
-    reportType: "SALES",
+    reportType: "SUPPLIER_PERFORMANCE",
     startDate: yearStart,
     endDate: today,
     productId: "",
@@ -45,63 +56,89 @@ const initialFilters = {
     paymentStatus: "",
 };
 
-const reportTypes = [
-    { value: "SALES", label: "Sales Report" },
-    { value: "ORDERS", label: "Order Report" },
+const reportCatalog = [
+    {
+        value: "SUPPLIER_PERFORMANCE",
+        title: "Supplier Performance Report",
+        description: "Vendor scorecards, ranking, order fulfillment rates, and on-time delivery audits.",
+        icon: Award,
+        badge: "Epic 4 Core",
+    },
+    {
+        value: "PROCUREMENT",
+        title: "Procurement & Purchase Report",
+        description: "Purchase order logs, supplier-wise & part-wise procurement, received vs pending volumes.",
+        icon: ShoppingBag,
+        badge: "Epic 4 Core",
+    },
     {
         value: "INVENTORY",
-        label: "Inventory Report",
+        title: "Inventory Stock Valuation Report",
+        description: "Comprehensive stock on hand, low-stock alerts, out-of-stock items, and valuation.",
+        icon: Boxes,
+        badge: "Epic 4 Core",
     },
     {
-        value: "SUPPLIERS",
-        label: "Supplier Report",
-    },
-    {
-        value: "PAYMENTS",
-        label: "Payment Report",
+        value: "REORDER_RECOMMENDATIONS",
+        title: "Reorder Recommendation Report",
+        description: "Parts below thresholds, suggested replenishment, lead times, MOQ, and cost estimates.",
+        icon: AlertTriangle,
+        badge: "Epic 4 Core",
     },
     {
         value: "SUPPLIER_TRANSACTIONS",
-        label: "Supplier Transaction Report",
+        title: "Supplier Transaction History",
+        description: "Audit trail of purchase orders, deliveries, status updates, and supplier lifecycle events.",
+        icon: Clock,
+        badge: "Epic 4 Core",
+    },
+    {
+        value: "SALES",
+        title: "Sales Revenue Report",
+        description: "Customer sales orders, revenue totals, profit margins, and inventory movement.",
+        icon: TrendingUp,
+        badge: "Management",
+    },
+    {
+        value: "ORDERS",
+        title: "Customer Orders Report",
+        description: "Customer orders breakdown by status, fulfillment dates, and payment states.",
+        icon: ClipboardList,
+        badge: "Sales Operations",
+    },
+    {
+        value: "PAYMENTS",
+        title: "Financial Payments Report",
+        description: "Customer and gateway payments, transaction IDs, statuses, and revenue collections.",
+        icon: CreditCard,
+        badge: "Finance",
     },
 ];
 
 function ManagementReportsPage() {
-    const [filters, setFilters] =
-        useState(initialFilters);
-
-    const [dashboard, setDashboard] =
-        useState(null);
-
+    const [filters, setFilters] = useState(initialFilters);
+    const [dashboard, setDashboard] = useState(null);
     const [report, setReport] = useState(null);
     const [suppliers, setSuppliers] = useState([]);
     const [products, setProducts] = useState([]);
 
-    const [dashboardLoading, setDashboardLoading] =
-        useState(true);
-
-    const [reportLoading, setReportLoading] =
-        useState(false);
-
-    const [exporting, setExporting] =
-        useState(false);
+    const [dashboardLoading, setDashboardLoading] = useState(true);
+    const [reportLoading, setReportLoading] = useState(false);
+    const [exporting, setExporting] = useState(false);
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
     const loadReferenceData = useCallback(async () => {
         try {
-            const [supplierData, productData] =
-                await Promise.all([
-                    getSuppliers(),
-                    getActiveSpareParts(),
-                ]);
+            const [supplierData, productData] = await Promise.all([
+                getSuppliers(),
+                getActiveSpareParts(),
+            ]);
 
             setSuppliers(supplierData);
             setProducts(productData);
         } catch {
-            // Reference dropdown failures should not stop
-            // dashboard and report functions.
             setSuppliers([]);
             setProducts([]);
         }
@@ -120,10 +157,8 @@ function ManagementReportsPage() {
             setDashboard(data);
         } catch (requestError) {
             setError(
-                getErrorMessage(
-                    requestError,
-                    "Unable to load management dashboard."
-                )
+                requestError.response?.data?.message ||
+                "Unable to load management dashboard."
             );
         } finally {
             setDashboardLoading(false);
@@ -140,22 +175,24 @@ function ManagementReportsPage() {
 
     useEffect(() => {
         if (!success) return undefined;
-
-        const timer = window.setTimeout(
-            () => setSuccess(""),
-            3500
-        );
-
+        const timer = window.setTimeout(() => setSuccess(""), 4000);
         return () => window.clearTimeout(timer);
     }, [success]);
 
     const handleFilterChange = (event) => {
         const { name, value } = event.target;
-
         setFilters((previous) => ({
             ...previous,
             [name]: value,
         }));
+    };
+
+    const handleSelectReportType = (reportType) => {
+        setFilters((prev) => ({
+            ...prev,
+            reportType,
+        }));
+        setReport(null);
     };
 
     const validateDates = () => {
@@ -164,19 +201,14 @@ function ManagementReportsPage() {
             filters.endDate &&
             filters.startDate > filters.endDate
         ) {
-            setError(
-                "Start date cannot be after end date."
-            );
-
+            setError("Start date cannot be after end date.");
             return false;
         }
-
         return true;
     };
 
     const handleGenerateReport = async (event) => {
-        event.preventDefault();
-
+        if (event) event.preventDefault();
         if (!validateDates()) return;
 
         try {
@@ -187,37 +219,26 @@ function ManagementReportsPage() {
                 reportType: filters.reportType,
                 startDate: filters.startDate || null,
                 endDate: filters.endDate || null,
-                productId: filters.productId
-                    ? Number(filters.productId)
-                    : null,
-                supplierId: filters.supplierId
-                    ? Number(filters.supplierId)
-                    : null,
-                transactionType:
-                    filters.transactionType || null,
-                orderStatus:
-                    filters.orderStatus || null,
-                paymentStatus:
-                    filters.paymentStatus || null,
+                productId: filters.productId ? Number(filters.productId) : null,
+                supplierId: filters.supplierId ? Number(filters.supplierId) : null,
+                transactionType: filters.transactionType || null,
+                orderStatus: filters.orderStatus || null,
+                paymentStatus: filters.paymentStatus || null,
             });
 
             setReport(data);
-            setSuccess(
-                "Management report generated successfully."
-            );
+            setSuccess(`${getCurrentReportMeta()?.title || "Report"} generated successfully.`);
         } catch (requestError) {
             setError(
-                getErrorMessage(
-                    requestError,
-                    "Unable to generate report."
-                )
+                requestError.response?.data?.message ||
+                "Unable to generate report from database records."
             );
         } finally {
             setReportLoading(false);
         }
     };
 
-    const handleExport = async () => {
+    const handleExportCsv = async () => {
         if (!validateDates()) return;
 
         try {
@@ -230,25 +251,24 @@ function ManagementReportsPage() {
                 endDate: filters.endDate,
                 productId: filters.productId,
                 supplierId: filters.supplierId,
-                transactionType:
-                filters.transactionType,
+                transactionType: filters.transactionType,
                 orderStatus: filters.orderStatus,
                 paymentStatus: filters.paymentStatus,
             });
 
-            setSuccess(
-                "CSV report downloaded successfully."
-            );
+            setSuccess("CSV/Excel report file downloaded successfully.");
         } catch (requestError) {
             setError(
-                getErrorMessage(
-                    requestError,
-                    "Unable to export CSV report."
-                )
+                requestError.response?.data?.message ||
+                "Unable to export CSV report."
             );
         } finally {
             setExporting(false);
         }
+    };
+
+    const handlePrintPdf = () => {
+        window.print();
     };
 
     const resetFilters = () => {
@@ -257,49 +277,101 @@ function ManagementReportsPage() {
         setError("");
     };
 
-    const reportRecords = useMemo(
-        () => report?.records ?? [],
-        [report]
-    );
+    const getCurrentReportMeta = () => {
+        return reportCatalog.find((r) => r.value === filters.reportType) || reportCatalog[0];
+    };
+
+    const reportRecords = useMemo(() => report?.records ?? [], [report]);
 
     const tableColumns = useMemo(() => {
-        if (reportRecords.length === 0) {
-            return [];
-        }
-
+        if (reportRecords.length === 0) return [];
         return Object.keys(reportRecords[0]);
     }, [reportRecords]);
 
-    const showProductFilter =
-        filters.reportType === "INVENTORY" ||
-        filters.reportType === "SALES";
+    // Show/hide contextual filters based on active report
+    const showProductFilter = [
+        "INVENTORY",
+        "PROCUREMENT",
+        "REORDER_RECOMMENDATIONS",
+        "SALES",
+    ].includes(filters.reportType);
 
-    const showSupplierFilter =
-        filters.reportType === "SUPPLIERS" ||
-        filters.reportType ===
-        "SUPPLIER_TRANSACTIONS";
+    const showSupplierFilter = [
+        "SUPPLIER_PERFORMANCE",
+        "PROCUREMENT",
+        "REORDER_RECOMMENDATIONS",
+        "SUPPLIER_TRANSACTIONS",
+        "SUPPLIERS",
+    ].includes(filters.reportType);
 
-    const showTransactionType =
-        filters.reportType ===
-        "SUPPLIER_TRANSACTIONS";
+    const showOrderStatusFilter = [
+        "PROCUREMENT",
+        "ORDERS",
+    ].includes(filters.reportType);
 
-    const showOrderStatus =
-        filters.reportType === "ORDERS";
+    const showTransactionType = filters.reportType === "SUPPLIER_TRANSACTIONS";
+    const showPaymentStatus = filters.reportType === "PAYMENTS";
 
-    const showPaymentStatus =
-        filters.reportType === "PAYMENTS";
+    const formatCurrency = (val) => {
+        return new Intl.NumberFormat("en-LK", {
+            style: "currency",
+            currency: "LKR",
+            maximumFractionDigits: 0,
+        }).format(Number(val || 0));
+    };
+
+    const formatHeader = (key) => {
+        return key
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase())
+            .replace(/_/g, " ");
+    };
+
+    const formatCellValue = (key, value) => {
+        if (value === null || value === undefined) return "—";
+
+        // Boolean status
+        if (typeof value === "boolean") {
+            return value ? "Active" : "Inactive";
+        }
+
+        // Amount / currency columns
+        const isAmountColumn = [
+            "totalAmount",
+            "unitPrice",
+            "price",
+            "estimatedCost",
+            "totalProcurementValue",
+            "grossSales",
+            "netSales",
+            "amount",
+        ].includes(key);
+
+        if (isAmountColumn && !isNaN(Number(value))) {
+            return formatCurrency(value);
+        }
+
+        // Dates
+        if (key.toLowerCase().includes("date") || key.toLowerCase().includes("at")) {
+            if (typeof value === "string" && value.length >= 10) {
+                return value.includes("T") ? new Date(value).toLocaleDateString() : value;
+            }
+        }
+
+        return String(value);
+    };
+
+    const currentMeta = getCurrentReportMeta();
 
     return (
         <main className="management-reports-page">
+            {/* Header Banner */}
             <section className="management-hero">
                 <div>
                     <span>MANAGEMENT CONTROL CENTER</span>
-
-                    <h1>Dashboard & Reports</h1>
-
+                    <h1>Reports & Business Analytics</h1>
                     <p>
-                        Review sales, orders, inventory, payments and
-                        supplier activity.
+                        Real-time procurement audits, vendor performance evaluation, inventory replenishment, and executive reports generated directly from database records.
                     </p>
                 </div>
 
@@ -309,107 +381,226 @@ function ManagementReportsPage() {
             </section>
 
             {error && (
-                <Message
-                    type="error"
-                    message={error}
-                    onClose={() => setError("")}
-                />
+                <div className="report-alert error">
+                    <span>{error}</span>
+                    <button type="button" onClick={() => setError("")}>
+                        <X size={17} />
+                    </button>
+                </div>
             )}
 
             {success && (
-                <Message
-                    type="success"
-                    message={success}
-                    onClose={() => setSuccess("")}
-                />
+                <div className="report-alert success">
+                    <span>{success}</span>
+                    <button type="button" onClick={() => setSuccess("")}>
+                        <X size={17} />
+                    </button>
+                </div>
             )}
 
-            <section className="dashboard-date-filter">
-                <div>
-                    <label>Dashboard Start Date</label>
+            {/* Global Management Dashboard KPI Highlights */}
+            {dashboard && (
+                <section style={{ margin: "24px 0" }}>
+                    <div style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "14px"
+                    }}>
+                        <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700 }}>
+                            Live Enterprise KPIs
+                        </h2>
+                        <span style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.6)" }}>
+                            Period: {filters.startDate} to {filters.endDate}
+                        </span>
+                    </div>
 
-                    <input
-                        type="date"
-                        name="startDate"
-                        value={filters.startDate}
-                        max={filters.endDate || today}
-                        onChange={handleFilterChange}
-                    />
+                    <div className="management-main-metrics" style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                        gap: "16px"
+                    }}>
+                        <article className="management-metric-card" style={{
+                            background: "rgba(12, 22, 18, 0.85)",
+                            border: "1px solid rgba(184, 243, 74, 0.22)",
+                            borderRadius: "16px",
+                            padding: "18px 20px"
+                        }}>
+                            <span style={{ display: "block", fontSize: "12px", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
+                                Active Suppliers
+                            </span>
+                            <strong style={{ fontSize: "28px", color: "var(--primary-lime, #B8F34A)" }}>
+                                {dashboard?.suppliers?.activeSuppliers ?? 0}
+                            </strong>
+                            <small style={{ display: "block", color: "rgba(255,255,255,0.5)", marginTop: "4px" }}>
+                                of {dashboard?.suppliers?.totalSuppliers ?? 0} registered
+                            </small>
+                        </article>
+
+                        <article className="management-metric-card" style={{
+                            background: "rgba(12, 22, 18, 0.85)",
+                            border: "1px solid rgba(184, 243, 74, 0.22)",
+                            borderRadius: "16px",
+                            padding: "18px 20px"
+                        }}>
+                            <span style={{ display: "block", fontSize: "12px", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
+                                Low-Stock Alerts
+                            </span>
+                            <strong style={{ fontSize: "28px", color: "#fbbf24" }}>
+                                {dashboard?.inventory?.lowStockPartsCount ?? 0}
+                            </strong>
+                            <small style={{ display: "block", color: "rgba(255,255,255,0.5)", marginTop: "4px" }}>
+                                {dashboard?.inventory?.outOfStockCount ?? 0} out of stock
+                            </small>
+                        </article>
+
+                        <article className="management-metric-card" style={{
+                            background: "rgba(12, 22, 18, 0.85)",
+                            border: "1px solid rgba(184, 243, 74, 0.22)",
+                            borderRadius: "16px",
+                            padding: "18px 20px"
+                        }}>
+                            <span style={{ display: "block", fontSize: "12px", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
+                                Total Inventory Value
+                            </span>
+                            <strong style={{ fontSize: "24px", color: "#38bdf8" }}>
+                                {formatCurrency(dashboard?.inventory?.totalStockValue ?? 0)}
+                            </strong>
+                            <small style={{ display: "block", color: "rgba(255,255,255,0.5)", marginTop: "4px" }}>
+                                {dashboard?.inventory?.totalPartsCount ?? 0} part items
+                            </small>
+                        </article>
+
+                        <article className="management-metric-card" style={{
+                            background: "rgba(12, 22, 18, 0.85)",
+                            border: "1px solid rgba(184, 243, 74, 0.22)",
+                            borderRadius: "16px",
+                            padding: "18px 20px"
+                        }}>
+                            <span style={{ display: "block", fontSize: "12px", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
+                                Gross Sales Revenue
+                            </span>
+                            <strong style={{ fontSize: "24px", color: "#34d399" }}>
+                                {formatCurrency(dashboard?.sales?.grossSales ?? 0)}
+                            </strong>
+                            <small style={{ display: "block", color: "rgba(255,255,255,0.5)", marginTop: "4px" }}>
+                                {dashboard?.sales?.completedSalesCount ?? 0} completed orders
+                            </small>
+                        </article>
+                    </div>
+                </section>
+            )}
+
+            {/* Interactive Report Selector Cards */}
+            <section style={{ margin: "32px 0 20px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+                    <FileText size={20} color="var(--primary-lime, #B8F34A)" />
+                    <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 800 }}>
+                        Select Report Module
+                    </h2>
                 </div>
 
-                <div>
-                    <label>Dashboard End Date</label>
+                <div className="report-selector-grid">
+                    {reportCatalog.map((item) => {
+                        const Icon = item.icon;
+                        const isSelected = filters.reportType === item.value;
 
-                    <input
-                        type="date"
-                        name="endDate"
-                        value={filters.endDate}
-                        min={filters.startDate}
-                        max={today}
-                        onChange={handleFilterChange}
-                    />
+                        return (
+                            <button
+                                key={item.value}
+                                type="button"
+                                className={`report-selector-card ${isSelected ? "active" : ""}`}
+                                onClick={() => handleSelectReportType(item.value)}
+                            >
+                                <div>
+                                    <div className="report-card-top">
+                                        <div className="report-card-icon">
+                                            <Icon size={20} />
+                                        </div>
+                                        <div>
+                                            <h3>{item.title}</h3>
+                                        </div>
+                                    </div>
+                                    <p>{item.description}</p>
+                                </div>
+
+                                <div style={{ marginTop: "14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <span style={{
+                                        fontSize: "10.5px",
+                                        fontWeight: 800,
+                                        letterSpacing: "0.05em",
+                                        textTransform: "uppercase",
+                                        padding: "2px 8px",
+                                        borderRadius: "999px",
+                                        background: isSelected ? "var(--primary-lime, #B8F34A)" : "rgba(255, 255, 255, 0.08)",
+                                        color: isSelected ? "#071c14" : "rgba(255, 255, 255, 0.6)"
+                                    }}>
+                                        {item.badge}
+                                    </span>
+
+                                    {isSelected && (
+                                        <span style={{ fontSize: "12px", color: "var(--primary-lime, #B8F34A)", fontWeight: 700 }}>
+                                            Selected ✓
+                                        </span>
+                                    )}
+                                </div>
+                            </button>
+                        );
+                    })}
                 </div>
-
-                <button
-                    type="button"
-                    className="report-button secondary"
-                    onClick={loadDashboard}
-                    disabled={dashboardLoading}
-                >
-                    <RefreshCw
-                        size={17}
-                        className={
-                            dashboardLoading ? "spin" : ""
-                        }
-                    />
-                    Refresh Dashboard
-                </button>
             </section>
 
-            {dashboardLoading ? (
-                <section className="report-loading-card">
-                    <RefreshCw size={36} className="spin" />
-                    <h3>Loading dashboard...</h3>
-                </section>
-            ) : (
-                <DashboardSummary dashboard={dashboard} />
-            )}
-
-            <section className="report-builder-card">
-                <div className="report-section-heading">
+            {/* Report Configuration & Filters Bar */}
+            <section className="report-filter-card" style={{
+                background: "rgba(12, 22, 18, 0.85)",
+                border: "1px solid rgba(184, 243, 74, 0.22)",
+                borderRadius: "20px",
+                padding: "24px",
+                marginBottom: "28px"
+            }}>
+                <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: "12px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                    paddingBottom: "14px",
+                    marginBottom: "18px"
+                }}>
                     <div>
-                        <h2>Generate Management Report</h2>
-                        <p>
-                            Select a report type and apply the required
-                            filters.
+                        <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 750, color: "#fff" }}>
+                            Filter Criteria: {currentMeta.title}
+                        </h3>
+                        <p style={{ margin: "4px 0 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.6)" }}>
+                            Filter records by date ranges, vendors, catalog parts, and order statuses.
                         </p>
                     </div>
 
-                    <FileBarChart size={28} />
+                    <div style={{ display: "flex", gap: "10px" }}>
+                        <button
+                            type="button"
+                            className="report-button secondary"
+                            onClick={resetFilters}
+                        >
+                            Reset Filters
+                        </button>
+
+                        <button
+                            type="button"
+                            className="report-button primary"
+                            onClick={handleGenerateReport}
+                            disabled={reportLoading}
+                        >
+                            <RefreshCw size={16} className={reportLoading ? "spin" : ""} />
+                            {reportLoading ? "Generating..." : "Generate Report"}
+                        </button>
+                    </div>
                 </div>
 
-                <form
-                    className="report-filter-grid"
-                    onSubmit={handleGenerateReport}
-                >
-                    <FilterGroup label="Report Type">
-                        <select
-                            name="reportType"
-                            value={filters.reportType}
-                            onChange={handleFilterChange}
-                        >
-                            {reportTypes.map((type) => (
-                                <option
-                                    key={type.value}
-                                    value={type.value}
-                                >
-                                    {type.label}
-                                </option>
-                            ))}
-                        </select>
-                    </FilterGroup>
-
-                    <FilterGroup label="Start Date">
+                <form className="report-filter-grid" onSubmit={handleGenerateReport}>
+                    <div className="report-filter-group">
+                        <label>Date Range (From)</label>
                         <input
                             type="date"
                             name="startDate"
@@ -417,9 +608,10 @@ function ManagementReportsPage() {
                             max={filters.endDate || today}
                             onChange={handleFilterChange}
                         />
-                    </FilterGroup>
+                    </div>
 
-                    <FilterGroup label="End Date">
+                    <div className="report-filter-group">
+                        <label>Date Range (To)</label>
                         <input
                             type="date"
                             name="endDate"
@@ -428,251 +620,263 @@ function ManagementReportsPage() {
                             max={today}
                             onChange={handleFilterChange}
                         />
-                    </FilterGroup>
-
-                    {showProductFilter && (
-                        <FilterGroup label="Product">
-                            <select
-                                name="productId"
-                                value={filters.productId}
-                                onChange={handleFilterChange}
-                            >
-                                <option value="">All Products</option>
-
-                                {products.map((product) => (
-                                    <option
-                                        key={product.id}
-                                        value={product.id}
-                                    >
-                                        {product.partNumber} -{" "}
-                                        {product.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </FilterGroup>
-                    )}
+                    </div>
 
                     {showSupplierFilter && (
-                        <FilterGroup label="Supplier">
+                        <div className="report-filter-group">
+                            <label>Supplier / Vendor</label>
                             <select
                                 name="supplierId"
                                 value={filters.supplierId}
                                 onChange={handleFilterChange}
                             >
-                                <option value="">
-                                    All Suppliers
-                                </option>
-
-                                {suppliers.map((supplier) => (
-                                    <option
-                                        key={supplier.id}
-                                        value={supplier.id}
-                                    >
-                                        {supplier.supplierCode} -{" "}
-                                        {getSupplierName(supplier)}
+                                <option value="">All Suppliers ({suppliers.length})</option>
+                                {suppliers.map((s) => (
+                                    <option key={s.id} value={s.id}>
+                                        {s.supplierCode} - {s.companyName || s.name}
                                     </option>
                                 ))}
                             </select>
-                        </FilterGroup>
+                        </div>
                     )}
 
-                    {showTransactionType && (
-                        <FilterGroup label="Transaction Type">
+                    {showProductFilter && (
+                        <div className="report-filter-group">
+                            <label>Spare Part / SKU</label>
                             <select
-                                name="transactionType"
-                                value={filters.transactionType}
+                                name="productId"
+                                value={filters.productId}
                                 onChange={handleFilterChange}
                             >
-                                <option value="">All Types</option>
-                                <option value="PURCHASE_CREATED">
-                                    Purchase Created
-                                </option>
-                                <option value="PURCHASE_RECEIVED">
-                                    Purchase Received
-                                </option>
-                                <option value="PURCHASE_CANCELLED">
-                                    Purchase Cancelled
-                                </option>
-                                <option value="PRICE_UPDATED">
-                                    Price Updated
-                                </option>
-                                <option value="SUPPLIER_ACTIVATED">
-                                    Supplier Activated
-                                </option>
-                                <option value="SUPPLIER_DEACTIVATED">
-                                    Supplier Deactivated
-                                </option>
+                                <option value="">All Spare Parts ({products.length})</option>
+                                {products.map((p) => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.partNumber} - {p.name}
+                                    </option>
+                                ))}
                             </select>
-                        </FilterGroup>
+                        </div>
                     )}
 
-                    {showOrderStatus && (
-                        <FilterGroup label="Order Status">
+                    {showOrderStatusFilter && (
+                        <div className="report-filter-group">
+                            <label>Order Status</label>
                             <select
                                 name="orderStatus"
                                 value={filters.orderStatus}
                                 onChange={handleFilterChange}
                             >
-                                <option value="">
-                                    All Statuses
-                                </option>
-                                <option value="PENDING">
-                                    Pending
-                                </option>
-                                <option value="CONFIRMED">
-                                    Confirmed
-                                </option>
-                                <option value="COMPLETED">
-                                    Completed
-                                </option>
-                                <option value="CANCELLED">
-                                    Cancelled
-                                </option>
+                                <option value="">All Order Statuses</option>
+                                <option value="ORDERED">Ordered (Pending Delivery)</option>
+                                <option value="RECEIVED">Received (Completed)</option>
+                                <option value="CANCELLED">Cancelled</option>
                             </select>
-                        </FilterGroup>
+                        </div>
+                    )}
+
+                    {showTransactionType && (
+                        <div className="report-filter-group">
+                            <label>Transaction Type</label>
+                            <select
+                                name="transactionType"
+                                value={filters.transactionType}
+                                onChange={handleFilterChange}
+                            >
+                                <option value="">All Transaction Types</option>
+                                <option value="PURCHASE_CREATED">Purchase Created</option>
+                                <option value="PURCHASE_RECEIVED">Purchase Received</option>
+                                <option value="PURCHASE_CANCELLED">Purchase Cancelled</option>
+                                <option value="PRICE_UPDATED">Price Updated</option>
+                                <option value="SUPPLIER_ACTIVATED">Supplier Activated</option>
+                                <option value="SUPPLIER_DEACTIVATED">Supplier Deactivated</option>
+                                <option value="SUPPLIER_SUSPENDED">Supplier Suspended</option>
+                            </select>
+                        </div>
                     )}
 
                     {showPaymentStatus && (
-                        <FilterGroup label="Payment Status">
+                        <div className="report-filter-group">
+                            <label>Payment Status</label>
                             <select
                                 name="paymentStatus"
                                 value={filters.paymentStatus}
                                 onChange={handleFilterChange}
                             >
-                                <option value="">
-                                    All Statuses
-                                </option>
-                                <option value="PENDING">
-                                    Pending
-                                </option>
-                                <option value="COMPLETED">
-                                    Completed
-                                </option>
-                                <option value="FAILED">
-                                    Failed
-                                </option>
-                                <option value="REFUNDED">
-                                    Refunded
-                                </option>
+                                <option value="">All Payment Statuses</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="FAILED">Failed</option>
+                                <option value="REFUNDED">Refunded</option>
                             </select>
-                        </FilterGroup>
+                        </div>
                     )}
-
-                    <div className="report-filter-actions">
-                        <button
-                            type="button"
-                            className="report-button secondary"
-                            onClick={resetFilters}
-                        >
-                            Reset
-                        </button>
-
-                        <button
-                            type="submit"
-                            className="report-button primary"
-                            disabled={reportLoading}
-                        >
-                            <FileBarChart size={17} />
-
-                            {reportLoading
-                                ? "Generating..."
-                                : "Generate Report"}
-                        </button>
-
-                        <button
-                            type="button"
-                            className="report-button export"
-                            onClick={handleExport}
-                            disabled={exporting}
-                        >
-                            <Download size={17} />
-
-                            {exporting
-                                ? "Downloading..."
-                                : "Export CSV"}
-                        </button>
-                    </div>
                 </form>
             </section>
 
+            {/* Generated Report Output Section */}
             {report && (
                 <section className="generated-report-card">
-                    <div className="report-section-heading">
-                        <div>
-                            <h2>
-                                {formatLabel(report.reportType)} Report
-                            </h2>
-
-                            <p>
-                                {report.startDate} to {report.endDate}
-                            </p>
-                        </div>
-
-                        <div className="report-result-summary">
-              <span>
-                Records:{" "}
-                  <strong>
-                  {report.totalRecords ?? 0}
-                </strong>
-              </span>
-
-                            <span>
-                Total:{" "}
-                                <strong>
-                  {formatCurrency(
-                      report.totalAmount
-                  )}
-                </strong>
-              </span>
+                    {/* Printable PDF Header (Visible during print / PDF generation) */}
+                    <div className="report-print-header" style={{ display: "none" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <div>
+                                <h1>SPAREHUB ENTERPRISE</h1>
+                                <p style={{ fontWeight: "bold", fontSize: "14px" }}>
+                                    Automotive Spare Parts & Supply Chain Management
+                                </p>
+                                <p>Report Title: <strong>{currentMeta.title}</strong></p>
+                            </div>
+                            <div style={{ textAlign: "right" }}>
+                                <p>Generated On: <strong>{new Date().toLocaleString()}</strong></p>
+                                <p>Filter Window: {filters.startDate || "All"} to {filters.endDate || "All"}</p>
+                            </div>
                         </div>
                     </div>
 
-                    {reportLoading ? (
-                        <div className="report-loading-card">
-                            <RefreshCw
-                                size={32}
-                                className="spin"
-                            />
-                        </div>
-                    ) : reportRecords.length === 0 ? (
-                        <div className="report-empty-state">
-                            <FileBarChart size={43} />
-                            <h3>No report records found</h3>
+                    {/* Interactive Report Header */}
+                    <div className="report-section-heading">
+                        <div>
+                            <span className="supplier-eyebrow">ACTIVE REPORT PREVIEW</span>
+                            <h2>{currentMeta.title}</h2>
                             <p>
-                                Change the selected filters and generate
-                                the report again.
+                                Results compiled from actual database records • Window: {filters.startDate} to {filters.endDate}
+                            </p>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                            <button
+                                type="button"
+                                className="report-button export"
+                                onClick={handleExportCsv}
+                                disabled={exporting || reportRecords.length === 0}
+                                title="Download as CSV spreadsheet"
+                            >
+                                <FileSpreadsheet size={16} />
+                                <span>{exporting ? "Exporting..." : "Export Excel/CSV"}</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                className="report-button"
+                                onClick={handlePrintPdf}
+                                disabled={reportRecords.length === 0}
+                                style={{
+                                    background: "rgba(56, 189, 248, 0.15)",
+                                    borderColor: "rgba(56, 189, 248, 0.35)",
+                                    color: "#38bdf8"
+                                }}
+                                title="Print or save as professional PDF"
+                            >
+                                <Printer size={16} />
+                                <span>Print / Save PDF</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Summary KPI Strip */}
+                    <div className="report-summary-bar" style={{
+                        display: "flex",
+                        gap: "24px",
+                        flexWrap: "wrap",
+                        padding: "16px 20px",
+                        background: "rgba(0, 0, 0, 0.25)",
+                        borderRadius: "12px",
+                        margin: "18px 0"
+                    }}>
+                        <div>
+                            <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
+                                Matching Records
+                            </span>
+                            <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "#fff" }}>
+                                {reportRecords.length}
+                            </div>
+                        </div>
+
+                        {report.totalAmount !== null && report.totalAmount !== undefined && (
+                            <div>
+                                <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
+                                    Total Value / Procurement Investment
+                                </span>
+                                <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--primary-lime, #B8F34A)" }}>
+                                    {formatCurrency(report.totalAmount)}
+                                </div>
+                            </div>
+                        )}
+
+                        <div>
+                            <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
+                                Generation Timestamp
+                            </span>
+                            <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "rgba(255,255,255,0.8)" }}>
+                                {report.generatedAt ? new Date(report.generatedAt).toLocaleTimeString() : new Date().toLocaleTimeString()}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Records Table or Empty State */}
+                    {reportRecords.length === 0 ? (
+                        <div className="report-empty-state" style={{ padding: "48px 24px", textAlign: "center" }}>
+                            <PackageCheck size={50} color="var(--primary-lime, #B8F34A)" />
+                            <h3 style={{ margin: "16px 0 6px" }}>No matching records found</h3>
+                            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px" }}>
+                                No database records matched the selected date window and filter parameters. Try expanding the date range.
                             </p>
                         </div>
                     ) : (
-                        <div className="report-table-wrapper">
+                        <div className="report-table-wrapper" style={{ overflowX: "auto" }}>
                             <table className="report-table">
                                 <thead>
-                                <tr>
-                                    {tableColumns.map((column) => (
-                                        <th key={column}>
-                                            {formatLabel(column)}
-                                        </th>
-                                    ))}
-                                </tr>
+                                    <tr>
+                                        {tableColumns.map((col) => (
+                                            <th key={col}>{formatHeader(col)}</th>
+                                        ))}
+                                    </tr>
                                 </thead>
-
                                 <tbody>
-                                {reportRecords.map(
-                                    (record, rowIndex) => (
+                                    {reportRecords.map((row, rowIndex) => (
                                         <tr key={rowIndex}>
-                                            {tableColumns.map(
-                                                (column) => (
-                                                    <td key={column}>
-                                                        {formatCellValue(
-                                                            column,
-                                                            record[column]
+                                            {tableColumns.map((col) => {
+                                                const rawVal = row[col];
+                                                const formatted = formatCellValue(col, rawVal);
+
+                                                // Colorize status tags
+                                                const isStatusCol = col.toLowerCase() === "status" || col.toLowerCase() === "urgency" || col.toLowerCase() === "rating";
+
+                                                return (
+                                                    <td key={col}>
+                                                        {isStatusCol ? (
+                                                            <span style={{
+                                                                padding: "3px 8px",
+                                                                borderRadius: "999px",
+                                                                fontSize: "11px",
+                                                                fontWeight: 750,
+                                                                background:
+                                                                    String(rawVal).includes("ACTIVE") || String(rawVal).includes("RECEIVED") || String(rawVal).includes("COMPLETED") || String(rawVal).includes("EXCELLENT")
+                                                                        ? "rgba(52, 211, 153, 0.15)"
+                                                                        : String(rawVal).includes("CRITICAL") || String(rawVal).includes("CANCELLED")
+                                                                            ? "rgba(239, 68, 68, 0.15)"
+                                                                            : String(rawVal).includes("SUSPENDED") || String(rawVal).includes("LOW")
+                                                                                ? "rgba(249, 115, 22, 0.15)"
+                                                                                : "rgba(56, 189, 248, 0.15)",
+                                                                color:
+                                                                    String(rawVal).includes("ACTIVE") || String(rawVal).includes("RECEIVED") || String(rawVal).includes("COMPLETED") || String(rawVal).includes("EXCELLENT")
+                                                                        ? "#34d399"
+                                                                        : String(rawVal).includes("CRITICAL") || String(rawVal).includes("CANCELLED")
+                                                                            ? "#f87171"
+                                                                            : String(rawVal).includes("SUSPENDED") || String(rawVal).includes("LOW")
+                                                                                ? "#f97316"
+                                                                                : "#38bdf8",
+                                                            }}>
+                                                                {formatted}
+                                                            </span>
+                                                        ) : (
+                                                            formatted
                                                         )}
                                                     </td>
-                                                )
-                                            )}
+                                                );
+                                            })}
                                         </tr>
-                                    )
-                                )}
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
@@ -681,300 +885,6 @@ function ManagementReportsPage() {
             )}
         </main>
     );
-}
-
-function DashboardSummary({ dashboard }) {
-    const sales = dashboard?.sales ?? {};
-    const orders = dashboard?.orders ?? {};
-    const inventory = dashboard?.inventory ?? {};
-    const suppliers = dashboard?.suppliers ?? {};
-    const payments = dashboard?.payments ?? {};
-
-    return (
-        <>
-            <section className="management-main-metrics">
-                <DashboardMetric
-                    title="Net Sales"
-                    value={formatCurrency(sales.netSales)}
-                    subtitle={`${sales.completedSales ?? 0} completed sales`}
-                    icon={<TrendingUp size={24} />}
-                    type="green"
-                />
-
-                <DashboardMetric
-                    title="Total Orders"
-                    value={orders.totalOrders ?? 0}
-                    subtitle={`${orders.pendingOrders ?? 0} pending orders`}
-                    icon={<ShoppingCart size={24} />}
-                    type="blue"
-                />
-
-                <DashboardMetric
-                    title="Products"
-                    value={inventory.totalProducts ?? 0}
-                    subtitle={`${inventory.lowStockProducts ?? 0} low-stock products`}
-                    icon={<Boxes size={24} />}
-                    type="amber"
-                />
-
-                <DashboardMetric
-                    title="Suppliers"
-                    value={suppliers.totalSuppliers ?? 0}
-                    subtitle={`${suppliers.activeSuppliers ?? 0} active suppliers`}
-                    icon={<Truck size={24} />}
-                    type="purple"
-                />
-
-                <DashboardMetric
-                    title="Payments Received"
-                    value={formatCurrency(
-                        payments.totalReceivedAmount
-                    )}
-                    subtitle={`${payments.pendingPayments ?? 0} pending payments`}
-                    icon={<CreditCard size={24} />}
-                    type="green"
-                />
-            </section>
-
-            <section className="dashboard-breakdown-grid">
-                <BreakdownCard
-                    title="Sales Summary"
-                    icon={<TrendingUp size={21} />}
-                    values={[
-                        [
-                            "Gross Sales",
-                            formatCurrency(sales.grossSales),
-                        ],
-                        [
-                            "Discounts",
-                            formatCurrency(sales.discounts),
-                        ],
-                        [
-                            "Refunds",
-                            formatCurrency(sales.refunds),
-                        ],
-                        [
-                            "Net Sales",
-                            formatCurrency(sales.netSales),
-                        ],
-                    ]}
-                />
-
-                <BreakdownCard
-                    title="Order Activity"
-                    icon={<ClipboardList size={21} />}
-                    values={[
-                        ["Pending", orders.pendingOrders ?? 0],
-                        [
-                            "Confirmed",
-                            orders.confirmedOrders ?? 0,
-                        ],
-                        [
-                            "Completed",
-                            orders.completedOrders ?? 0,
-                        ],
-                        [
-                            "Cancelled",
-                            orders.cancelledOrders ?? 0,
-                        ],
-                    ]}
-                />
-
-                <BreakdownCard
-                    title="Inventory Status"
-                    icon={<PackageSearch size={21} />}
-                    values={[
-                        [
-                            "Active Products",
-                            inventory.activeProducts ?? 0,
-                        ],
-                        [
-                            "Inactive Products",
-                            inventory.inactiveProducts ?? 0,
-                        ],
-                        [
-                            "Low Stock",
-                            inventory.lowStockProducts ?? 0,
-                        ],
-                        [
-                            "Out of Stock",
-                            inventory.outOfStockProducts ?? 0,
-                        ],
-                    ]}
-                />
-
-                <BreakdownCard
-                    title="Supplier Purchases"
-                    icon={<Truck size={21} />}
-                    values={[
-                        [
-                            "Active Suppliers",
-                            suppliers.activeSuppliers ?? 0,
-                        ],
-                        [
-                            "Pending Purchases",
-                            suppliers.pendingPurchases ?? 0,
-                        ],
-                        [
-                            "Received Purchases",
-                            suppliers.receivedPurchases ?? 0,
-                        ],
-                        [
-                            "Cancelled Purchases",
-                            suppliers.cancelledPurchases ?? 0,
-                        ],
-                    ]}
-                />
-            </section>
-        </>
-    );
-}
-
-function DashboardMetric({
-                             title,
-                             value,
-                             subtitle,
-                             icon,
-                             type,
-                         }) {
-    return (
-        <article
-            className={`management-metric-card ${type}`}
-        >
-            <div className="management-metric-icon">
-                {icon}
-            </div>
-
-            <div>
-                <span>{title}</span>
-                <strong>{value}</strong>
-                <small>{subtitle}</small>
-            </div>
-        </article>
-    );
-}
-
-function BreakdownCard({
-                           title,
-                           icon,
-                           values,
-                       }) {
-    return (
-        <article className="breakdown-card">
-            <div className="breakdown-card-heading">
-                {icon}
-                <h3>{title}</h3>
-            </div>
-
-            <div className="breakdown-list">
-                {values.map(([label, value]) => (
-                    <div key={label}>
-                        <span>{label}</span>
-                        <strong>{value}</strong>
-                    </div>
-                ))}
-            </div>
-        </article>
-    );
-}
-
-function FilterGroup({ label, children }) {
-    return (
-        <div className="report-filter-group">
-            <label>{label}</label>
-            {children}
-        </div>
-    );
-}
-
-function Message({ type, message, onClose }) {
-    return (
-        <div className={`report-alert ${type}`}>
-            <span>{message}</span>
-
-            <button type="button" onClick={onClose}>
-                <X size={17} />
-            </button>
-        </div>
-    );
-}
-
-function getSupplierName(supplier) {
-    return (
-        supplier?.name ||
-        supplier?.supplierName ||
-        supplier?.contactPerson ||
-        "Supplier"
-    );
-}
-
-function getErrorMessage(error, fallback) {
-    return (
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        fallback
-    );
-}
-
-function formatLabel(value) {
-    if (!value) return "Unknown";
-
-    return value
-        .toString()
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .replaceAll("_", " ")
-        .toLowerCase()
-        .replace(/\b\w/g, (letter) =>
-            letter.toUpperCase()
-        );
-}
-
-function formatCurrency(value) {
-    return new Intl.NumberFormat("en-LK", {
-        style: "currency",
-        currency: "LKR",
-        minimumFractionDigits: 2,
-    }).format(Number(value || 0));
-}
-
-function formatCellValue(column, value) {
-    if (value === null || value === undefined) {
-        return "—";
-    }
-
-    const lowerColumn = column.toLowerCase();
-
-    if (
-        lowerColumn.includes("amount") ||
-        lowerColumn.includes("price") ||
-        lowerColumn.includes("value") ||
-        lowerColumn.includes("subtotal") ||
-        lowerColumn.includes("discount")
-    ) {
-        return formatCurrency(value);
-    }
-
-    if (
-        lowerColumn.includes("date") ||
-        lowerColumn.includes("createdat") ||
-        lowerColumn.includes("paidat")
-    ) {
-        const date = new Date(value);
-
-        if (!Number.isNaN(date.getTime())) {
-            return new Intl.DateTimeFormat("en-LK", {
-                year: "numeric",
-                month: "short",
-                day: "2-digit",
-            }).format(date);
-        }
-    }
-
-    if (typeof value === "boolean") {
-        return value ? "Yes" : "No";
-    }
-
-    return String(value);
 }
 
 export default ManagementReportsPage;

@@ -17,14 +17,14 @@ public record UpdateProfileRequest(
         String lastName,
 
         @Pattern(
-                regexp = "^$|^[0-9+][0-9\\s-]{8,19}$",
-                message = "Enter a valid phone number"
+                regexp = "^$|^0[1-9][0-9]{8}$",
+                message = "Phone number must be a valid 10-digit Sri Lankan phone number starting with 0 (e.g. 07XXXXXXXX)"
         )
         String phone,
 
         @Pattern(
-                regexp = "^$|^[0-9+][0-9\\s-]{8,19}$",
-                message = "Enter a valid phone number"
+                regexp = "^$|^0[1-9][0-9]{8}$",
+                message = "Phone number must be a valid 10-digit Sri Lankan phone number starting with 0 (e.g. 07XXXXXXXX)"
         )
         String phoneNumber,
 

@@ -1,5 +1,6 @@
 package com.sparehub.dto.response.supplier;
 
+import com.sparehub.entity.supplier.SupplierStatus;
 import java.time.LocalDateTime;
 
 public record SupplierResponse(
@@ -17,6 +18,7 @@ public record SupplierResponse(
         String bankAccountDetails,
         String notes,
         Boolean active,
+        SupplierStatus status,
         Integer productCount,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

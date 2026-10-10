@@ -154,11 +154,17 @@ export default function UserAccountsPage() {
     };
 
     const getFullName = (selectedUser) => {
+        if (!selectedUser) return "Unknown User";
+
+        if (selectedUser.fullName && selectedUser.fullName.trim()) {
+            return selectedUser.fullName.trim();
+        }
+
         const fullName = `${
             selectedUser.firstName ?? ""
         } ${selectedUser.lastName ?? ""}`.trim();
 
-        return fullName || selectedUser.name || "Unknown User";
+        return fullName || selectedUser.name || selectedUser.email || "Unknown User";
     };
 
     const normalizeRole = (userRole) => {

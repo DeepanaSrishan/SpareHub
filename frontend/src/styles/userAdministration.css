@@ -468,7 +468,7 @@
 .admin-customer-statistics strong {
     color: var(--primary-lime);
     font-size: 22px;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
 }
 
 @media (max-width: 1000px) {

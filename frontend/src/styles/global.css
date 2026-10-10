@@ -1,13 +1,16 @@
+@import url('https://fonts.cdnfonts.com/css/google-sans');
+@import url('https://fonts.cdnfonts.com/css/product-sans');
 @import "./scroll-driven.css";
 
 /* ==========================================================================
    SpareHub Design System - Premium Automotive SaaS
    Color Palette: Dark Forest Green (#071C14), Pine (#123C2B), Electric Lime (#B8F34A)
    Off-White Background (#F3F7F4), Clean Surface (#FFFFFF), Forest Ink (#10251C)
+   Typography: Google Sans, Google Sans Text, Product Sans
    ========================================================================== */
 
 :root {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     color: #FFFFFF;
     background: #08080a;
     font-synthesis: none;
@@ -51,6 +54,7 @@
 
 * {
     box-sizing: border-box;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
 }
 
 /* Custom Scrollbar */
@@ -78,12 +82,12 @@ body {
     min-height: 100vh;
     background: #08080a;
     color: #FFFFFF;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     letter-spacing: -0.02em;
     color: #FFFFFF;
 }
@@ -92,7 +96,7 @@ button,
 input,
 textarea,
 select {
-    font: inherit;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
 }
 
 a {
@@ -137,6 +141,12 @@ select:focus {
     border-color: var(--primary-lime);
     box-shadow: 0 0 0 3px rgba(184, 243, 74, 0.25);
     background: rgba(8, 18, 14, 0.98);
+}
+
+select option {
+    background-color: #0c1612;
+    color: #FFFFFF;
+    padding: 10px 14px;
 }
 
 /* ========================================================
@@ -787,8 +797,9 @@ select:focus {
     width: 44px;
     height: 44px;
     border-radius: 14px;
-    background: rgba(18, 60, 43, 0.08);
-    color: var(--secondary-green);
+    background: rgba(184, 243, 74, 0.12);
+    border: 1px solid rgba(184, 243, 74, 0.25);
+    color: var(--primary-lime);
 }
 
 .page-title {
@@ -847,53 +858,57 @@ select:focus {
 }
 
 .status-success {
-    background: rgba(16, 185, 129, 0.12);
-    color: #047857;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.15);
+    color: #34D399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
 }
 
 .status-success .badge-dot {
-    background: #10B981;
+    background: #34D399;
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
 }
 
 .status-warning {
-    background: rgba(245, 158, 11, 0.12);
-    color: #B45309;
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.15);
+    color: #FBBF24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
 }
 
 .status-warning .badge-dot {
-    background: #F59E0B;
+    background: #FBBF24;
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
 }
 
 .status-danger {
-    background: rgba(220, 38, 38, 0.12);
-    color: #DC2626;
-    border: 1px solid rgba(220, 38, 38, 0.3);
+    background: rgba(220, 38, 38, 0.15);
+    color: #F87171;
+    border: 1px solid rgba(220, 38, 38, 0.35);
 }
 
 .status-danger .badge-dot {
-    background: #DC2626;
+    background: #F87171;
+    box-shadow: 0 0 8px rgba(248, 113, 113, 0.6);
 }
 
 .status-info {
-    background: rgba(37, 99, 235, 0.12);
-    color: #2563EB;
-    border: 1px solid rgba(37, 99, 235, 0.3);
+    background: rgba(56, 189, 248, 0.15);
+    color: #38BDF8;
+    border: 1px solid rgba(56, 189, 248, 0.35);
 }
 
 .status-info .badge-dot {
-    background: #2563EB;
+    background: #38BDF8;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
 }
 
 .status-neutral {
-    background: rgba(100, 115, 107, 0.12);
-    color: var(--text-muted);
-    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .status-neutral .badge-dot {
-    background: var(--text-muted);
+    background: #cbd5e1;
 }
 
 /* ========================================================

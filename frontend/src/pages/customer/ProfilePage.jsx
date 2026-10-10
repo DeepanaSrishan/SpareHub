@@ -20,6 +20,18 @@ import profileService from "../../services/profileService";
 import useAuth from "../../hooks/useAuth";
 import "../../styles/customer.css";
 
+const resolveLoyaltyTier = (tier, points = 0) => {
+    const pts = Number(points) || 0;
+    if (pts >= 3000) return "Platinum";
+    if (pts >= 1500) return "Gold";
+    if (pts >= 500) return "Silver";
+    if (tier && tier.trim() && tier.toUpperCase() !== "BRONZE") {
+        const clean = tier.trim();
+        return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
+    }
+    return "Bronze";
+};
+
 const initialProfile = {
     fullName: "",
     email: "",
@@ -64,19 +76,40 @@ function ProfilePage() {
             setError("");
 
             const data = await profileService.getProfile();
+            const resolvedTier = resolveLoyaltyTier(data.loyaltyTier, data.loyaltyPoints);
+
+            // Clean & standardize phone to 10 digits if present
+            let initialPhone = (data.phone ?? "").toString().trim();
+            if (initialPhone) {
+                if (initialPhone.startsWith("+94")) {
+                    initialPhone = "0" + initialPhone.slice(3).replace(/\D/g, "");
+                } else if (initialPhone.startsWith("94") && initialPhone.length > 10) {
+                    initialPhone = "0" + initialPhone.slice(2).replace(/\D/g, "");
+                } else {
+                    initialPhone = initialPhone.replace(/\D/g, "");
+                }
+                initialPhone = initialPhone.slice(0, 10);
+            }
 
             setProfile({
                 fullName: data.fullName ?? "",
                 email: data.email ?? "",
-                phone: data.phone ?? "",
+                phone: initialPhone,
                 address: data.address ?? "",
                 role: data.role ?? "",
                 accountStatus: data.accountStatus ?? "ACTIVE",
-                loyaltyTier: data.loyaltyTier ?? null,
+                loyaltyTier: resolvedTier,
                 loyaltyPoints: data.loyaltyPoints ?? 0,
                 lastLoginAt: data.lastLoginAt ?? null,
                 createdAt: data.createdAt ?? null,
             });
+
+            if (updateStoredUser) {
+                updateStoredUser({
+                    loyaltyTier: resolvedTier,
+                    loyaltyPoints: data.loyaltyPoints ?? 0,
+                });
+            }
         } catch (err) {
             setError(
                 err.response?.data?.message ||
@@ -85,7 +118,7 @@ function ProfilePage() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [updateStoredUser]);
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -94,10 +127,45 @@ function ProfilePage() {
 
     const handleProfileChange = (event) => {
         const { name, value } = event.target;
+        if (name === "phone") {
+            // Strictly digits only (no text/symbols) and max 10 digits
+            const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
+            setProfile((previousProfile) => ({
+                ...previousProfile,
+                phone: digitsOnly,
+            }));
+            return;
+        }
         setProfile((previousProfile) => ({
             ...previousProfile,
             [name]: value,
         }));
+    };
+
+    const handlePhoneKeyDown = (event) => {
+        // Allow navigation and shortcut keys
+        if (
+            [
+                "Backspace",
+                "Delete",
+                "Tab",
+                "ArrowLeft",
+                "ArrowRight",
+                "ArrowUp",
+                "ArrowDown",
+                "Home",
+                "End",
+                "Enter",
+            ].includes(event.key) ||
+            event.ctrlKey ||
+            event.metaKey
+        ) {
+            return;
+        }
+        // Disallow any key that is not a numeric digit (0-9)
+        if (!/^[0-9]$/.test(event.key)) {
+            event.preventDefault();
+        }
     };
 
     const handlePasswordChange = (event) => {
@@ -115,6 +183,22 @@ function ProfilePage() {
         if (!trimmedName || trimmedName.length < 2) {
             setError("Full name must contain between 2 and 120 characters.");
             return;
+        }
+
+        const trimmedPhone = profile.phone ? profile.phone.trim() : "";
+        if (trimmedPhone) {
+            if (!trimmedPhone.startsWith("0")) {
+                setError("Phone number must start with 0 according to Sri Lankan standard (e.g. 07XXXXXXXX).");
+                return;
+            }
+            if (trimmedPhone.length !== 10) {
+                setError(`Phone number must contain exactly 10 digits (currently ${trimmedPhone.length}/10).`);
+                return;
+            }
+            if (!/^0[1-9]\d{8}$/.test(trimmedPhone)) {
+                setError("Please enter a valid Sri Lankan phone number (e.g. 0771234567).");
+                return;
+            }
         }
 
         try {
@@ -270,6 +354,8 @@ function ProfilePage() {
         );
     }
 
+    const displayTier = resolveLoyaltyTier(profile.loyaltyTier, profile.loyaltyPoints);
+
     return (
         <div className="customer-page profile-page-container">
             {/* Hero Profile Banner Card */}
@@ -291,10 +377,10 @@ function ProfilePage() {
                             <span className="status-dot"></span>
                             {profile.accountStatus}
                         </span>
-                        {profile.loyaltyTier && (
-                            <span className="profile-badge-loyalty">
+                        {(profile.role === "CUSTOMER" || profile.loyaltyTier || profile.loyaltyPoints > 0) && (
+                            <span className={`profile-badge-loyalty tier-${displayTier.toLowerCase()}`}>
                                 <Award size={14} />
-                                {profile.loyaltyTier} Tier ({profile.loyaltyPoints} pts)
+                                {displayTier} Tier ({profile.loyaltyPoints ?? 0} pts)
                             </span>
                         )}
                     </div>
@@ -387,12 +473,28 @@ function ProfilePage() {
                                     id="phone"
                                     name="phone"
                                     type="tel"
-                                    maxLength="20"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    maxLength={10}
                                     value={profile.phone}
                                     onChange={handleProfileChange}
-                                    placeholder="e.g. 0771234567 or +94771234567"
+                                    onKeyDown={handlePhoneKeyDown}
+                                    placeholder="07XXXXXXXX (10 digits)"
                                 />
                             </div>
+                            <small className="field-hint">
+                                Sri Lankan standard: 10 digits starting with 0 (e.g. 0771234567) {profile.phone ? `(${profile.phone.length}/10 digits)` : ""}
+                            </small>
+                            {profile.phone && !profile.phone.startsWith("0") && (
+                                <small className="field-warning" style={{ color: "#ef4444", display: "block", marginTop: "4px", fontSize: "12px", fontWeight: "600" }}>
+                                    ⚠️ Must start with 0 according to Sri Lankan standard (e.g. 07XXXXXXXX).
+                                </small>
+                            )}
+                            {profile.phone && profile.phone.length > 0 && profile.phone.length < 10 && (
+                                <small className="field-warning" style={{ color: "#f59e0b", display: "block", marginTop: "4px", fontSize: "12px" }}>
+                                    ℹ️ {10 - profile.phone.length} more digit{10 - profile.phone.length > 1 ? "s" : ""} required (10 digits total).
+                                </small>
+                            )}
                         </div>
 
                         <div className="form-group">

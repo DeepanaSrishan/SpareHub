@@ -82,4 +82,10 @@ public interface SupplierPurchaseRepository
             LocalDateTime startDate,
             LocalDateTime endDate
     );
+
+    List<SupplierPurchase>
+    findAllBySparePartIdAndStatus(
+            Long sparePartId,
+            PurchaseStatus status
+    );
 }

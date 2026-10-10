@@ -48,6 +48,7 @@ const transactionTypes = [
     "PRICE_UPDATED",
     "SUPPLIER_ACTIVATED",
     "SUPPLIER_DEACTIVATED",
+    "SUPPLIER_SUSPENDED",
 ];
 
 function SupplierAnalyticsPage() {

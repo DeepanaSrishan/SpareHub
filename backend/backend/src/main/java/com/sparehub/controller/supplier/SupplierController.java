@@ -101,4 +101,29 @@ public class SupplierController {
         SupplierResponse response = supplierService.activateSupplier(supplierId);
         return ResponseEntity.ok(ApiResponse.success("Supplier activated successfully", response));
     }
+
+    /*
+     * Suspend supplier
+     */
+    @PatchMapping("/{supplierId}/suspend")
+    public ResponseEntity<ApiResponse<SupplierResponse>> suspendSupplier(
+            @PathVariable Long supplierId,
+            @RequestParam(required = false) String reason
+    ) {
+        SupplierResponse response = supplierService.suspendSupplier(supplierId, reason);
+        return ResponseEntity.ok(ApiResponse.success("Supplier suspended successfully", response));
+    }
+
+    /*
+     * Update supplier status directly (ACTIVE, INACTIVE, SUSPENDED)
+     */
+    @PatchMapping("/{supplierId}/status")
+    public ResponseEntity<ApiResponse<SupplierResponse>> updateSupplierStatus(
+            @PathVariable Long supplierId,
+            @RequestParam com.sparehub.entity.supplier.SupplierStatus status,
+            @RequestParam(required = false) String reason
+    ) {
+        SupplierResponse response = supplierService.updateSupplierStatus(supplierId, status, reason);
+        return ResponseEntity.ok(ApiResponse.success("Supplier status updated successfully", response));
+    }
 }

@@ -25,7 +25,7 @@
   width: 100%;
   background-color: var(--cinematic-bg);
   color: var(--cinematic-text-main);
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
   overflow-x: hidden;
   position: relative;
   display: flex;
@@ -414,7 +414,7 @@
 }
 
 .cinematic-brand-name {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
   font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -435,7 +435,7 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #ffffff;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
 }
 
 .cinematic-card-subtitle {

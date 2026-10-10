@@ -14,6 +14,7 @@ import {
     AlertCircle,
     ArrowLeft,
     Ban,
+    Calendar,
     Check,
     CheckCircle2,
     Copy,
@@ -56,6 +57,29 @@ const formatDateTime = (value) => {
 const formatCardNumber = (value) => {
     const digits = value.replace(/\D/g, "").slice(0, 16);
     return digits.replace(/(\d{4})(?=\d)/g, "$1 ");
+};
+
+const CURRENT_MIN_YEAR = 26; // 2026 onwards
+const CURRENT_MONTH = 10; // Current Month in 2026
+
+const validateExpiry = (expiryDate) => {
+    if (!expiryDate || expiryDate.length < 5) return null;
+    const [monthStr, yearStr] = expiryDate.split("/");
+    const month = parseInt(monthStr, 10);
+    const year = parseInt(yearStr, 10);
+    if (isNaN(month) || month < 1 || month > 12) {
+        return { valid: false, error: "Invalid expiry month. Month must be between 01 and 12." };
+    }
+    if (isNaN(year) || year < CURRENT_MIN_YEAR) {
+        return { valid: false, error: "Invalid expiry year. Year must be 2026 or later (e.g. 26, 27...). Past years cannot be added." };
+    }
+    if (year === CURRENT_MIN_YEAR && month < CURRENT_MONTH) {
+        return { valid: false, error: "Card has already expired. Expiry month cannot be in the past." };
+    }
+    if (year > 50) {
+        return { valid: false, error: "Please enter a valid card expiry year (up to 2050)." };
+    }
+    return { valid: true, message: `Valid through ${String(month).padStart(2, "0")}/20${year}` };
 };
 
 const formatExpiry = (value) => {
@@ -155,6 +179,8 @@ const OrderDetailsPage = () => {
         cvv: "",
     });
 
+    const modalExpiryFeedback = validateExpiry(cardDetails.expiryDate);
+
     const [bankDetails, setBankDetails] = useState({
         bankName: "Commercial Bank of Ceylon",
         depositSlipReference: "",
@@ -181,9 +207,20 @@ const OrderDetailsPage = () => {
             if (!cardDetails.expiryDate || cardDetails.expiryDate.length < 5) {
                 return "Please enter a valid expiry date in MM/YY format.";
             }
-            const [month] = cardDetails.expiryDate.split("/").map(Number);
-            if (!month || month < 1 || month > 12) {
+            const [monthStr, yearStr] = cardDetails.expiryDate.split("/");
+            const month = parseInt(monthStr, 10);
+            const year = parseInt(yearStr, 10);
+            if (isNaN(month) || month < 1 || month > 12) {
                 return "Invalid expiry month. Month must be between 01 and 12.";
+            }
+            if (isNaN(year) || year < CURRENT_MIN_YEAR) {
+                return "Invalid expiry year. Year must be 2026 or later (e.g. 26, 27...). Past years cannot be added.";
+            }
+            if (year === CURRENT_MIN_YEAR && month < CURRENT_MONTH) {
+                return "This card has already expired. Expiry month cannot be in the past.";
+            }
+            if (year > 50) {
+                return "Please enter a realistic card expiry year (up to 2050).";
             }
             if (!cardDetails.cvv || cardDetails.cvv.length < 3) {
                 return "Please enter a valid 3 or 4 digit CVV/CVC.";
@@ -1137,24 +1174,82 @@ const OrderDetailsPage = () => {
 
                                     <div className="card-fields-row">
                                         <div className="form-group">
-                                            <label htmlFor="modalExpiry">
-                                                Expiry Date *
-                                            </label>
-                                            <input
-                                                id="modalExpiry"
-                                                type="text"
-                                                placeholder="MM/YY"
-                                                maxLength={5}
-                                                value={cardDetails.expiryDate}
-                                                onChange={(e) =>
-                                                    setCardDetails((prev) => ({
-                                                        ...prev,
-                                                        expiryDate: formatExpiry(
-                                                            e.target.value
-                                                        ),
-                                                    }))
-                                                }
-                                            />
+                                            <div className="expiry-label-row">
+                                                <label htmlFor="modalExpiry">
+                                                    Expiry Date (MM/YY) <span className="req">*</span>
+                                                </label>
+                                                <span className="expiry-year-badge">Min Year: 2026</span>
+                                            </div>
+                                            <div className="card-input-wrapper">
+                                                <input
+                                                    id="modalExpiry"
+                                                    type="text"
+                                                    placeholder="MM/YY"
+                                                    maxLength={5}
+                                                    value={cardDetails.expiryDate}
+                                                    onChange={(e) =>
+                                                        setCardDetails((prev) => ({
+                                                            ...prev,
+                                                            expiryDate: formatExpiry(
+                                                                e.target.value
+                                                            ),
+                                                        }))
+                                                    }
+                                                    className={
+                                                        modalExpiryFeedback
+                                                            ? modalExpiryFeedback.valid
+                                                                ? "input-success"
+                                                                : "input-error"
+                                                            : ""
+                                                    }
+                                                />
+                                                <Calendar size={16} className="input-inner-icon" />
+                                            </div>
+                                            {modalExpiryFeedback && (
+                                                <div
+                                                    className={`expiry-feedback-msg ${
+                                                        modalExpiryFeedback.valid ? "success" : "error"
+                                                    }`}
+                                                >
+                                                    <span>
+                                                        {modalExpiryFeedback.valid ? "✓ " : "⚠️ "}
+                                                        {modalExpiryFeedback.valid
+                                                            ? modalExpiryFeedback.message
+                                                            : modalExpiryFeedback.error}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div className="expiry-quick-years">
+                                                <span className="quick-years-label">Select Year:</span>
+                                                {["26", "27", "28", "29", "30", "31"].map((yr) => (
+                                                    <button
+                                                        key={yr}
+                                                        type="button"
+                                                        className={`year-chip-btn ${
+                                                            cardDetails.expiryDate.endsWith("/" + yr) ? "active" : ""
+                                                        }`}
+                                                        onClick={() => {
+                                                            let m = "12";
+                                                            if (cardDetails.expiryDate && cardDetails.expiryDate.includes("/")) {
+                                                                m = cardDetails.expiryDate.split("/")[0] || "12";
+                                                            } else if (cardDetails.expiryDate && cardDetails.expiryDate.length >= 2) {
+                                                                m = cardDetails.expiryDate.slice(0, 2);
+                                                            }
+                                                            m = m.padStart(2, "0").slice(0, 2);
+                                                            const mNum = parseInt(m, 10);
+                                                            if (isNaN(mNum) || mNum < 1 || mNum > 12) {
+                                                                m = "12";
+                                                            }
+                                                            setCardDetails((prev) => ({
+                                                                ...prev,
+                                                                expiryDate: `${m}/${yr}`,
+                                                            }));
+                                                        }}
+                                                    >
+                                                        '{yr}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
 
                                         <div className="form-group">

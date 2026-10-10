@@ -22,6 +22,7 @@ public class SupplierMapper {
                 supplier.getCity(),
                 supplier.getCountry(),
                 supplier.getActive(),
+                supplier.getStatus(),
                 getProductCount(supplier),
                 supplier.getCreatedAt(),
                 supplier.getUpdatedAt()
@@ -46,6 +47,7 @@ public class SupplierMapper {
                 supplier.getBankAccountDetails(),
                 supplier.getNotes(),
                 supplier.getActive(),
+                supplier.getStatus(),
                 getProductCount(supplier),
                 supplier.getCreatedAt(),
                 supplier.getUpdatedAt()

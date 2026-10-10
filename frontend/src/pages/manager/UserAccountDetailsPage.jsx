@@ -13,6 +13,18 @@ import userAdministrationService from "../../services/userAdministrationService"
 import useAuth from "../../hooks/useAuth";
 import "../../styles/userAdministration.css";
 
+const resolveTierName = (tier, points = 0) => {
+    const pts = Number(points) || 0;
+    if (pts >= 3000) return "Platinum";
+    if (pts >= 1500) return "Gold";
+    if (pts >= 500) return "Silver";
+    if (tier && tier.trim() && tier.toUpperCase() !== "BRONZE") {
+        const clean = tier.trim();
+        return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
+    }
+    return "Bronze";
+};
+
 export default function UserAccountDetailsPage() {
     const { userId } = useParams();
     const { user: loggedInUser } = useAuth();
@@ -49,11 +61,17 @@ export default function UserAccountDetailsPage() {
     };
 
     const getFullName = () => {
+        if (!account) return "Unknown User";
+
+        if (account.fullName && account.fullName.trim()) {
+            return account.fullName.trim();
+        }
+
         const fullName = `${account?.firstName ?? ""} ${
             account?.lastName ?? ""
         }`.trim();
 
-        return fullName || account?.name || "Unknown User";
+        return fullName || account?.name || account?.email || "Unknown User";
     };
 
     const normalizeRole = (role) => {
@@ -302,7 +320,10 @@ export default function UserAccountDetailsPage() {
                         <div>
                             <span>Loyalty Tier</span>
                             <strong>
-                                {account.loyaltyTier || "BRONZE"}
+                                {resolveTierName(
+                                    account.loyaltyTier,
+                                    account.rewardPoints ?? 0
+                                ).toUpperCase()}
                             </strong>
                         </div>
 

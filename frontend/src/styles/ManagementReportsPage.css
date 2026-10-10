@@ -200,7 +200,7 @@
     font-size: 20px;
     font-weight: 800;
     color: #b8f34a;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
 }
 
 .management-metric-card small {
@@ -272,7 +272,7 @@
 .breakdown-list strong {
     font-size: 14px;
     color: #b8f34a;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     font-weight: 700;
 }
 
@@ -510,3 +510,168 @@
         width: 100%;
     }
 }
+
+/* ========================================================
+   Interactive Report Selection Cards
+   ======================================================== */
+.report-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 20px 0 24px;
+}
+
+.report-selector-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 18px 20px;
+    background: rgba(12, 22, 18, 0.85);
+    border: 1px solid rgba(184, 243, 74, 0.2);
+    border-radius: 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    color: #ffffff;
+}
+
+.report-selector-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(184, 243, 74, 0.45);
+    background: rgba(18, 32, 26, 0.95);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(184, 243, 74, 0.1);
+}
+
+.report-selector-card.active {
+    border-color: var(--primary-lime, #b8f34a);
+    background: rgba(184, 243, 74, 0.08);
+    box-shadow: 0 0 0 1px var(--primary-lime, #b8f34a), 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.report-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.report-card-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 10px;
+    background: rgba(184, 243, 74, 0.12);
+    color: var(--primary-lime, #b8f34a);
+    flex-shrink: 0;
+}
+
+.report-selector-card.active .report-card-icon {
+    background: var(--primary-lime, #b8f34a);
+    color: #071c14;
+}
+
+.report-card-top h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 750;
+    color: #ffffff;
+    line-height: 1.3;
+}
+
+.report-selector-card p {
+    margin: 0;
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.45;
+}
+
+/* ========================================================
+   Print / Export to PDF Styling
+   ======================================================== */
+@media print {
+    body, html {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    /* Hide UI controls during print */
+    header,
+    .navbar,
+    .management-hero,
+    .dashboard-date-filter,
+    .management-main-metrics,
+    .dashboard-breakdown-grid,
+    .report-selector-grid,
+    .report-filter-card,
+    .report-button,
+    .report-filter-actions,
+    .desktop-nav-scroll-wrapper,
+    .mobile-header-controls {
+        display: none !important;
+    }
+
+    .management-reports-page {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: #000000 !important;
+    }
+
+    .generated-report-card {
+        background: #ffffff !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        color: #000000 !important;
+    }
+
+    .report-print-header {
+        display: block !important;
+        border-bottom: 2px solid #000000;
+        padding-bottom: 14px;
+        margin-bottom: 20px;
+    }
+
+    .report-print-header h1 {
+        color: #000000 !important;
+        margin: 0 0 4px !important;
+        font-size: 24px !important;
+    }
+
+    .report-print-header p {
+        color: #555555 !important;
+        margin: 2px 0 !important;
+        font-size: 12px !important;
+    }
+
+    .report-summary-bar {
+        background: #f4f4f5 !important;
+        color: #000000 !important;
+        border: 1px solid #d4d4d8 !important;
+    }
+
+    .report-table-wrapper {
+        border: 1px solid #000000 !important;
+    }
+
+    .report-table {
+        color: #000000 !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    .report-table th {
+        background: #e4e4e7 !important;
+        color: #000000 !important;
+        border: 1px solid #a1a1aa !important;
+        font-weight: bold !important;
+    }
+
+    .report-table td {
+        color: #000000 !important;
+        border: 1px solid #e4e4e7 !important;
+    }
+}

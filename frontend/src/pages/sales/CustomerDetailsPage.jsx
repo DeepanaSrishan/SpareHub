@@ -50,7 +50,7 @@ function CustomerDetailsPage() {
                 );
 
             setCustomer(data);
-            setSelectedTier(data?.loyaltyTier ?? "BRONZE");
+            setSelectedTier((data?.loyaltyTier ?? "BRONZE").toUpperCase());
         } catch (err) {
             setError(
                 err.response?.data?.message ||
@@ -114,16 +114,23 @@ function CustomerDetailsPage() {
                     selectedTier
                 );
 
+            const updatedTierName =
+                updatedCustomer?.currentTier ??
+                updatedCustomer?.loyaltyTier ??
+                selectedTier;
+
             setCustomer((currentCustomer) => ({
                 ...currentCustomer,
                 ...updatedCustomer,
-                loyaltyTier:
-                    updatedCustomer?.loyaltyTier ?? selectedTier,
+                loyaltyTier: updatedTierName,
             }));
 
+            setSelectedTier((updatedTierName || "BRONZE").toUpperCase());
+
             setSuccessMessage(
-                `Loyalty tier එක ${selectedTier} ලෙස update කළා.`
+                `Loyalty tier එක ${updatedTierName} ලෙස update කළා.`
             );
+            loadTransactions();
         } catch (err) {
             setError(
                 err.response?.data?.message ||
@@ -135,12 +142,30 @@ function CustomerDetailsPage() {
     };
 
     const getFullName = () => {
+        if (!customer) return "Unknown Customer";
+
+        if (customer.fullName && customer.fullName.trim()) {
+            return customer.fullName.trim();
+        }
+
         const fullName =
             `${customer?.firstName ?? ""} ${
                 customer?.lastName ?? ""
             }`.trim();
 
-        return fullName || customer?.name || "Unknown Customer";
+        if (fullName) {
+            return fullName;
+        }
+
+        if (customer?.name && customer?.name.trim()) {
+            return customer.name.trim();
+        }
+
+        if (customer?.email && customer?.email.trim()) {
+            return customer.email.trim();
+        }
+
+        return "Unknown Customer";
     };
 
     const formatMoney = (value) => {
@@ -212,7 +237,7 @@ function CustomerDetailsPage() {
 
                 <article className="summary-card">
                     <span>Reward Points</span>
-                    <strong>{customer.rewardPoints ?? 0}</strong>
+                    <strong>{customer.loyaltyPoints ?? customer.rewardPoints ?? 0}</strong>
                 </article>
 
                 <article className="summary-card">
@@ -298,7 +323,7 @@ function CustomerDetailsPage() {
 
                         <select
                             id="loyaltyTier"
-                            value={selectedTier}
+                            value={(selectedTier || "BRONZE").toUpperCase()}
                             onChange={(event) =>
                                 setSelectedTier(event.target.value)
                             }
@@ -314,7 +339,8 @@ function CustomerDetailsPage() {
                             onClick={handleTierUpdate}
                             disabled={
                                 tierSaving ||
-                                selectedTier === customer.loyaltyTier
+                                (selectedTier || "").toUpperCase() ===
+                                (customer?.loyaltyTier || "").toUpperCase()
                             }
                         >
                             {tierSaving ? "Updating..." : "Update Tier"}
@@ -447,7 +473,7 @@ function CustomerDetailsPage() {
                                             <td>
                                                 <strong
                                                     style={{
-                                                        color: (tx.points ?? 0) >= 0 ? "#16a34a" : "#dc2626",
+                                                        color: (tx.points ?? 0) >= 0 ? "#4ade80" : "#f87171",
                                                     }}
                                                 >
                                                     {(tx.points ?? 0) > 0 ? `+${tx.points}` : tx.points ?? 0}
@@ -457,7 +483,7 @@ function CustomerDetailsPage() {
                                                 <strong>{tx.balanceAfter ?? 0} pts</strong>
                                             </td>
                                             <td>
-                                                <span style={{ color: "#475569", fontSize: "13px" }}>
+                                                <span style={{ color: "#94a3b8", fontSize: "13px" }}>
                                                     {tx.description || "—"}
                                                 </span>
                                             </td>

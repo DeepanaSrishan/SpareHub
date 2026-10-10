@@ -120,6 +120,13 @@ public class Supplier {
     @Column(length = 500)
     private String notes;
 
+    @Enumerated(EnumType.STRING)
+    @Column(
+            name = "status",
+            length = 30
+    )
+    private SupplierStatus status = SupplierStatus.ACTIVE;
+
     @Column(nullable = false)
     private Boolean active = true;
 
@@ -201,5 +208,30 @@ public class Supplier {
             SupplierProduct supplierProduct
     ) {
         products.remove(supplierProduct);
+    }
+
+    public SupplierStatus getStatus() {
+        if (status == null) {
+            return Boolean.TRUE.equals(active) ? SupplierStatus.ACTIVE : SupplierStatus.INACTIVE;
+        }
+        return status;
+    }
+
+    public void setStatus(SupplierStatus status) {
+        this.status = status;
+        this.active = (status == SupplierStatus.ACTIVE);
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+        if (Boolean.TRUE.equals(active)) {
+            this.status = SupplierStatus.ACTIVE;
+        } else if (this.status == SupplierStatus.ACTIVE || this.status == null) {
+            this.status = SupplierStatus.INACTIVE;
+        }
+    }
+
+    public boolean isEligibleForPurchase() {
+        return getStatus() == SupplierStatus.ACTIVE && Boolean.TRUE.equals(active);
     }
 }

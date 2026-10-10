@@ -35,4 +35,31 @@ public record CustomerDetailResponse(
 
         long inactiveDays
 ) {
+    public String getName() {
+        return fullName;
+    }
+
+    public String getFirstName() {
+        if (fullName == null || fullName.isBlank()) return "";
+        String[] parts = fullName.trim().split("\\s+", 2);
+        return parts[0];
+    }
+
+    public String getLastName() {
+        if (fullName == null || fullName.isBlank()) return "";
+        String[] parts = fullName.trim().split("\\s+", 2);
+        return parts.length > 1 ? parts[1] : "";
+    }
+
+    public String getPhoneNumber() {
+        return phone;
+    }
+
+    public Integer getRewardPoints() {
+        return loyaltyPoints != null ? loyaltyPoints : 0;
+    }
+
+    public LocalDateTime getLastPurchaseDate() {
+        return lastPurchaseAt;
+    }
 }

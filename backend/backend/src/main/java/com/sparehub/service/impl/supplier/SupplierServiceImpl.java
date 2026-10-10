@@ -200,6 +200,51 @@ public class SupplierServiceImpl
         return supplierMapper.toResponse(savedSupplier);
     }
 
+    @Override
+    public SupplierResponse suspendSupplier(
+            Long supplierId,
+            String reason
+    ) {
+        Supplier supplier =
+                getRequiredSupplier(supplierId);
+
+        if (supplier.getStatus() == com.sparehub.entity.supplier.SupplierStatus.SUSPENDED) {
+            throw new BadRequestException(
+                    "Supplier is already suspended"
+            );
+        }
+
+        supplier.setStatus(com.sparehub.entity.supplier.SupplierStatus.SUSPENDED);
+
+        if (supplier.getProducts() != null) {
+            supplier.getProducts()
+                    .forEach(supplierProduct ->
+                            supplierProduct.setActive(false)
+                    );
+        }
+
+        Supplier savedSupplier =
+                supplierRepository.save(supplier);
+
+        return supplierMapper.toResponse(savedSupplier);
+    }
+
+    @Override
+    public SupplierResponse updateSupplierStatus(
+            Long supplierId,
+            com.sparehub.entity.supplier.SupplierStatus status,
+            String reason
+    ) {
+        if (status == null) {
+            throw new BadRequestException("Status is required");
+        }
+        return switch (status) {
+            case ACTIVE -> activateSupplier(supplierId);
+            case INACTIVE -> deactivateSupplier(supplierId);
+            case SUSPENDED -> suspendSupplier(supplierId, reason);
+        };
+    }
+
     private Supplier getRequiredSupplier(
             Long supplierId
     ) {

@@ -35,10 +35,43 @@ export default function RegisterPage() {
     const handleChange = (event) => {
         const { name, value } = event.target;
 
+        if (name === "phone") {
+            const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
+            setForm((current) => ({
+                ...current,
+                phone: digitsOnly,
+            }));
+            return;
+        }
+
         setForm((current) => ({
             ...current,
             [name]: value,
         }));
+    };
+
+    const handlePhoneKeyDown = (event) => {
+        if (
+            [
+                "Backspace",
+                "Delete",
+                "Tab",
+                "ArrowLeft",
+                "ArrowRight",
+                "ArrowUp",
+                "ArrowDown",
+                "Home",
+                "End",
+                "Enter",
+            ].includes(event.key) ||
+            event.ctrlKey ||
+            event.metaKey
+        ) {
+            return;
+        }
+        if (!/^[0-9]$/.test(event.key)) {
+            event.preventDefault();
+        }
     };
 
     const handleSubmit = async (event) => {
@@ -54,6 +87,22 @@ export default function RegisterPage() {
         if (form.password.length < 8) {
             setError("Password must be at least 8 characters long.");
             return;
+        }
+
+        if (form.phone && form.phone.trim()) {
+            const trimmedPhone = form.phone.trim();
+            if (!trimmedPhone.startsWith("0")) {
+                setError("Phone number must start with 0 as per Sri Lankan standard (e.g. 07XXXXXXXX).");
+                return;
+            }
+            if (trimmedPhone.length !== 10) {
+                setError(`Phone number must contain exactly 10 digits (currently ${trimmedPhone.length}/10).`);
+                return;
+            }
+            if (!/^0[1-9]\d{8}$/.test(trimmedPhone)) {
+                setError("Please enter a valid 10-digit Sri Lankan phone number (e.g. 0771234567).");
+                return;
+            }
         }
 
         setSubmitting(true);
@@ -121,12 +170,17 @@ export default function RegisterPage() {
                     </label>
 
                     <label>
-                        Phone number
+                        Phone number (10 digits)
                         <input
+                            type="tel"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            maxLength={10}
                             name="phone"
                             placeholder="0771234567"
                             value={form.phone}
                             onChange={handleChange}
+                            onKeyDown={handlePhoneKeyDown}
                         />
                     </label>
 

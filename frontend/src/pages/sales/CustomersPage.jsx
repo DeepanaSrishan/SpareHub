@@ -3,6 +3,18 @@ import { Link } from "react-router-dom";
 import customerManagementService from "../../services/customerManagementService";
 import "../../styles/customerManagement.css";
 
+const resolveTierName = (tier, points = 0) => {
+    const pts = Number(points) || 0;
+    if (pts >= 3000) return "Platinum";
+    if (pts >= 1500) return "Gold";
+    if (pts >= 500) return "Silver";
+    if (tier && tier.trim() && tier.toUpperCase() !== "BRONZE") {
+        const clean = tier.trim();
+        return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
+    }
+    return "Bronze";
+};
+
 function CustomersPage() {
     const [customers, setCustomers] = useState([]);
     const [searchInput, setSearchInput] = useState("");
@@ -63,10 +75,29 @@ function CustomersPage() {
     };
 
     const getFullName = (customer) => {
-        const fullName =
-            `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim();
+        if (!customer) return "Unknown Customer";
 
-        return fullName || customer.name || "Unknown Customer";
+        if (customer.fullName && customer.fullName.trim()) {
+            return customer.fullName.trim();
+        }
+
+        const combinedName = `${customer.firstName ?? ""} ${
+            customer.lastName ?? ""
+        }`.trim();
+
+        if (combinedName) {
+            return combinedName;
+        }
+
+        if (customer.name && customer.name.trim()) {
+            return customer.name.trim();
+        }
+
+        if (customer.email && customer.email.trim()) {
+            return customer.email.trim();
+        }
+
+        return "Unknown Customer";
     };
 
     return (
@@ -155,17 +186,21 @@ function CustomersPage() {
                                 <tr key={customer.id}>
                                     <td>{getFullName(customer)}</td>
                                     <td>{customer.email}</td>
-                                    <td>{customer.phoneNumber || "—"}</td>
+                                    <td>{customer.phone || customer.phoneNumber || "—"}</td>
                                     <td>
-                      <span
-                          className={`tier-badge tier-${(
-                              customer.loyaltyTier || "BRONZE"
-                          ).toLowerCase()}`}
-                      >
-                        {customer.loyaltyTier || "BRONZE"}
-                      </span>
+                                        {(() => {
+                                            const tierName = resolveTierName(
+                                                customer.loyaltyTier,
+                                                customer.loyaltyPoints ?? customer.rewardPoints ?? 0
+                                            );
+                                            return (
+                                                <span className={`tier-badge tier-${tierName.toLowerCase()}`}>
+                                                    {tierName.toUpperCase()}
+                                                </span>
+                                            );
+                                        })()}
                                     </td>
-                                    <td>{customer.rewardPoints ?? 0}</td>
+                                    <td>{customer.loyaltyPoints ?? customer.rewardPoints ?? 0}</td>
                                     <td>
                       <span
                           className={`status-badge ${

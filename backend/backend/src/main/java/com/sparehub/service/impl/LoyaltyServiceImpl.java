@@ -57,7 +57,7 @@ public class LoyaltyServiceImpl
     private BigDecimal nearTierPercent;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public LoyaltyStatusResponse
     getCurrentCustomerLoyaltyStatus() {
 
@@ -70,7 +70,7 @@ public class LoyaltyServiceImpl
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public LoyaltyStatusResponse getCustomerLoyaltyStatus(
             Long customerId
     ) {
@@ -251,6 +251,12 @@ public class LoyaltyServiceImpl
                         + " SpareHub reward points."
         );
 
+        List<LoyaltyTier> tiers =
+                loyaltyTierRepository
+                        .findByActiveTrueOrderByMinimumPointsAsc();
+
+        autoUpgradeTierIfEligible(customer, tiers);
+
         createNearTierNotificationIfRequired(
                 customer
         );
@@ -259,7 +265,7 @@ public class LoyaltyServiceImpl
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public BigDecimal calculateLoyaltyDiscount(
             Long customerId,
             BigDecimal subtotal
@@ -272,6 +278,12 @@ public class LoyaltyServiceImpl
         ) <= 0) {
             return BigDecimal.ZERO;
         }
+
+        List<LoyaltyTier> tiers =
+                loyaltyTierRepository
+                        .findByActiveTrueOrderByMinimumPointsAsc();
+
+        autoUpgradeTierIfEligible(customer, tiers);
 
         LoyaltyTier tier =
                 customer.getLoyaltyTier();
@@ -351,6 +363,8 @@ public class LoyaltyServiceImpl
         List<LoyaltyTier> tiers =
                 loyaltyTierRepository
                         .findByActiveTrueOrderByMinimumPointsAsc();
+
+        autoUpgradeTierIfEligible(customer, tiers);
 
         LoyaltyTier currentTier =
                 customer.getLoyaltyTier();
@@ -495,13 +509,117 @@ public class LoyaltyServiceImpl
                     "Eligible purchase amount must be greater than zero"
             );
         }
-
         if (spendPerPoint.compareTo(
                 BigDecimal.ZERO
         ) <= 0) {
             throw new IllegalStateException(
                     "Loyalty spend-per-point configuration must be greater than zero"
             );
+        }
+    }
+
+    private boolean autoUpgradeTierIfEligible(
+            User customer,
+            List<LoyaltyTier> tiers
+    ) {
+        if (customer == null || tiers == null || tiers.isEmpty()) {
+            return false;
+        }
+
+        int points = customer.getLoyaltyPoints() == null
+                ? 0
+                : customer.getLoyaltyPoints();
+
+        // Find highest tier customer qualifies for based on points
+        LoyaltyTier eligibleTier = tiers.stream()
+                .filter(tier -> tier.getMinimumPoints() != null && tier.getMinimumPoints() <= points)
+                .reduce((first, second) -> second)
+                .orElse(null);
+
+        if (eligibleTier == null) {
+            return false;
+        }
+
+        LoyaltyTier currentTier = customer.getLoyaltyTier();
+        int currentMin = (currentTier != null && currentTier.getMinimumPoints() != null)
+                ? currentTier.getMinimumPoints()
+                : -1;
+        int eligibleMin = eligibleTier.getMinimumPoints() != null
+                ? eligibleTier.getMinimumPoints()
+                : 0;
+
+        // Only upgrade if eligible tier is higher than current tier (never downgrade manually assigned tier)
+        if (currentTier == null || eligibleMin > currentMin) {
+            String previousTierName = currentTier == null ? "None" : currentTier.getName();
+            customer.setLoyaltyTier(eligibleTier);
+            userRepository.save(customer);
+
+            LoyaltyTransaction transaction = LoyaltyTransaction.builder()
+                    .customer(customer)
+                    .transactionType(
+                            LoyaltyTransactionType.TIER_CHANGED
+                    )
+                    .points(0)
+                    .balanceAfter(points)
+                    .description(
+                            "Automatic loyalty tier upgrade from "
+                                    + previousTierName
+                                    + " to "
+                                    + eligibleTier.getName()
+                                    + " based on reward points balance ("
+                                    + points
+                                    + " pts)"
+                    )
+                    .performedByUserId(null)
+                    .build();
+
+            loyaltyTransactionRepository.save(transaction);
+
+            notificationService.createNotification(
+                    customer,
+                    NotificationType.TIER_UPDATED,
+                    "Loyalty tier upgraded!",
+                    "Congratulations! You have been automatically upgraded to the "
+                            + eligibleTier.getName()
+                            + " loyalty tier. You are now eligible for a "
+                            + eligibleTier.getDiscountPercentage()
+                            + "% discount."
+            );
+
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    @Transactional
+    public LoyaltyTier ensureCustomerTierUpToDate(User customer) {
+        if (customer == null || customer.getRole() != Role.CUSTOMER) {
+            return null;
+        }
+
+        List<LoyaltyTier> tiers =
+                loyaltyTierRepository
+                        .findByActiveTrueOrderByMinimumPointsAsc();
+
+        autoUpgradeTierIfEligible(customer, tiers);
+        return customer.getLoyaltyTier();
+    }
+
+    @Override
+    @Transactional
+    public void syncAllCustomerTiers() {
+        List<LoyaltyTier> tiers =
+                loyaltyTierRepository
+                        .findByActiveTrueOrderByMinimumPointsAsc();
+
+        List<User> customers = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == Role.CUSTOMER)
+                .toList();
+
+        for (User customer : customers) {
+            autoUpgradeTierIfEligible(customer, tiers);
         }
     }
 }

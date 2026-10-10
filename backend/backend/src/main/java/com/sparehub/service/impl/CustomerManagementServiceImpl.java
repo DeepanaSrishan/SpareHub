@@ -64,8 +64,10 @@ public class CustomerManagementServiceImpl
     private final NotificationService
             notificationService;
 
+    private final com.sparehub.service.LoyaltyService loyaltyService;
+
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Page<CustomerSummaryResponse>
     searchCustomers(
             String keyword,
@@ -132,7 +134,7 @@ public class CustomerManagementServiceImpl
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CustomerDetailResponse getCustomerById(
             Long customerId,
             int inactiveDays
@@ -363,16 +365,29 @@ public class CustomerManagementServiceImpl
         );
     }
 
+    private String resolveCustomerName(User customer) {
+        if (customer == null) {
+            return "Customer";
+        }
+        if (customer.getFullName() != null && !customer.getFullName().trim().isBlank()) {
+            return customer.getFullName().trim();
+        }
+        if (customer.getEmail() != null && !customer.getEmail().trim().isBlank()) {
+            return customer.getEmail().trim();
+        }
+        return "Customer #" + customer.getId();
+    }
+
     private CustomerSummaryResponse mapToSummary(
             User customer,
             int inactiveDays
     ) {
         LoyaltyTier tier =
-                customer.getLoyaltyTier();
+                loyaltyService.ensureCustomerTierUpToDate(customer);
 
         return new CustomerSummaryResponse(
                 customer.getId(),
-                customer.getFullName(),
+                resolveCustomerName(customer),
                 customer.getEmail(),
                 customer.getPhone(),
                 customer.getAccountStatus(),
@@ -394,11 +409,11 @@ public class CustomerManagementServiceImpl
             int inactiveDays
     ) {
         LoyaltyTier tier =
-                customer.getLoyaltyTier();
+                loyaltyService.ensureCustomerTierUpToDate(customer);
 
         return new CustomerDetailResponse(
                 customer.getId(),
-                customer.getFullName(),
+                resolveCustomerName(customer),
                 customer.getEmail(),
                 customer.getPhone(),
                 customer.getAddress(),

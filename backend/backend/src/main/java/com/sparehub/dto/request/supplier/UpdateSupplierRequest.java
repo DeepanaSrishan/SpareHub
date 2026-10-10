@@ -1,6 +1,7 @@
 package com.sparehub.dto.request.supplier;
 
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -20,6 +21,7 @@ public record UpdateSupplierRequest(
                 max = 120,
                 message = "Contact person cannot exceed 120 characters"
         )
+        @JsonAlias({"name", "supplierName"})
         String contactPerson,
 
         @NotBlank(message = "Email is required")

@@ -250,24 +250,40 @@ public class OrderServiceImpl implements OrderService {
     private BigDecimal resolveLoyaltyDiscountPercentage(
             User customer
     ) {
-        if (customer.getLoyaltyTier() == null) {
-            return BigDecimal.ZERO;
+        BigDecimal tierDiscount = BigDecimal.ZERO;
+
+        if (customer.getLoyaltyTier() != null) {
+            if (customer.getLoyaltyTier().getDiscountPercentage() != null) {
+                tierDiscount = customer.getLoyaltyTier().getDiscountPercentage();
+            } else {
+                String tierName = customer.getLoyaltyTier().getName() != null
+                        ? customer.getLoyaltyTier().getName().trim().toUpperCase(Locale.ROOT)
+                        : "";
+
+                tierDiscount = switch (tierName) {
+                    case "SILVER" -> new BigDecimal("5.00");
+                    case "GOLD" -> new BigDecimal("10.00");
+                    case "PLATINUM" -> new BigDecimal("15.00");
+                    default -> BigDecimal.ZERO;
+                };
+            }
         }
 
-        if (customer.getLoyaltyTier().getDiscountPercentage() != null) {
-            return customer.getLoyaltyTier().getDiscountPercentage();
+        if (tierDiscount.compareTo(BigDecimal.ZERO) > 0) {
+            return tierDiscount;
         }
 
-        String tierName = customer.getLoyaltyTier().getName() != null
-                ? customer.getLoyaltyTier().getName().trim().toUpperCase(Locale.ROOT)
-                : "";
+        // Fallback: If customer reached points threshold but tier is not yet refreshed
+        int points = customer.getLoyaltyPoints() == null ? 0 : customer.getLoyaltyPoints();
+        if (points >= 3000) {
+            return new BigDecimal("15.00");
+        } else if (points >= 1500) {
+            return new BigDecimal("10.00");
+        } else if (points >= 500) {
+            return new BigDecimal("5.00");
+        }
 
-        return switch (tierName) {
-            case "SILVER" -> new BigDecimal("5.00");
-            case "GOLD" -> new BigDecimal("10.00");
-            case "PLATINUM" -> new BigDecimal("15.00");
-            default -> BigDecimal.ZERO;
-        };
+        return BigDecimal.ZERO;
     }
 
     private User getCurrentUser() {

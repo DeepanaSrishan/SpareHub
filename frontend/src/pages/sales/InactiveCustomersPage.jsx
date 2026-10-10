@@ -3,6 +3,18 @@ import { Link } from "react-router-dom";
 import customerManagementService from "../../services/customerManagementService";
 import "../../styles/customerManagement.css";
 
+const resolveTierName = (tier, points = 0) => {
+    const pts = Number(points) || 0;
+    if (pts >= 3000) return "Platinum";
+    if (pts >= 1500) return "Gold";
+    if (pts >= 500) return "Silver";
+    if (tier && tier.trim() && tier.toUpperCase() !== "BRONZE") {
+        const clean = tier.trim();
+        return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
+    }
+    return "Bronze";
+};
+
 function InactiveCustomersPage() {
     const [customers, setCustomers] = useState([]);
     const [inactiveDays, setInactiveDays] = useState(90);
@@ -49,6 +61,32 @@ function InactiveCustomersPage() {
     const handleDaysChange = (event) => {
         setInactiveDays(Number(event.target.value));
         setPage(0);
+    };
+
+    const getFullName = (customer) => {
+        if (!customer) return "Unknown Customer";
+
+        if (customer.fullName && customer.fullName.trim()) {
+            return customer.fullName.trim();
+        }
+
+        const combinedName = `${customer.firstName ?? ""} ${
+            customer.lastName ?? ""
+        }`.trim();
+
+        if (combinedName) {
+            return combinedName;
+        }
+
+        if (customer.name && customer.name.trim()) {
+            return customer.name.trim();
+        }
+
+        if (customer.email && customer.email.trim()) {
+            return customer.email.trim();
+        }
+
+        return "Unknown Customer";
     };
 
     return (
@@ -120,24 +158,21 @@ function InactiveCustomersPage() {
                             <tbody>
                             {customers.map((customer) => (
                                 <tr key={customer.id}>
-                                    <td>
-                                        {`${customer.firstName ?? ""} ${
-                                                customer.lastName ?? ""
-                                            }`.trim() ||
-                                            customer.name ||
-                                            "Unknown Customer"}
-                                    </td>
+                                    <td>{getFullName(customer)}</td>
 
                                     <td>{customer.email}</td>
 
                                     <td>
-                                        {customer.loyaltyTier || "BRONZE"}
+                                        {resolveTierName(
+                                            customer.loyaltyTier,
+                                            customer.loyaltyPoints ?? customer.rewardPoints ?? 0
+                                        ).toUpperCase()}
                                     </td>
 
                                     <td>
-                                        {customer.lastPurchaseDate
+                                        {customer.lastPurchaseAt || customer.lastPurchaseDate
                                             ? new Date(
-                                                customer.lastPurchaseDate
+                                                customer.lastPurchaseAt || customer.lastPurchaseDate
                                             ).toLocaleDateString()
                                             : "No purchases"}
                                     </td>

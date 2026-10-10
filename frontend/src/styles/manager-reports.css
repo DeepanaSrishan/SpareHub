@@ -194,7 +194,7 @@
     font-size: 1.55rem;
     font-weight: 800;
     color: #b8f34a;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     word-break: break-word;
     text-shadow: 0 0 12px rgba(184, 243, 74, 0.25);
 }
@@ -448,7 +448,7 @@
 
 .payment-status-grid strong {
     color: #b8f34a;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
 }
 
 .payment-calculation-panel > div {
@@ -475,7 +475,7 @@
     color: #b8f34a !important;
     font-size: 1.25rem;
     font-weight: 800;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     text-shadow: 0 0 12px rgba(184, 243, 74, 0.3);
 }
 

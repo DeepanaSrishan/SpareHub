@@ -319,9 +319,29 @@ public class BillingServiceImpl implements BillingService {
             if (cleanText(request.cardHolderName()) == null) {
                 throw new BadRequestException("Cardholder name is required");
             }
-            if (cleanText(request.expiryDate()) == null) {
+            String rawExpiry = cleanText(request.expiryDate());
+            if (rawExpiry == null) {
                 throw new BadRequestException("Card expiry date (MM/YY) is required");
             }
+            java.util.regex.Matcher expiryMatcher = java.util.regex.Pattern.compile("^(0[1-9]|1[0-2])/([0-9]{2})$").matcher(rawExpiry.trim());
+            if (!expiryMatcher.matches()) {
+                throw new BadRequestException("Card expiry date must be in valid MM/YY format (e.g. 12/26)");
+            }
+            int expMonth = Integer.parseInt(expiryMatcher.group(1));
+            int expYear = Integer.parseInt(expiryMatcher.group(2));
+
+            int minAllowedYear = 26; // 2026 onwards
+            int currentMonth = 10;   // October 2026
+            if (expYear < minAllowedYear) {
+                throw new BadRequestException("Card expiry year must be 2026 or later (e.g. 26, 27...). Past years cannot be accepted.");
+            }
+            if (expYear == minAllowedYear && expMonth < currentMonth) {
+                throw new BadRequestException("This card has already expired. Expiry month cannot be in the past.");
+            }
+            if (expYear > 50) {
+                throw new BadRequestException("Card expiry year cannot exceed 2050");
+            }
+
             if (cleanText(request.cvv()) == null || cleanText(request.cvv()).length() < 3) {
                 throw new BadRequestException("Valid 3 or 4 digit CVV/CVC is required");
             }

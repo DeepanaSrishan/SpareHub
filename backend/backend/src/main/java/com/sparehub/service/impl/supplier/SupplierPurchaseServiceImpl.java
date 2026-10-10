@@ -51,9 +51,9 @@ public class SupplierPurchaseServiceImpl
     ) {
         Supplier supplier = getRequiredSupplier(supplierId);
 
-        if (!Boolean.TRUE.equals(supplier.getActive())) {
+        if (!supplier.isEligibleForPurchase()) {
             throw new BadRequestException(
-                    "Cannot create a purchase for an inactive supplier"
+                    "Cannot create a purchase for an inactive or suspended supplier (Current status: " + supplier.getStatus() + ")"
             );
         }
 

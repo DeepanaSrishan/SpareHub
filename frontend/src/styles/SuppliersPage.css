@@ -115,7 +115,7 @@
 .supplier-summary-card strong {
     font-size: 32px;
     font-weight: 800;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     color: #b8f34a;
     text-shadow: 0 0 12px rgba(184, 243, 74, 0.25);
 }
@@ -374,6 +374,12 @@
     color: #f87171;
     background: rgba(248, 113, 113, 0.15);
     border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+.supplier-status.suspended {
+    color: #f97316;
+    background: rgba(249, 115, 22, 0.15);
+    border: 1px solid rgba(249, 115, 22, 0.35);
 }
 
 .supplier-actions-column {
@@ -705,7 +711,7 @@
 .purchase-total-preview strong {
     color: var(--primary-lime);
     font-size: 22px;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
 }
 
 .purchase-total-preview small {
@@ -720,18 +726,18 @@
     margin-bottom: 20px;
     padding: 16px;
     border-radius: 14px;
-    background: #F3F7F4;
-    border: 1px solid var(--border);
+    background: rgba(8, 18, 14, 0.92);
+    border: 1px solid rgba(184, 243, 74, 0.22);
 }
 
 .purchase-action-summary span {
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.65);
     font-size: 0.9rem;
 }
 
 .purchase-action-summary strong {
     text-align: right;
-    color: var(--text-main);
+    color: #ffffff;
     font-weight: 700;
 }
 
@@ -741,14 +747,14 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 20px;
-    color: var(--primary-dark);
+    color: var(--primary-lime);
     font-weight: 750;
     text-decoration: none;
     transition: all 0.2s;
 }
 
 .supplier-back-link:hover {
-    color: var(--accent-blue);
+    color: #c5f668;
     gap: 12px;
 }
 
@@ -757,12 +763,13 @@
     align-items: center;
     gap: 5px;
     padding: 5px 12px;
-    color: #047857;
+    color: #34d399;
     border-radius: 999px;
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
     font-size: 12px;
     font-weight: 800;
+    box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
 }
 
 .set-preferred-button {
@@ -770,10 +777,10 @@
     align-items: center;
     gap: 5px;
     padding: 6px 12px;
-    color: #b45309;
+    color: #fbbf24;
     border: 1px solid rgba(245, 158, 11, 0.35);
     border-radius: 10px;
-    background: rgba(245, 158, 11, 0.1);
+    background: rgba(245, 158, 11, 0.15);
     font-size: 12px;
     font-weight: 750;
     cursor: pointer;
@@ -781,7 +788,8 @@
 }
 
 .set-preferred-button:hover {
-    background: rgba(245, 158, 11, 0.2);
+    background: rgba(245, 158, 11, 0.25);
+    color: #fde047;
 }
 
 .set-preferred-button:disabled {
@@ -795,9 +803,9 @@
     justify-content: center;
     gap: 8px;
     padding: 16px;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(184, 243, 74, 0.2);
     border-radius: 14px;
-    background: #F3F7F4;
+    background: rgba(8, 18, 14, 0.92);
 }
 
 .supplier-checkbox-group label {
@@ -806,17 +814,17 @@
     gap: 10px;
     font-weight: 700;
     cursor: pointer;
-    color: var(--text-main);
+    color: #ffffff;
 }
 
 .supplier-checkbox-group input {
     width: 18px;
     height: 18px;
-    accent-color: var(--secondary-green);
+    accent-color: var(--primary-lime);
 }
 
 .supplier-checkbox-group small {
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.65);
     line-height: 1.45;
 }
 

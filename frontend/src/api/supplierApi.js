@@ -54,3 +54,39 @@ export const activateSupplier = async (supplierId) => {
 
     return extractData(response);
 };
+
+export const suspendSupplier = async (supplierId, reason = "") => {
+    const response = await api.patch(
+        `${BASE_URL}/${supplierId}/suspend`,
+        null,
+        { params: reason ? { reason } : {} }
+    );
+
+    return extractData(response);
+};
+
+export const updateSupplierStatus = async (supplierId, status, reason = "") => {
+    const response = await api.patch(
+        `${BASE_URL}/${supplierId}/status`,
+        null,
+        { params: { status, ...(reason ? { reason } : {}) } }
+    );
+
+    return extractData(response);
+};
+
+export const getSupplierPerformance = async (supplierId) => {
+    const response = await api.get(
+        `/manager/suppliers/${supplierId}/performance`
+    );
+
+    return extractData(response);
+};
+
+export const getSupplierTransactions = async (supplierId) => {
+    const response = await api.get(
+        `/manager/suppliers/${supplierId}/transactions`
+    );
+
+    return extractData(response);
+};

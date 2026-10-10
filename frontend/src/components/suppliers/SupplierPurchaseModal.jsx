@@ -23,16 +23,32 @@ function SupplierPurchaseModal({
                                    onSupplierChange,
                                    onClose,
                                    onSubmit,
+                                   initialValues = null,
                                }) {
     const [form, setForm] = useState(initialForm);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (open) {
-            setForm(initialForm);
+            if (initialValues) {
+                setForm({
+                    ...initialForm,
+                    supplierId: initialValues.supplierId ? String(initialValues.supplierId) : "",
+                    supplierProductId: initialValues.supplierProductId ? String(initialValues.supplierProductId) : "",
+                    orderedQuantity: initialValues.orderedQuantity ? String(initialValues.orderedQuantity) : "",
+                    expectedDeliveryDate: initialValues.expectedDeliveryDate || "",
+                    supplierInvoiceNumber: initialValues.supplierInvoiceNumber || "",
+                    notes: initialValues.notes || "",
+                });
+                if (initialValues.supplierId && onSupplierChange) {
+                    onSupplierChange(initialValues.supplierId);
+                }
+            } else {
+                setForm(initialForm);
+            }
             setErrors({});
         }
-    }, [open]);
+    }, [open, initialValues]);
 
     const selectedSupplierProduct = useMemo(
         () =>
@@ -358,13 +374,15 @@ function getPurchasePrice(item) {
 }
 
 function isSupplierActive(supplier) {
+    if (supplier?.status) {
+        return supplier.status.toString().toUpperCase() === "ACTIVE";
+    }
+
     if (typeof supplier?.active === "boolean") {
         return supplier.active;
     }
 
-    return (
-        supplier?.status?.toUpperCase() === "ACTIVE"
-    );
+    return false;
 }
 
 function formatCurrency(value) {

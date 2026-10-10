@@ -13,6 +13,7 @@ function SupplierFormModal({
                                open,
                                supplier,
                                loading,
+                               error,
                                onClose,
                                onSubmit,
                            }) {
@@ -26,9 +27,9 @@ function SupplierFormModal({
         if (supplier) {
             setForm({
                 name:
+                    supplier.contactPerson ??
                     supplier.name ??
                     supplier.supplierName ??
-                    supplier.contactPerson ??
                     "",
                 companyName: supplier.companyName ?? "",
                 email: supplier.email ?? "",
@@ -74,11 +75,15 @@ function SupplierFormModal({
         if (!form.contactNumber.trim()) {
             errors.contactNumber =
                 "Contact number is required";
+        } else if (!/^[0-9+()\-\s]{7,25}$/.test(form.contactNumber.trim())) {
+            errors.contactNumber =
+                "Enter a valid contact number (7-25 digits)";
         }
 
-        if (
-            form.email &&
-            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
+        if (!form.email.trim()) {
+            errors.email = "Email is required";
+        } else if (
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())
         ) {
             errors.email = "Enter a valid email address";
         }
@@ -96,6 +101,7 @@ function SupplierFormModal({
         }
 
         await onSubmit({
+            contactPerson: form.name.trim(),
             name: form.name.trim(),
             companyName: form.companyName.trim(),
             email: form.email.trim(),
@@ -138,6 +144,12 @@ function SupplierFormModal({
                         <X size={20} />
                     </button>
                 </div>
+
+                {error && (
+                    <div style={{ margin: "14px 28px 0" }} className="supplier-alert error">
+                        <span>{error}</span>
+                    </div>
+                )}
 
                 <form
                     className="supplier-form"
@@ -186,7 +198,7 @@ function SupplierFormModal({
 
                         <div className="supplier-form-group">
                             <label htmlFor="supplier-email">
-                                Email
+                                Email *
                             </label>
 
                             <input

@@ -156,7 +156,7 @@
 
 .order-list-details strong {
     color: #b8f34a;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     font-size: 1.05rem;
 }
 
@@ -396,7 +396,7 @@
 .order-detail-item strong {
     font-size: 1.1rem;
     color: #b8f34a;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     font-weight: 800;
 }
 
@@ -427,7 +427,7 @@
 .payment-summary-grid strong {
     font-size: 1.2rem;
     color: #b8f34a;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     font-weight: 800;
 }
 
@@ -496,7 +496,7 @@
     color: #b8f34a;
     font-size: 1.25rem;
     font-weight: 800;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
     text-shadow: 0 0 10px rgba(184, 243, 74, 0.25);
 }
 
@@ -780,7 +780,7 @@
     font-size: 1.25rem;
     font-weight: 800;
     color: #b8f34a !important;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
 }
 
 .invoice-footer {
@@ -1052,6 +1052,98 @@
 .payment-modal-section select:focus {
     border-color: #b8f34a;
     box-shadow: 0 0 0 3px rgba(184, 243, 74, 0.25);
+}
+
+/* Card Expiry Year Selection & Real-time Feedback in Modal */
+.payment-modal-section .expiry-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.payment-modal-section .expiry-year-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--primary-lime, #b8f34a);
+    background: rgba(184, 243, 74, 0.12);
+    border: 1px solid rgba(184, 243, 74, 0.25);
+    padding: 2px 7px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
+
+.payment-modal-section .expiry-feedback-msg {
+    margin-top: 5px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1.35;
+}
+
+.payment-modal-section .expiry-feedback-msg.error {
+    color: #f87171;
+}
+
+.payment-modal-section .expiry-feedback-msg.success {
+    color: #34d399;
+}
+
+.payment-modal-section .expiry-quick-years {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.payment-modal-section .quick-years-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.payment-modal-section .year-chip-btn {
+    border: 1px solid rgba(184, 243, 74, 0.22);
+    background: rgba(18, 28, 22, 0.85);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+}
+
+.payment-modal-section .year-chip-btn:hover {
+    background: rgba(184, 243, 74, 0.22);
+    border-color: #b8f34a;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.payment-modal-section .year-chip-btn.active {
+    background: #b8f34a;
+    color: #08080a;
+    border-color: #b8f34a;
+    font-weight: 800;
+    box-shadow: 0 0 10px rgba(184, 243, 74, 0.35);
+}
+
+.payment-modal-section .input-error {
+    border-color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.08) !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
+}
+
+.payment-modal-section .input-success {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
 }
 
 .modal-actions {

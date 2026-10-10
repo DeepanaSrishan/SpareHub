@@ -48,6 +48,8 @@ public class ManagementReportServiceImpl
     private final SupplierRepository supplierRepository;
     private final SupplierPurchaseRepository supplierPurchaseRepository;
     private final SupplierTransactionRepository supplierTransactionRepository;
+    private final com.sparehub.service.supplier.SupplierPerformanceService supplierPerformanceService;
+    private final com.sparehub.service.inventory.ReorderRecommendationService reorderRecommendationService;
 
     @Override
     public ManagementDashboardResponse getDashboardSummary(
@@ -126,6 +128,21 @@ public class ManagementReportServiceImpl
                     generatePaymentReport(filter, range);
             case SUPPLIER_TRANSACTIONS ->
                     generateSupplierTransactionReport(
+                            filter,
+                            range
+                    );
+            case SUPPLIER_PERFORMANCE ->
+                    generateSupplierPerformanceReport(
+                            filter,
+                            range
+                    );
+            case PROCUREMENT ->
+                    generateProcurementReport(
+                            filter,
+                            range
+                    );
+            case REORDER_RECOMMENDATIONS ->
+                    generateReorderRecommendationReport(
                             filter,
                             range
                     );
@@ -984,6 +1001,151 @@ public class ManagementReportServiceImpl
 
     private String getSupplierName(Supplier supplier) {
         return supplier.getCompanyName();
+    }
+
+    /*
+     * PROCUREMENT / PURCHASE REPORT
+     */
+    private ManagementReportResponse generateProcurementReport(
+            ManagementReportFilter filter,
+            DateRange range
+    ) {
+        List<Map<String, Object>> records =
+                supplierPurchaseRepository.findAll()
+                        .stream()
+                        .filter(purchase -> isWithinRange(
+                                purchase.getOrderedAt(),
+                                range
+                        ))
+                        .filter(purchase ->
+                                filter.supplierId() == null
+                                        || (purchase.getSupplier() != null
+                                        && purchase.getSupplier().getId().equals(filter.supplierId())))
+                        .filter(purchase ->
+                                filter.productId() == null
+                                        || (purchase.getSparePart() != null
+                                        && purchase.getSparePart().getId().equals(filter.productId())))
+                        .filter(purchase ->
+                                filter.orderStatus() == null
+                                        || filter.orderStatus().isBlank()
+                                        || statusEquals(purchase.getStatus(), filter.orderStatus()))
+                        .map(purchase -> {
+                            Map<String, Object> row = new LinkedHashMap<>();
+                            row.put("purchaseId", purchase.getId());
+                            row.put("purchaseNumber", purchase.getPurchaseNumber());
+                            row.put("orderedAt", purchase.getOrderedAt());
+                            row.put("supplierCode", purchase.getSupplier() != null ? purchase.getSupplier().getSupplierCode() : "");
+                            row.put("supplierName", purchase.getSupplier() != null ? getSupplierName(purchase.getSupplier()) : "");
+                            row.put("partNumber", purchase.getSparePart() != null ? purchase.getSparePart().getPartNumber() : "");
+                            row.put("productName", purchase.getSparePart() != null ? purchase.getSparePart().getName() : "");
+                            row.put("orderedQuantity", purchase.getOrderedQuantity());
+                            row.put("receivedQuantity", purchase.getReceivedQuantity() == null ? 0 : purchase.getReceivedQuantity());
+                            int pendingQty = Math.max(0, (purchase.getOrderedQuantity() == null ? 0 : purchase.getOrderedQuantity())
+                                    - (purchase.getReceivedQuantity() == null ? 0 : purchase.getReceivedQuantity()));
+                            row.put("pendingQuantity", pendingQty);
+                            row.put("unitPrice", purchase.getUnitPurchasePrice());
+                            row.put("totalAmount", purchase.getTotalAmount());
+                            row.put("status", purchase.getStatus());
+                            row.put("expectedDeliveryDate", purchase.getExpectedDeliveryDate());
+                            row.put("receivedAt", purchase.getReceivedAt());
+                            row.put("invoiceNumber", purchase.getSupplierInvoiceNumber() != null ? purchase.getSupplierInvoiceNumber() : "");
+                            return row;
+                        })
+                        .toList();
+
+        return createReportResponse(
+                filter,
+                range,
+                records,
+                sumRecordAmounts(records, "totalAmount")
+        );
+    }
+
+    /*
+     * SUPPLIER PERFORMANCE REPORT
+     */
+    private ManagementReportResponse generateSupplierPerformanceReport(
+            ManagementReportFilter filter,
+            DateRange range
+    ) {
+        var rankingResponse = supplierPerformanceService.getAllSupplierPerformance(
+                range.startDate(),
+                range.endDate()
+        );
+
+        List<Map<String, Object>> records = rankingResponse.suppliers()
+                .stream()
+                .filter(perf -> filter.supplierId() == null || perf.supplierId().equals(filter.supplierId()))
+                .map(perf -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("supplierId", perf.supplierId());
+                    row.put("supplierCode", perf.supplierCode());
+                    row.put("supplierName", perf.supplierName());
+                    row.put("companyName", perf.companyName());
+                    row.put("totalOrders", perf.totalPurchaseOrders());
+                    row.put("completedOrders", perf.receivedOrders());
+                    row.put("pendingOrders", perf.pendingOrders());
+                    row.put("cancelledOrders", perf.cancelledOrders());
+                    row.put("totalProcurementValue", perf.totalReceivedPurchaseValue() != null ? perf.totalReceivedPurchaseValue() : BigDecimal.ZERO);
+                    row.put("onTimeDeliveryRate", perf.onTimeDeliveryRate() != null ? perf.onTimeDeliveryRate() + "%" : "0%");
+                    row.put("completionRate", perf.completionRate() != null ? perf.completionRate() + "%" : "0%");
+                    row.put("cancellationRate", perf.cancellationRate() != null ? perf.cancellationRate() + "%" : "0%");
+                    row.put("averageDeliveryDays", perf.averageDeliveryDays());
+                    row.put("performanceScore", perf.performanceScore());
+                    row.put("rating", perf.performanceRating() != null ? perf.performanceRating().name() : "UNRATED");
+                    return row;
+                })
+                .toList();
+
+        return createReportResponse(
+                filter,
+                range,
+                records,
+                sumRecordAmounts(records, "totalProcurementValue")
+        );
+    }
+
+    /*
+     * REORDER RECOMMENDATION REPORT
+     */
+    private ManagementReportResponse generateReorderRecommendationReport(
+            ManagementReportFilter filter,
+            DateRange range
+    ) {
+        var summary = reorderRecommendationService.getReorderRecommendations(true);
+
+        List<Map<String, Object>> records = summary.recommendations()
+                .stream()
+                .filter(rec -> filter.productId() == null || rec.sparePartId().equals(filter.productId()))
+                .filter(rec -> filter.supplierId() == null || (rec.preferredSupplierId() != null && rec.preferredSupplierId().equals(filter.supplierId())))
+                .map(rec -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("partId", rec.sparePartId());
+                    row.put("partNumber", rec.partNumber());
+                    row.put("name", rec.sparePartName());
+                    row.put("category", rec.categoryName());
+                    row.put("brand", rec.brand());
+                    row.put("currentStock", rec.currentStock());
+                    row.put("reorderLevel", rec.reorderLevel());
+                    row.put("shortage", rec.netShortage());
+                    row.put("pendingOrders", rec.pendingOrderedQuantity());
+                    row.put("effectiveStock", rec.effectiveStock());
+                    row.put("suggestedQuantity", rec.suggestedOrderQuantity());
+                    row.put("preferredSupplier", rec.preferredSupplierName() != null ? rec.preferredSupplierName() : "None");
+                    row.put("unitPrice", rec.unitPurchasePrice() != null ? rec.unitPurchasePrice() : BigDecimal.ZERO);
+                    row.put("estimatedCost", rec.estimatedTotalCost() != null ? rec.estimatedTotalCost() : BigDecimal.ZERO);
+                    row.put("urgency", rec.urgencyStatus());
+                    row.put("reason", rec.recommendationReason());
+                    return row;
+                })
+                .toList();
+
+        return createReportResponse(
+                filter,
+                range,
+                records,
+                sumRecordAmounts(records, "estimatedCost")
+        );
     }
 
     private record DateRange(

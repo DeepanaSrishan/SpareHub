@@ -25,12 +25,18 @@ public class ProfileServiceImpl
 
     private final CurrentUserService currentUserService;
 
+    private final com.sparehub.service.LoyaltyService loyaltyService;
+
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ProfileResponse getCurrentProfile() {
 
         User user =
                 currentUserService.getCurrentUser();
+
+        if (user.getRole() == com.sparehub.enums.Role.CUSTOMER) {
+            loyaltyService.ensureCustomerTierUpToDate(user);
+        }
 
         return mapToProfileResponse(user);
     }
@@ -52,11 +58,15 @@ public class ProfileServiceImpl
 
         user.setFullName(resolvedName);
 
-        user.setPhone(
-                normalizeOptionalValue(
-                        request.resolvePhone()
-                )
+        String resolvedPhone = normalizeOptionalValue(
+                request.resolvePhone()
         );
+        if (resolvedPhone != null && !resolvedPhone.matches("^0[1-9][0-9]{8}$")) {
+            throw new BadRequestException(
+                    "Phone number must be a valid 10-digit Sri Lankan phone number starting with 0 (e.g. 07XXXXXXXX)"
+            );
+        }
+        user.setPhone(resolvedPhone);
 
         user.setAddress(
                 normalizeOptionalValue(
@@ -165,6 +175,19 @@ public class ProfileServiceImpl
                         ? null
                         : user.getLoyaltyTier()
                         .getName();
+
+        if (user.getRole() == com.sparehub.enums.Role.CUSTOMER && user.getLoyaltyPoints() != null) {
+            int pts = user.getLoyaltyPoints();
+            if (pts >= 3000 && !"Platinum".equalsIgnoreCase(loyaltyTierName)) {
+                loyaltyTierName = "Platinum";
+            } else if (pts >= 1500 && !"Gold".equalsIgnoreCase(loyaltyTierName) && !"Platinum".equalsIgnoreCase(loyaltyTierName)) {
+                loyaltyTierName = "Gold";
+            } else if (pts >= 500 && ("Bronze".equalsIgnoreCase(loyaltyTierName) || loyaltyTierName == null)) {
+                loyaltyTierName = "Silver";
+            } else if (loyaltyTierName == null) {
+                loyaltyTierName = "Bronze";
+            }
+        }
 
         return new ProfileResponse(
                 user.getId(),

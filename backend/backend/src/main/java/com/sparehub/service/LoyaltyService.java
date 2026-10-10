@@ -29,4 +29,8 @@ public interface LoyaltyService {
             Long customerId,
             BigDecimal subtotal
     );
+
+    com.sparehub.entity.LoyaltyTier ensureCustomerTierUpToDate(com.sparehub.entity.User customer);
+
+    void syncAllCustomerTiers();
 }

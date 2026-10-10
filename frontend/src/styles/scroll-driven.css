@@ -197,23 +197,24 @@
     align-items: center;
     gap: 8px;
     padding: 9px 18px;
-    background: #FFFFFF;
+    background: rgba(18, 32, 26, 0.75);
+    backdrop-filter: blur(8px);
     border: 1.5px solid var(--border);
     border-radius: 999px;
     font-size: 0.84rem;
     font-weight: 700;
-    color: var(--text-main);
+    color: #FFFFFF;
     text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 2px 6px rgba(7, 28, 20, 0.04);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .quick-nav-pill:hover {
-    border-color: var(--secondary-green);
-    color: var(--primary-dark);
-    background: #FAFCFA;
+    border-color: var(--accent-lime);
+    color: #B8F34A;
+    background: rgba(26, 44, 37, 0.95);
     transform: translateY(-2px);
     box-shadow: 0 4px 14px var(--accent-lime-glow);
 }

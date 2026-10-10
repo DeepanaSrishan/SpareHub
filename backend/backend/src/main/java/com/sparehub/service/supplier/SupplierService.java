@@ -39,4 +39,15 @@ public interface SupplierService {
     SupplierResponse activateSupplier(
             Long supplierId
     );
+
+    SupplierResponse suspendSupplier(
+            Long supplierId,
+            String reason
+    );
+
+    SupplierResponse updateSupplierStatus(
+            Long supplierId,
+            com.sparehub.entity.supplier.SupplierStatus status,
+            String reason
+    );
 }
