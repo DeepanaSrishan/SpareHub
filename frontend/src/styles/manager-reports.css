@@ -1,0 +1,552 @@
+/* ========================================================
+   SpareHub Manager Financial & Performance Reports Styles
+   Dark Studio Luxury Theme
+   ======================================================== */
+.manager-reports-page {
+    width: min(1280px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 35px 0 70px;
+    color: #ffffff;
+    position: relative;
+    z-index: 10;
+}
+
+.manager-reports-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.manager-reports-header h1 {
+    margin: 5px 0;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    color: #ffffff;
+    font-weight: 800;
+}
+
+.manager-reports-header p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ========================================================
+   Filters & Tabs
+   ======================================================== */
+.report-filter-panel {
+    display: grid;
+    grid-template-columns: minmax(170px, 1fr) minmax(170px, 1fr) auto auto;
+    align-items: end;
+    gap: 14px;
+    padding: 20px 24px;
+    margin-bottom: 22px;
+    border: 1px solid rgba(184, 243, 74, 0.22);
+    border-radius: 18px;
+    background: rgba(12, 22, 18, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+}
+
+.report-date-field label {
+    display: block;
+    margin-bottom: 7px;
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.report-date-field > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    border: 1px solid rgba(184, 243, 74, 0.25);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(8, 18, 14, 0.92);
+    transition: all 0.2s ease;
+}
+
+.report-date-field > div:focus-within {
+    border-color: #b8f34a;
+    box-shadow: 0 0 0 3px rgba(184, 243, 74, 0.25);
+}
+
+.report-date-field input {
+    width: 100%;
+    min-height: 42px;
+    border: 0;
+    outline: 0;
+    color: #ffffff;
+    background: transparent;
+    font: inherit;
+    font-size: 0.92rem;
+}
+
+.report-tabs {
+    display: inline-flex;
+    gap: 6px;
+    padding: 6px;
+    margin-bottom: 22px;
+    border: 1px solid rgba(184, 243, 74, 0.22);
+    border-radius: 14px;
+    background: rgba(12, 22, 18, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.report-tabs button {
+    min-height: 41px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border: 0;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    background: transparent;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.report-tabs button:hover {
+    color: #ffffff;
+    background: rgba(184, 243, 74, 0.12);
+}
+
+.report-tabs button.active {
+    color: #071c14;
+    background: #b8f34a;
+    box-shadow: 0 4px 14px rgba(184, 243, 74, 0.35);
+}
+
+.report-period-label {
+    margin-bottom: 18px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+/* ========================================================
+   Metric KPI Cards
+   ======================================================== */
+.report-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.report-stat-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    min-height: 120px;
+    padding: 22px;
+    box-sizing: border-box;
+    border: 1px solid rgba(184, 243, 74, 0.22);
+    border-radius: 18px;
+    background: rgba(12, 22, 18, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #ffffff;
+}
+
+.report-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 20px rgba(184, 243, 74, 0.08);
+    border-color: rgba(184, 243, 74, 0.45);
+}
+
+.report-stat-icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 14px;
+}
+
+.report-stat-card > div:last-child {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.report-stat-card span {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.report-stat-card strong {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #b8f34a;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
+    word-break: break-word;
+    text-shadow: 0 0 12px rgba(184, 243, 74, 0.25);
+}
+
+.report-stat-card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.report-stat-blue .report-stat-icon {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.report-stat-green .report-stat-icon {
+    color: #b8f34a;
+    background: rgba(184, 243, 74, 0.15);
+    border: 1px solid rgba(184, 243, 74, 0.3);
+}
+
+.report-stat-purple .report-stat-icon {
+    color: #c084fc;
+    background: rgba(192, 132, 252, 0.15);
+    border: 1px solid rgba(192, 132, 252, 0.3);
+}
+
+.report-stat-cyan .report-stat-icon {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.report-stat-orange .report-stat-icon {
+    color: #fb923c;
+    background: rgba(251, 146, 60, 0.15);
+    border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+.report-stat-red .report-stat-icon {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.15);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+/* ========================================================
+   Panels, Tables, and Charts
+   ======================================================== */
+.report-content-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    margin-bottom: 24px;
+}
+
+.report-panel,
+.report-loading-card,
+.report-empty-card {
+    border: 1px solid rgba(184, 243, 74, 0.22);
+    border-radius: 18px;
+    background: rgba(12, 22, 18, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+}
+
+.report-panel {
+    padding: 24px;
+}
+
+.report-panel-header,
+.report-panel-header > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.report-panel-header {
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.report-panel-header h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.report-bar-list,
+.payment-method-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.report-bar-label,
+.payment-method-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 7px;
+}
+
+.report-bar-label span {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.84rem;
+}
+
+.report-bar-track {
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.report-bar-fill {
+    height: 100%;
+    min-width: 0;
+    border-radius: inherit;
+    transition: width 0.35s ease;
+}
+
+.product-bar {
+    background: linear-gradient(90deg, #10b981, #b8f34a);
+    box-shadow: 0 0 10px rgba(184, 243, 74, 0.5);
+}
+
+.payment-bar {
+    background: linear-gradient(90deg, #0284c7, #38bdf8);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+.product-sales-ranking {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-sales-ranking > article {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.product-sales-ranking > article:last-child {
+    border-bottom: 0;
+}
+
+.product-rank {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    color: #071c14;
+    background: #b8f34a;
+    font-weight: 800;
+    font-size: 0.82rem;
+    box-shadow: 0 0 10px rgba(184, 243, 74, 0.3);
+}
+
+.product-ranking-info > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 9px;
+}
+
+.product-ranking-info section {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.product-ranking-info section:last-child {
+    align-items: flex-end;
+}
+
+.product-ranking-info span {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.8rem;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.report-table th {
+    color: #b8f34a;
+    background: rgba(18, 30, 24, 0.95);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 800;
+    border-bottom: 1px solid rgba(184, 243, 74, 0.25);
+}
+
+.report-table td {
+    color: #e2e8f0;
+}
+
+.report-table tr:hover td {
+    background: rgba(184, 243, 74, 0.05);
+}
+
+.payment-method-heading section {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.payment-method-heading span {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.82rem;
+}
+
+.payment-status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.payment-status-grid article {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: rgba(18, 28, 22, 0.88);
+    border: 1px solid rgba(184, 243, 74, 0.22);
+}
+
+.payment-status-grid span {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.82rem;
+}
+
+.payment-status-grid strong {
+    color: #b8f34a;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
+}
+
+.payment-calculation-panel > div {
+    width: min(500px, 100%);
+    margin-left: auto;
+}
+
+.payment-calculation-panel section {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 12px 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.94rem;
+}
+
+.refund-calculation {
+    color: #f87171 !important;
+}
+
+.net-calculation {
+    padding-top: 18px !important;
+    border-top: 1px solid rgba(184, 243, 74, 0.25);
+    color: #b8f34a !important;
+    font-size: 1.25rem;
+    font-weight: 800;
+    font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', sans-serif;
+    text-shadow: 0 0 12px rgba(184, 243, 74, 0.3);
+}
+
+.report-no-data {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.report-loading-card,
+.report-empty-card {
+    padding: 55px 20px;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}
+
+.report-loading-card svg {
+    color: #b8f34a;
+}
+
+/* ========================================================
+   Responsive Breakpoints
+   ======================================================== */
+@media (max-width: 950px) {
+    .report-filter-panel {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .report-stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .report-content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 620px) {
+    .manager-reports-page {
+        width: min(100% - 20px, 1280px);
+        padding-top: 22px;
+    }
+
+    .manager-reports-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .report-filter-panel,
+    .report-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .report-tabs {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .report-tabs button {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .payment-status-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-ranking-info > div:first-child {
+        flex-direction: column;
+    }
+
+    .product-ranking-info section:last-child {
+        align-items: flex-start;
+    }
+}

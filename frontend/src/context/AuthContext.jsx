@@ -1,79 +1,157 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import api from '../services/api';
+import {
+    createContext,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 
-const AuthContext = createContext(null);
+import authService from "../services/authService";
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+export const AuthContext = createContext(null);
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('sparehub_user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        localStorage.removeItem('sparehub_user');
-      }
-    }
-    setLoading(false);
-  }, []);
+export function AuthProvider({ children }) {
+    const [user, setUser] = useState(null);
+    const [initializing, setInitializing] =
+        useState(true);
 
-  const login = async (email, password) => {
-    const res = await api.login({ email, password });
-    if (res.success) {
-      setUser(res);
-      localStorage.setItem('sparehub_user', JSON.stringify(res));
-    }
-    return res;
-  };
+    useEffect(() => {
+        try {
+            const storedUser =
+                localStorage.getItem(
+                    "sparehub_user"
+                );
 
-  const register = async (userData) => {
-    const res = await api.register(userData);
-    if (res.success) {
-      setUser(res);
-      localStorage.setItem('sparehub_user', JSON.stringify(res));
-    }
-    return res;
-  };
+            const token =
+                localStorage.getItem(
+                    "sparehub_access_token"
+                );
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('sparehub_user');
-  };
+            if (storedUser && token) {
+                setUser(JSON.parse(storedUser));
+            }
+        } catch {
+            localStorage.removeItem(
+                "sparehub_user"
+            );
 
-  const updateUserLocal = (updatedData) => {
-    const updated = { ...user, ...updatedData };
-    setUser(updated);
-    localStorage.setItem('sparehub_user', JSON.stringify(updated));
-  };
+            localStorage.removeItem(
+                "sparehub_access_token"
+            );
+        } finally {
+            setInitializing(false);
+        }
+    }, []);
 
-  // Demo Fast Role Switcher
-  const switchDemoRole = async (roleType) => {
-    try {
-      let email = 'customer@sparehub.com';
-      let password = 'customer123';
-      if (roleType === 'SALES_STAFF') {
-        email = 'sales@sparehub.com';
-        password = 'sales123';
-      } else if (roleType === 'INVENTORY_STAFF') {
-        email = 'inventory@sparehub.com';
-        password = 'inventory123';
-      } else if (roleType === 'MANAGER') {
-        email = 'manager@sparehub.com';
-        password = 'manager123';
-      }
-      return await login(email, password);
-    } catch (e) {
-      console.error("Failed to switch demo persona:", e);
-    }
-  };
+    const login = useCallback(
+        async (credentials) => {
+            const authData =
+                await authService.login(
+                    credentials
+                );
 
-  return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUserLocal, switchDemoRole }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+            const authenticatedUser = {
+                id: authData.userId,
+                fullName: authData.fullName,
+                email: authData.email,
+                role: authData.role,
+                accountStatus:
+                authData.accountStatus,
+                loyaltyTier:
+                authData.loyaltyTier,
+                loyaltyPoints:
+                authData.loyaltyPoints,
+            };
 
-export const useAuth = () => useContext(AuthContext);
+            localStorage.setItem(
+                "sparehub_access_token",
+                authData.accessToken
+            );
+            localStorage.setItem(
+                "accessToken",
+                authData.accessToken
+            );
+            localStorage.setItem(
+                "token",
+                authData.accessToken
+            );
+
+            localStorage.setItem(
+                "sparehub_user",
+                JSON.stringify(
+                    authenticatedUser
+                )
+            );
+
+            setUser(authenticatedUser);
+
+            return authenticatedUser;
+        },
+        []
+    );
+
+    const logout = useCallback(() => {
+        localStorage.removeItem(
+            "sparehub_access_token"
+        );
+        localStorage.removeItem(
+            "accessToken"
+        );
+        localStorage.removeItem(
+            "token"
+        );
+        localStorage.removeItem(
+            "sparehub_user"
+        );
+        localStorage.removeItem(
+            "user"
+        );
+
+        setUser(null);
+    }, []);
+
+    const updateStoredUser = useCallback(
+        (updatedUser) => {
+            setUser((currentUser) => {
+                const mergedUser = {
+                    ...currentUser,
+                    ...updatedUser,
+                };
+
+                localStorage.setItem(
+                    "sparehub_user",
+                    JSON.stringify(mergedUser)
+                );
+
+                return mergedUser;
+            });
+        },
+        []
+    );
+
+    const value = useMemo(
+        () => ({
+            user,
+            initializing,
+            isAuthenticated: Boolean(user),
+            login,
+            logout,
+            updateStoredUser,
+        }),
+        [
+            user,
+            initializing,
+            login,
+            logout,
+            updateStoredUser,
+        ]
+    );
+
+
+    return (
+        <AuthContext.Provider
+            value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
+}

@@ -1,0 +1,379 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Google+Sans+Text:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap');
+@import url('https://fonts.cdnfonts.com/css/google-sans');
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Google Sans'), local('Product Sans'), url('https://fonts.cdnfonts.com/s/14955/ProductSans-Regular.woff') format('woff');
+}
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 500;
+  src: local('Google Sans Medium'), local('Product Sans Medium'), url('https://fonts.cdnfonts.com/s/14955/ProductSans-Medium.woff') format('woff');
+}
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Google Sans Bold'), local('Product Sans Bold'), url('https://fonts.cdnfonts.com/s/14955/ProductSans-Bold.woff') format('woff');
+}
+
+/* ==========================================================================
+   SPAREHUB - VEHICLE EXPLOSION SCROLLYTELLING (CAR FRAMES)
+   Pure Dark Studio (#0c1013) with Full-Screen Cover Canvas
+   Typography: Google Sans
+   ========================================================================== */
+
+body:has(.bike-page-layout-root),
+body:has(.bike-page-root) {
+  background-color: #0c1013 !important;
+  font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.bike-page-layout-root,
+.bike-page-root {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #0c1013;
+  color: #ffffff;
+  overflow-x: hidden;
+  font-family: 'Google Sans', 'Google Sans Text', 'Product Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.bike-page-content-wrapper {
+  position: relative;
+  z-index: 10;
+}
+
+.bike-assembly-fullscreen-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: #0c1013;
+}
+
+.bike-assembly-fullscreen-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+.bike-assembly-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(12, 16, 19, 0.42) 0%,
+    rgba(12, 16, 19, 0.72) 65%,
+    #0c1013 96%
+  );
+}
+
+.bike-assembly-hud {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(12, 22, 18, 0.88);
+  border: 1px solid rgba(184, 243, 74, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.75rem;
+}
+
+.bike-assembly-hud-dot-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+}
+
+.bike-assembly-hud-dot-ping {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #b8f34a;
+  opacity: 0.75;
+  animation: bikeHudPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.bike-assembly-hud-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #b8f34a;
+}
+
+@keyframes bikeHudPing {
+  75%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.bike-assembly-hud-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  color: #b8f34a;
+  letter-spacing: 0.05em;
+}
+
+.bike-assembly-hud-divider {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.bike-assembly-hud-stage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+}
+
+.bike-assembly-top-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 9999;
+}
+
+.bike-assembly-top-loader-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #b8f34a 100%);
+  transition: width 0.15s ease-out;
+  box-shadow: 0 0 10px #b8f34a;
+}
+
+/* ==========================================================================
+   GLOBAL DARK GLASSMORPHISM FOR REMAINING PAGES
+   High-contrast, luxury dark theme tailored for 3D scrollytelling background
+   ========================================================================== */
+.bike-page-layout-root,
+.bike-page-root {
+  color: #f1f5f9;
+}
+
+.bike-page-layout-root h1,
+.bike-page-layout-root h2,
+.bike-page-layout-root h3,
+.bike-page-layout-root h4,
+.bike-page-layout-root h5,
+.bike-page-layout-root h6,
+.bike-page-root h1,
+.bike-page-root h2,
+.bike-page-root h3,
+.bike-page-root h4,
+.bike-page-root h5,
+.bike-page-root h6 {
+  color: #ffffff !important;
+}
+
+.bike-page-layout-root p,
+.bike-page-layout-root span,
+.bike-page-root p,
+.bike-page-root span {
+  color: rgba(241, 245, 249, 0.85);
+}
+
+/* Universal Glassmorphic Card Container for all pages */
+.bike-page-layout-root .cart-items-card,
+.bike-page-layout-root .checkout-main-card,
+.bike-page-layout-root .cart-summary-card,
+.bike-page-layout-root .checkout-summary-card,
+.bike-page-layout-root .empty-cart-card,
+.bike-page-layout-root .order-success-card,
+.bike-page-layout-root .order-list-card,
+.bike-page-layout-root .order-panel,
+.bike-page-layout-root .order-filter-card,
+.bike-page-layout-root .order-detail-header,
+.bike-page-layout-root .empty-orders-card,
+.bike-page-layout-root .invoice-card,
+.bike-page-layout-root .invoice-document,
+.bike-page-layout-root .loyalty-card,
+.bike-page-layout-root .profile-card,
+.bike-page-layout-root .content-card,
+.bike-page-layout-root .stat-card,
+.bike-page-layout-root .notification-card,
+.bike-page-layout-root .empty-state,
+.bike-page-layout-root .catalog-product-details,
+.bike-page-layout-root .catalog-information-card,
+.bike-page-layout-root .dashboard-card,
+.bike-page-layout-root .stats-card,
+.bike-page-layout-root .management-card,
+.bike-page-layout-root .summary-card,
+.bike-page-layout-root .supplier-card,
+.bike-page-layout-root .supplier-content-card,
+.bike-page-layout-root .supplier-summary-card,
+.bike-page-layout-root .inventory-card,
+.bike-page-layout-root .inventory-filter-card,
+.bike-page-layout-root .inventory-table-card,
+.bike-page-layout-root .inventory-form-card,
+.bike-page-layout-root .staff-order-filters,
+.bike-page-layout-root .staff-order-table-card,
+.bike-page-layout-root .staff-order-panel,
+.bike-page-layout-root .staff-order-detail-header,
+.bike-page-layout-root .staff-empty-state,
+.bike-page-layout-root .admin-filter-card,
+.bike-page-layout-root .admin-table-card,
+.bike-page-layout-root .admin-detail-card,
+.bike-page-layout-root .admin-account-profile,
+.bike-page-layout-root .report-filter-panel,
+.bike-page-layout-root .report-stat-card,
+.bike-page-layout-root .report-panel,
+.bike-page-layout-root .breakdown-card,
+.bike-page-layout-root .report-builder-card,
+.bike-page-layout-root .generated-report-card,
+.bike-page-layout-root .payment-modal-card,
+.bike-page-root .auth-card,
+.bike-page-root .register-card {
+  background: rgba(12, 22, 18, 0.86) !important;
+  border: 1px solid rgba(184, 243, 74, 0.22) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65), 0 0 20px rgba(184, 243, 74, 0.04) !important;
+  color: #f1f5f9 !important;
+  border-radius: 20px;
+}
+
+/* Card Titles and Elements */
+.bike-page-layout-root .cart-item-info h2,
+.bike-page-layout-root .order-list-top h2,
+.bike-page-layout-root .panel-heading h2,
+.bike-page-layout-root .order-detail-item h3,
+.bike-page-layout-root .profile-card-header h2,
+.bike-page-layout-root .management-card h2,
+.bike-page-layout-root .payment-modal-header h2,
+.bike-page-layout-root .cart-summary-card h2,
+.bike-page-layout-root .checkout-main-card h2,
+.bike-page-layout-root .inventory-table-heading h2,
+.bike-page-layout-root .report-panel-header h2,
+.bike-page-layout-root .report-section-heading h2,
+.bike-page-layout-root .breakdown-card-heading h3 {
+  color: #ffffff !important;
+}
+
+/* Universal Inputs, Textareas, Selects */
+.bike-page-layout-root input,
+.bike-page-layout-root select,
+.bike-page-layout-root textarea,
+.bike-page-root input,
+.bike-page-root select,
+.bike-page-root textarea {
+  background: rgba(8, 18, 14, 0.92) !important;
+  border: 1px solid rgba(184, 243, 74, 0.25) !important;
+  color: #ffffff !important;
+  border-radius: 12px;
+}
+
+.bike-page-layout-root input::placeholder,
+.bike-page-layout-root textarea::placeholder,
+.bike-page-root input::placeholder,
+.bike-page-root textarea::placeholder {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.bike-page-layout-root input:focus,
+.bike-page-layout-root select:focus,
+.bike-page-layout-root textarea:focus,
+.bike-page-root input:focus,
+.bike-page-root select:focus,
+.bike-page-root textarea:focus {
+  border-color: #b8f34a !important;
+  box-shadow: 0 0 0 3px rgba(184, 243, 74, 0.25) !important;
+  outline: none !important;
+}
+
+/* Auth Pages Full-Screen Alignment */
+.bike-page-root .auth-page {
+  background: transparent !important;
+}
+
+.bike-page-root .auth-info {
+  background: rgba(12, 22, 18, 0.72) !important;
+  border-right: 1px solid rgba(184, 243, 74, 0.2) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+}
+
+.bike-page-root .auth-form-section {
+  background: transparent !important;
+}
+
+.bike-page-root .auth-card h2,
+.bike-page-root .register-card h1 {
+  color: #ffffff !important;
+}
+
+.bike-page-root .auth-card > p,
+.bike-page-root .register-card > p {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.bike-page-root .auth-card label,
+.bike-page-root .register-card label {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.bike-page-root .auth-link {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.bike-page-root .auth-link a {
+  color: #b8f34a !important;
+}
+
+/* Universal Tables in Glassmorphic Containers */
+.bike-page-layout-root table {
+  color: #f1f5f9 !important;
+}
+
+.bike-page-layout-root table th {
+  background: rgba(18, 30, 24, 0.95) !important;
+  color: #b8f34a !important;
+  border-bottom: 1px solid rgba(184, 243, 74, 0.25) !important;
+}
+
+.bike-page-layout-root table td {
+  color: #e2e8f0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.bike-page-layout-root table tr:hover td {
+  background: rgba(184, 243, 74, 0.05) !important;
+}

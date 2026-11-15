@@ -1,0 +1,38 @@
+package com.sparehub.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+public record ChangePasswordRequest(
+
+        @NotBlank(message = "Current password is required")
+        String currentPassword,
+
+        @NotBlank(message = "New password is required")
+        @Size(
+                min = 8,
+                max = 72,
+                message =
+                        "New password must contain between 8 and 72 characters"
+        )
+        @Pattern(
+                regexp =
+                        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#._-]).+$",
+                message =
+                        "New password must include uppercase, lowercase, number and special character"
+        )
+        String newPassword,
+
+        String confirmNewPassword,
+
+        String confirmPassword
+) {
+
+    public String resolveConfirmPassword() {
+        if (confirmNewPassword != null && !confirmNewPassword.isBlank()) {
+            return confirmNewPassword;
+        }
+        return confirmPassword;
+    }
+}

@@ -1,112 +1,44 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = 'http://localhost:8080/api';
-
-const client = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+const api = axios.create({
+    baseURL:
+        import.meta.env.VITE_API_BASE_URL ||
+        "http://localhost:8080/api",
+    headers: {
+        "Content-Type": "application/json",
+    },
 });
 
-export const formatLKR = (amount) => {
-  if (amount === undefined || amount === null) return 'Rs. 0.00';
-  const num = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
-  return 'Rs. ' + num.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-};
+api.interceptors.request.use(
+    (config) => {
+        const token =
+            localStorage.getItem("sparehub_access_token") ||
+            localStorage.getItem("accessToken") ||
+            localStorage.getItem("token");
 
-export const api = {
-  // Authentication
-  register: async (userData) => {
-    const res = await client.post('/auth/register', userData);
-    return res.data;
-  },
+        if (token) {
+            config.headers.Authorization =
+                `Bearer ${token}`;
+        }
 
-  login: async (credentials) => {
-    const res = await client.post('/auth/login', credentials);
-    return res.data;
-  },
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
-  // Customer Profile
-  getProfile: async (userId) => {
-    const res = await client.get(`/users/${userId}/profile`);
-    return res.data;
-  },
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem("sparehub_access_token");
+            localStorage.removeItem("sparehub_user");
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+        }
 
-  updateProfile: async (userId, data) => {
-    const res = await client.put(`/users/${userId}/profile`, data);
-    return res.data;
-  },
-
-  // Loyalty Tiers & Customers for Sales Staff
-  getLoyaltyTiers: async () => {
-    const res = await client.get('/loyalty-tiers');
-    return res.data;
-  },
-
-  getCustomers: async (query = '') => {
-    const url = query ? `/customers?query=${encodeURIComponent(query)}` : '/customers';
-    const res = await client.get(url);
-    return res.data;
-  },
-
-  assignLoyaltyTier: async (customerId, tierId) => {
-    const res = await client.put(`/customers/${customerId}/loyalty-tier`, { tierId });
-    return res.data;
-  },
-
-  autoAssignTier: async (customerId) => {
-    const res = await client.post(`/customers/${customerId}/auto-tier`);
-    return res.data;
-  },
-
-  // Customer orders & transactions for Sales Staff
-  getCustomerOrders: async (customerId) => {
-    const res = await client.get(`/customers/${customerId}/orders`);
-    return res.data;
-  },
-
-  getCustomerSummary: async (customerId) => {
-    const res = await client.get(`/customers/${customerId}/summary`);
-    return res.data;
-  },
-
-  // Role-Based Access Control (RBAC) & User Management
-  getAllUsers: async () => {
-    const res = await client.get('/admin/users');
-    return res.data;
-  },
-
-  createStaffUser: async (staffData) => {
-    const res = await client.post('/admin/users/staff', staffData);
-    return res.data;
-  },
-
-  updateUserRoles: async (userId, roleNames) => {
-    const res = await client.put(`/admin/users/${userId}/roles`, { roleNames });
-    return res.data;
-  },
-
-  updateUserStatus: async (userId, isActive) => {
-    const res = await client.put(`/admin/users/${userId}/status`, { isActive });
-    return res.data;
-  },
-
-  getSystemStats: async () => {
-    const res = await client.get('/admin/stats');
-    return res.data;
-  },
-
-  // Notifications
-  getNotifications: async (userId) => {
-    const res = await client.get(`/notifications/user/${userId}`);
-    return res.data;
-  },
-
-  markNotificationRead: async (notificationId) => {
-    const res = await client.put(`/notifications/${notificationId}/read`);
-    return res.data;
-  },
-};
+        return Promise.reject(error);
+    }
+);
 
 export default api;
